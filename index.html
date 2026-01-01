@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Do It - Tzadok Family</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --whatsapp: #58d368;
+            --heart: #f43f5e;
+            --bg: #f8fafc;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
+        h2 { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 20px; }
+
+        .input-wrapper { position: relative; margin-bottom: 15px; width: 100%; }
+        input[type="text"], input[type="date"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 10px; }
+        .clear-x { position: absolute; right: 12px; top: 28px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 25px; }
+        .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
+        .face-wrapper.selected { opacity: 1; transform: translateY(-5px); }
+        .face { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face-wrapper.selected .face { border-color: var(--primary); }
+        .heart-box { width: 60px; height: 60px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid transparent; }
+        .face-wrapper.selected .heart-box { border-color: var(--heart); }
+
+        .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .cal-btn { background: #4285F4; margin-top: 10px; }
+
+        .discovery-card { background: #eff6ff; border:none; }
+        .cat-row { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .cat-btn { flex: 0 0 auto; padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .cat-btn.active { background: var(--primary); color: white; }
+        .suggest-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 15px; border-left: 5px solid var(--whatsapp); position: relative; }
+        .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 10px; }
+        .action-icon { cursor: pointer; font-size: 18px; opacity: 0.6; }
+        .details-text { font-size: 13px; color: #64748b; margin-top: 5px; white-space: pre-wrap; }
+
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
+        .stars span.active { color: #facc15; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="rating-screen" class="card hidden">
+        <h2 style="text-align:center">Rate the Idea!</h2>
+        <p id="rate-idea-name" style="text-align:center; font-size:18px; font-weight:bold;"></p>
+        <div class="stars" id="star-row">
+            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
+        </div>
+        <div id="star-desc" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:20px;">Choose your rating</div>
+        <button class="primary-btn" onclick="submitRating()">Submit My Vote</button>
+    </div>
+
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary);">
+        <h3>Edit Logistics</h3>
+        <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
+        <input type="date" id="edit-date">
+        <input type="text" id="edit-time" placeholder="Time (e.g. 10:00)">
+        <input type="text" id="edit-who" placeholder="Who's Coming?">
+        <button class="primary-btn" onclick="saveAndNotify()">Save & Notify Family</button>
+        <button class="primary-btn cal-btn" id="gcal-btn">Add to Google Calendar</button>
+        <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
+    </div>
+
+    <div id="main-app">
+        <div class="card">
+            <h2>New Activity</h2>
+            <div class="input-wrapper">
+                <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState(); toggleX('main-input', 'main-clear')">
+                <button id="main-clear" class="clear-x" onclick="clearField('main-input', 'main-clear'); updateUIState()">✕</button>
+            </div>
+            <div class="faces-container">
+                <div class="face-wrapper" id="f-all" onclick="selectAll()">
+                    <div class="heart-box">❤️</div>
+                    <p style="font-size:10px; margin-top:5px; font-weight:bold; color:var(--heart);">Everyone</p>
+                </div>
+                <div id="faces-render" style="display:flex; gap:10px;"></div>
+            </div>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
+        </div>
+
+        <div class="card">
+            <h2>🚀 Let's Do It! List</h2>
+            <div id="final-list"></div>
+        </div>
+
+        <div class="card discovery-card">
+            <h3 style="margin-top:0;">🔍 Discover Activities</h3>
+            <div class="input-wrapper">
+                <input type="text" id="search-input" placeholder="Search (e.g. Pool, Zoo)..." oninput="toggleX('search-input', 'search-clear'); runSearch()">
+                <button id="search-clear" class="clear-x" style="top:50%" onclick="clearField('search-input', 'search-clear'); setCat('outdoor')">✕</button>
+            </div>
+            <div class="cat-row">
+                <button class="cat-btn active" id="btn-outdoor" onclick="setCat('outdoor')">🌳 Outdoor</button>
+                <button class="cat-btn" id="btn-indoor" onclick="setCat('indoor')">🏠 Indoor</button>
+                <button class="cat-btn" id="btn-food" onclick="setCat('food')">🍦 Food</button>
+            </div>
+            <div id="results-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const family = [
+            { id: 1, name: "Amir", img: "amir.png" },
+            { id: 2, name: "Rani", img: "rani.png" },
+            { id: 3, name: "Lia", img: "lia.png" },
+            { id: 4, name: "Gal", img: "gal.png" }
+        ];
+
+        const db = [
+            { n: "Alexander Stream Hike", cat: "outdoor", d: "12m", info: "Hike with turtles.", tags: ["hike", "nature"] },
+            { n: "Michmoret Beach", cat: "outdoor", d: "20m", info: "Swimming and sunset.", tags: ["beach", "swimming", "pool"] },
+            { n: "Cinema City Hadera", cat: "indoor", d: "15m", info: "Movies and popcorn.", tags: ["movie", "cinema"] },
+            { n: "Bowling Netanya", cat: "indoor", d: "22m", info: "Lanes and arcade.", tags: ["bowling", "game"] },
+            { n: "Coffee Cart at Yanuv", cat: "food", d: "10m", info: "Friday coffee vibes.", tags: ["coffee", "breakfast"] },
+            { n: "Pizza in Yad Hana", cat: "food", d: "2m", info: "Thin crust local pizza.", tags: ["pizza", "food"] }
+        ];
+
+        let selected = [];
+        let currentRating = 0;
+        let editingId = null;
+        let activities = JSON.parse(localStorage.getItem('tzadok_final_list')) || [];
+
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rateName = urlParams.get('rate');
+            if (rateName) {
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('rating-screen').classList.remove('hidden');
+                document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
+            }
+            document.getElementById('faces-render').innerHTML = family.map(f => `
+                <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
+                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/60'">
+                    <p style="font-size:10px; margin-top:5px; font-weight:bold;">${f.name}</p>
+                </div>
+            `).join('');
+            setCat('outdoor');
+            renderFinalList();
+        }
+
+        function setStars(n) {
+            currentRating = n;
+            const stars = document.querySelectorAll('#star-row span');
+            stars.forEach((s, i) => s.classList.toggle('active', i < n));
+        }
+
+        function submitRating() {
+            if (currentRating === 0) return alert("Pick stars!");
+            const idea = new URLSearchParams(window.location.search).get('rate');
+            if (currentRating >= 4) {
+                activities.push({ id: Date.now(), title: idea, dateAdded: new Date().toLocaleDateString() });
+                localStorage.setItem('tzadok_final_list', JSON.stringify(activities));
+            }
+            window.location.href = window.location.pathname;
+        }
+
+        function openEdit(id) {
+            editingId = id;
+            const item = activities.find(a => a.id === id);
+            document.getElementById('edit-desc').value = item.details || '';
+            document.getElementById('edit-date').value = item.dateRaw || '';
+            document.getElementById('edit-time').value = item.time || '';
+            document.getElementById('edit-who').value = item.who || '';
+            document.getElementById('gcal-btn').onclick = () => {
+                const date = (item.dateRaw || "").replace(/-/g, '');
+                const time = (item.time || "1000").replace(/:/g, '');
+                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.title)}&dates=${date}T${time}00/${date}T${parseInt(time)+1}00&details=${encodeURIComponent(item.details || '')}&location=Israel&sf=true&output=xml`;
+                window.open(url, '_blank');
+            };
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function saveAndNotify() {
+            const idx = activities.findIndex(a => a.id === editingId);
+            const item = activities[idx];
+            item.details = document.getElementById('edit-desc').value;
+            item.dateRaw = document.getElementById('edit-date').value;
+            item.time = document.getElementById('edit-time').value;
+            item.who = document.getElementById('edit-who').value;
+            localStorage.setItem('tzadok_final_list', JSON.stringify(activities));
+            const msg = `${item.who}: New details for *${item.title}*\n📅 ${item.dateRaw} @ ${item.time}\n📍 ${item.details}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            closeEdit();
+            renderFinalList();
+        }
+
+        function toggleX(inp, btn) { document.getElementById(btn).style.display = document.getElementById(inp).value ? 'flex' : 'none'; }
+        function clearField(inp, btn) { document.getElementById(inp).value = ''; toggleX(inp, btn); }
+        function toggleFace(id) { const i = selected.indexOf(id); i > -1 ? selected.splice(i, 1) : selected.push(id); updateUIState(); }
+        function selectAll() { selected = selected.length === family.length ? [] : family.map(f => f.id); updateUIState(); }
+        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+        function updateUIState() {
+            const val = document.getElementById('main-input').value;
+            const btn = document.getElementById('action-btn');
+            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
+            document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
+            if (selected.length === 0) { btn.innerText = "Select Participants"; btn.disabled = true; }
+            else { 
+                const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `Let's Invite ${names}`; btn.disabled = !val; 
+            }
+        }
+
+        function runSearch() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const filtered = db.filter(a => a.n.toLowerCase().includes(q) || a.tags.some(t => t.includes(q)));
+            renderList(filtered);
+        }
+
+        function setCat(cat) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-'+cat).classList.add('active');
+            renderList(db.filter(a => a.cat === cat));
+        }
+
+        function renderList(list) {
+            document.getElementById('results-list').innerHTML = list.map(item => `
+                <div class="suggest-card">
+                    <button class="use-btn" onclick="document.getElementById('main-input').value='${item.n}'; updateUIState(); window.scrollTo(0,0)">Use This</button>
+                    <div style="font-weight:800; font-size:16px;">${item.n}</div>
+                    <div style="font-size:13px; color:#475569;">${item.info} | 📍 ${item.d}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderFinalList() {
+            document.getElementById('final-list').innerHTML = activities.map(a => `
+                <div class="list-item">
+                    <div class="item-actions"><span onclick="openEdit(${a.id})">📝</span> <span onclick="deleteIdea(${a.id})">🗑️</span></div>
+                    <div style="font-weight:bold;">${a.title}</div>
+                    <div class="details-text">${a.dateRaw ? '📅 ' + a.dateRaw : ''} ${a.time ? ' @ ' + a.time : ''}</div>
+                </div>
+            `).join('') || '<p style="color:#94a3b8; font-size:13px;">Empty</p>';
+        }
+
+        function sendWA() {
+            const val = document.getElementById('main-input').value;
+            const url = window.location.href.split('?')[0] + '?rate=' + encodeURIComponent(val);
+            const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const msg = `${names}: Amir suggests: "${val}". Rate it: ${url}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function deleteIdea(id) { activities = activities.filter(a => a.id !== id); localStorage.setItem('tzadok_final_list', JSON.stringify(activities)); renderFinalList(); }
+
+        init();
+    </script>
+</body>
+</html>
