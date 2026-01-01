@@ -15,13 +15,15 @@
 
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        h2 { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 20px; }
+        h2 { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 15px; }
 
-        .input-wrapper { position: relative; margin-bottom: 15px; width: 100%; }
-        input[type="text"], input[type="date"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 10px; }
-        .clear-x { position: absolute; right: 12px; top: 28px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+        /* Input & Clear Button UI */
+        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
+        input[type="text"], input[type="date"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
+        .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
 
-        .faces-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 25px; }
+        /* Faces & Selection */
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 20px 0; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
         .face-wrapper.selected { opacity: 1; transform: translateY(-5px); }
         .face { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
@@ -29,22 +31,28 @@
         .heart-box { width: 60px; height: 60px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
+        /* Buttons & List */
         .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; transition: 0.2s; }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .cal-btn { background: #4285F4; margin-top: 10px; }
 
+        /* Discovery & Suggestions */
         .discovery-card { background: #eff6ff; border:none; }
         .cat-row { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .cat-btn { flex: 0 0 auto; padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; font-weight: 700; font-size: 13px; cursor: pointer; }
-        .cat-btn.active { background: var(--primary); color: white; }
-        .suggest-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
+        .suggest-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+        .use-btn { float: right; background: white; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+
+        /* Logistics & List Items */
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 15px; border-left: 5px solid var(--whatsapp); position: relative; }
         .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 10px; }
         .action-icon { cursor: pointer; font-size: 18px; opacity: 0.6; }
         .details-text { font-size: 13px; color: #64748b; margin-top: 5px; white-space: pre-wrap; }
 
+        /* Rating Stars */
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
         .hidden { display: none !important; }
@@ -54,7 +62,7 @@
 
     <div id="rating-screen" class="card hidden">
         <h2 style="text-align:center">Rate the Idea!</h2>
-        <p id="rate-idea-name" style="text-align:center; font-size:18px; font-weight:bold;"></p>
+        <p id="rate-idea-name" style="text-align:center; font-size:18px; font-weight:bold; color:#334155;"></p>
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
@@ -66,7 +74,7 @@
         <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
         <input type="date" id="edit-date">
-        <input type="text" id="edit-time" placeholder="Time (e.g. 10:00)">
+        <input type="text" id="edit-time" placeholder="Time (e.g. 10:00 or Afternoon)">
         <input type="text" id="edit-who" placeholder="Who's Coming?">
         <button class="primary-btn" onclick="saveAndNotify()">Save & Notify Family</button>
         <button class="primary-btn cal-btn" id="gcal-btn">Add to Google Calendar</button>
@@ -98,7 +106,7 @@
         <div class="card discovery-card">
             <h3 style="margin-top:0;">🔍 Discover Activities</h3>
             <div class="input-wrapper">
-                <input type="text" id="search-input" placeholder="Search (e.g. Pool, Zoo)..." oninput="toggleX('search-input', 'search-clear'); runSearch()">
+                <input type="text" id="search-input" placeholder="Search (e.g. Pool, Zoo, Hike)..." oninput="toggleX('search-input', 'search-clear'); runSearch()">
                 <button id="search-clear" class="clear-x" style="top:50%" onclick="clearField('search-input', 'search-clear'); setCat('outdoor')">✕</button>
             </div>
             <div class="cat-row">
@@ -119,12 +127,14 @@
         ];
 
         const db = [
-            { n: "Alexander Stream Hike", cat: "outdoor", d: "12m", info: "Hike with turtles.", tags: ["hike", "nature"] },
-            { n: "Michmoret Beach", cat: "outdoor", d: "20m", info: "Swimming and sunset.", tags: ["beach", "swimming", "pool"] },
-            { n: "Cinema City Hadera", cat: "indoor", d: "15m", info: "Movies and popcorn.", tags: ["movie", "cinema"] },
-            { n: "Bowling Netanya", cat: "indoor", d: "22m", info: "Lanes and arcade.", tags: ["bowling", "game"] },
-            { n: "Coffee Cart at Yanuv", cat: "food", d: "10m", info: "Friday coffee vibes.", tags: ["coffee", "breakfast"] },
-            { n: "Pizza in Yad Hana", cat: "food", d: "2m", info: "Thin crust local pizza.", tags: ["pizza", "food"] }
+            { n: "Alexander Stream Hike", cat: "outdoor", d: "12m", info: "Hike with turtles and shaded spots.", tags: ["hike", "nature", "walk", "animals"] },
+            { n: "Michmoret Beach", cat: "outdoor", d: "20m", info: "Clean sandy beach for swimming and sunset walks.", tags: ["beach", "swimming", "sea", "pool", "water"] },
+            { n: "Cinema City Hadera", cat: "indoor", d: "15m", info: "VIP seating and latest movies.", tags: ["movie", "cinema", "indoor"] },
+            { n: "Bowling Netanya", cat: "indoor", d: "22m", info: "Fun lanes and arcade.", tags: ["bowling", "game", "indoor"] },
+            { n: "Coffee Cart at Yanuv", cat: "food", d: "10m", info: "Great pastries and Friday coffee vibes.", tags: ["coffee", "breakfast", "pastry"] },
+            { n: "Pizza in Yad Hana", cat: "food", d: "2m", info: "Our favorite thin-crust pizza spot.", tags: ["pizza", "dinner", "food"] },
+            { n: "Haifa Zoo", cat: "outdoor", d: "45m", info: "Variety of animals and walking trails.", tags: ["zoo", "animals", "trip"] },
+            { n: "Local Swimming Pool", cat: "outdoor", d: "5m", info: "Cool off in the community pool.", tags: ["pool", "swimming", "water"] }
         ];
 
         let selected = [];
@@ -140,6 +150,7 @@
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
             }
+
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/60'">
@@ -150,6 +161,7 @@
             renderFinalList();
         }
 
+        // --- RATING & LIST ---
         function setStars(n) {
             currentRating = n;
             const stars = document.querySelectorAll('#star-row span');
@@ -166,6 +178,7 @@
             window.location.href = window.location.pathname;
         }
 
+        // --- EDIT & GOOGLE CALENDAR & NOTIFY ---
         function openEdit(id) {
             editingId = id;
             const item = activities.find(a => a.id === id);
@@ -173,6 +186,7 @@
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
             document.getElementById('edit-who').value = item.who || '';
+            
             document.getElementById('gcal-btn').onclick = () => {
                 const date = (item.dateRaw || "").replace(/-/g, '');
                 const time = (item.time || "1000").replace(/:/g, '');
@@ -189,13 +203,17 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             item.who = document.getElementById('edit-who').value;
+            
             localStorage.setItem('tzadok_final_list', JSON.stringify(activities));
-            const msg = `${item.who}: New details for *${item.title}*\n📅 ${item.dateRaw} @ ${item.time}\n📍 ${item.details}`;
+            
+            const msg = `${item.who}: New details for *${item.title}*\n📅 When: ${item.dateRaw} @ ${item.time}\n📍 Where: ${item.details}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            
             closeEdit();
             renderFinalList();
         }
 
+        // --- UI UTILS ---
         function toggleX(inp, btn) { document.getElementById(btn).style.display = document.getElementById(inp).value ? 'flex' : 'none'; }
         function clearField(inp, btn) { document.getElementById(inp).value = ''; toggleX(inp, btn); }
         function toggleFace(id) { const i = selected.indexOf(id); i > -1 ? selected.splice(i, 1) : selected.push(id); updateUIState(); }
@@ -207,6 +225,7 @@
             const btn = document.getElementById('action-btn');
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
             document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
+            
             if (selected.length === 0) { btn.innerText = "Select Participants"; btn.disabled = true; }
             else { 
                 const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
@@ -216,7 +235,11 @@
 
         function runSearch() {
             const q = document.getElementById('search-input').value.toLowerCase();
-            const filtered = db.filter(a => a.n.toLowerCase().includes(q) || a.tags.some(t => t.includes(q)));
+            const filtered = db.filter(a => 
+                a.n.toLowerCase().includes(q) || 
+                a.info.toLowerCase().includes(q) || 
+                a.tags.some(tag => tag.includes(q))
+            );
             renderList(filtered);
         }
 
@@ -229,9 +252,9 @@
         function renderList(list) {
             document.getElementById('results-list').innerHTML = list.map(item => `
                 <div class="suggest-card">
-                    <button class="use-btn" onclick="document.getElementById('main-input').value='${item.n}'; updateUIState(); window.scrollTo(0,0)">Use This</button>
+                    <button class="use-btn" onclick="document.getElementById('main-input').value='${item.n}'; toggleX('main-input', 'main-clear'); updateUIState(); window.scrollTo(0,0)">Use This</button>
                     <div style="font-weight:800; font-size:16px;">${item.n}</div>
-                    <div style="font-size:13px; color:#475569;">${item.info} | 📍 ${item.d}</div>
+                    <div style="font-size:13px; color:#475569;">${item.info} | 📍 ${item.d} from Yad Hana</div>
                 </div>
             `).join('');
         }
@@ -243,14 +266,15 @@
                     <div style="font-weight:bold;">${a.title}</div>
                     <div class="details-text">${a.dateRaw ? '📅 ' + a.dateRaw : ''} ${a.time ? ' @ ' + a.time : ''}</div>
                 </div>
-            `).join('') || '<p style="color:#94a3b8; font-size:13px;">Empty</p>';
+            `).join('') || '<p style="color:#94a3b8; font-size:13px;">Empty list</p>';
         }
 
         function sendWA() {
             const val = document.getElementById('main-input').value;
-            const url = window.location.href.split('?')[0] + '?rate=' + encodeURIComponent(val);
+            const baseUrl = window.location.origin + window.location.pathname;
+            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(val)}`;
             const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const msg = `${names}: Amir suggests: "${val}". Rate it: ${url}`;
+            const msg = `${names}: Amir suggests: "${val}". Rate it: ${ratingUrl}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
