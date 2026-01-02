@@ -22,13 +22,12 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: flex-start; /* Changed to top-align to accommodate global header */
+            justify-content: flex-start; 
             margin: 0; 
             min-height: 100vh; 
             box-sizing: border-box; 
         }
 
-        /* App Header Style */
         .app-header {
             text-align: center;
             padding: 15px 0;
@@ -56,9 +55,6 @@
             animation: fadeIn 0.5s ease;
         }
 
-        .welcome-logo-container { flex: 0 0 auto; display: flex; justify-content: center; }
-        .welcome-logo-container img { max-width: 100px; height: auto; }
-
         .avatar-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -77,6 +73,9 @@
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
+        .input-group { margin-bottom: 12px; }
+        .input-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #64748b; }
+        
         input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
@@ -93,7 +92,7 @@
         .list-item { 
             background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; 
             border-left: 5px solid var(--whatsapp); position: relative; 
-            cursor: pointer; user-select: none; -webkit-user-select: none;
+            cursor: pointer; user-select: none;
         }
         .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
 
@@ -109,30 +108,37 @@
 
     <header class="app-header">
         <h1>🚀 Let's Do It!</h1>
+        <div id="personalized-greeting" style="font-weight: bold; color: #475569; margin-top: 5px;" class="hidden"></div>
     </header>
 
     <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header"></h2>
+        <h2 id="rating-header" style="font-weight: 500;"></h2>
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
         <div id="star-desc" class="star-label">Choose your rating</div>
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Submit Vote</button>
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
         <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
-        <input type="date" id="edit-date">
-        <input type="time" id="edit-time">
-        <button class="primary-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
+        <div class="input-group">
+            <span class="input-label">📅 Date</span>
+            <input type="date" id="edit-date">
+        </div>
+        <div class="input-group">
+            <span class="input-label">🕒 Time</span>
+            <input type="time" id="edit-time">
+        </div>
+        <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
     <div id="setup-card" class="card hidden">
         <h2>Who are you?</h2>
         <div class="avatar-options" id="avatar-selector"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Enter App</button>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
     </div>
 
     <div id="main-app" class="hidden">
@@ -187,6 +193,10 @@
         function init() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('rate')) {
+                const greeting = document.getElementById('personalized-greeting');
+                greeting.innerText = `Hey ${params.get('participants')}!`;
+                greeting.classList.remove('hidden');
+
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
                 return;
@@ -247,15 +257,31 @@
             const val = document.getElementById('main-input').value;
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
             const btn = document.getElementById('action-btn');
+            
             btn.disabled = !(selected.length > 0 && val);
-            btn.innerText = selected.length > 0 ? `Invite ${selected.length === family.length ? 'Everyone' : 'Selection'}` : "Select Participants";
+            
+            if (selected.length === 0) {
+                btn.innerText = "Select Participants";
+            } else if (selected.length === family.length) {
+                btn.innerText = "Invite Everyone";
+            } else {
+                const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `Invite ${names}`;
+            }
         }
 
         function sendWA() {
             const activity = document.getElementById('main-input').value;
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`, '_blank');
+            
+            let phone = "";
+            if (selected.length === 1) {
+                phone = family.find(f => f.id === selected[0]).phone;
+            }
+
+            const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} suggested: ${activity}\n\nRate it here:\n${url}`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
         }
 
         function setStars(n) {
@@ -268,7 +294,12 @@
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
             if (currentRating >= 4) {
-                activities.push({ id: Date.now(), title: params.get('rate'), joinedBy: params.get('participants'), creator: params.get('creator') });
+                activities.push({ 
+                    id: Date.now(), 
+                    title: params.get('rate'), 
+                    joinedBy: params.get('participants'), 
+                    creator: params.get('creator') 
+                });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 alert("Activity saved to your list!");
             }
@@ -292,6 +323,7 @@
             document.getElementById('edit-desc').value = item.details || '';
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
+            document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -301,7 +333,9 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            window.open(`https://wa.me/?text=${encodeURIComponent('✅ *UPDATE:* ' + item.title + '\n📅 ' + item.dateRaw + ' at ' + item.time + '\n📍 ' + item.details)}`, '_blank');
+            
+            const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit();
             renderFinalList();
         }
