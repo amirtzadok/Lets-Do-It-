@@ -22,16 +22,17 @@
         @media (min-width: 768px) {
             body { padding: 40px; }
             .card { max-width: 800px; padding: 40px; }
-            .avatar-options { grid-template-columns: repeat(4, 1fr) !important; } /* Horizontal on desktop */
+            .avatar-options { grid-template-columns: repeat(4, 1fr) !important; } 
             .faces-container { gap: 25px !important; }
+            .welcome-logo-container img { width: 220px !important; } /* Even larger for desktop welcome */
         }
 
         h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
-        /* Welcome Screen UI with Logo */
-        .welcome-logo-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .welcome-logo-container img { width: 80px; height: auto; }
-        .welcome-logo-container h1 { font-size: 32px; font-weight: 900; margin: 0; }
+        /* Welcome Screen UI with Larger Logo and No Text */
+        .welcome-logo-container { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; padding-top: 20px; }
+        .welcome-logo-container img { width: 160px; height: auto; transition: transform 0.3s ease; }
+        .welcome-logo-container img:hover { transform: scale(1.05); }
 
         /* Setup Screen - Vertical on Mobile by default */
         .avatar-options { display: grid; grid-template-columns: 1fr; gap: 15px; justify-items: center; margin: 20px 0; }
@@ -70,8 +71,7 @@
 
     <div id="setup-card" class="card hidden">
         <div class="welcome-logo-container">
-            <img src="logo.png" alt="Rocket Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
-            <h1>Let's Do It!</h1>
+            <img src="logo.png" alt="Let's Do It Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
         </div>
         <h2>Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
