@@ -17,42 +17,30 @@
 
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start;
-            margin: 0; 
-            min-height: 100vh; 
-            box-sizing: border-box; 
+            background: var(--bg); padding: 10px; display: flex; 
+            flex-direction: column; align-items: center; justify-content: flex-start;
+            margin: 0; min-height: 100vh; box-sizing: border-box; 
         }
 
         .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 480px;
-            padding: 15px 0;
-            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; max-width: 480px; padding: 15px 0; position: relative;
         }
         .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
 
-        .lang-btn {
+        .header-btn {
             background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px;
             border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
             top: 50%; transform: translateY(-50%);
         }
+        #help-btn { font-size: 16px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        #setup-card { height: auto; display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.5s ease; }
-
+        
         .avatar-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
         .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-weight: bold; margin-top: 4px; font-size: 13px; }
 
         @media (min-width: 768px) {
             body { padding-top: 20px; }
@@ -60,94 +48,78 @@
             .card, .app-header { max-width: 600px; }
         }
 
-        h2 { font-size: 18px; font-weight: 800; margin: 5px 0; text-align: center; }
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
-        .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
         input[type="file"] { font-size: 12px; margin-bottom: 10px; }
-        
-        .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
-
-        .optional-logistics { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
-        .toggle-logistics-btn { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-bottom: 5px; width: 100%; text-align: start; }
-        .cancel-logistics-btn { background: none; border: none; color: var(--heart); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-top: 5px; display: block; }
-
-        .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
-        .face-wrapper.selected { opacity: 1; }
-        .face { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
-        .face-wrapper.selected .face { border-color: var(--primary); }
-        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
-        .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
 
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; user-select: none; }
-        .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
+        .item-delete { position: absolute; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
 
-        .image-gallery { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
-        .image-gallery img { height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd; }
+        .image-gallery { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; }
+        .image-gallery img { height: 60px; border-radius: 8px; border: 1px solid #ddd; }
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
-        .stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 32px; color: #ddd; cursor: pointer; }
-        .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; margin-bottom: 5px; }
         .hidden { display: none !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body onload="init()">
 
     <header class="app-header">
+        <button id="help-btn" class="header-btn" onclick="openGuide()">?</button>
         <h1 id="app-name-display">🚀 Let's Do It!</h1>
-        <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()"></button>
+        <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
     </header>
 
-    <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header"></h2>
-        <div id="star-desc" class="star-label" data-i18n="chooseRating">Rate their idea!</div>
-        <div class="stars" id="star-row">
-            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
-        </div>
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;" data-i18n="submitVote">Let's do it!</button>
+    <div id="guide-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 200; border: 2px solid var(--primary); width: 95%; max-width: 450px;">
+        <h2 data-i18n="guideTitle">How it works</h2>
+        <div id="guide-content"></div>
+        <button class="primary-btn" onclick="closeGuide()" data-i18n="close">Got it!</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;">
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Logistics</h3>
         <div id="edit-fields">
-            <textarea id="edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
-            <input type="date" id="edit-date" oninput="validateLogistics()">
-            <input type="time" id="edit-time" oninput="validateLogistics()">
-            <select id="edit-duration" oninput="validateLogistics()">
-                <option value="" disabled selected data-i18n="chooseDuration">Choose duration</option>
+            <input type="text" id="edit-title" placeholder="Activity Name">
+            <div style="display:flex; gap:5px;"><input type="date" id="edit-date" style="flex:1;"><input type="time" id="edit-time" style="flex:1;"></div>
+            <select id="edit-duration">
+                <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
                 <option value="1-3" data-i18n="dur1">1-3 hours</option>
                 <option value="half" data-i18n="dur2">half a day</option>
                 <option value="full" data-i18n="dur3">full day</option>
             </select>
-            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled data-i18n="saveNotify">Save & Notify Participants</button>
+            <input type="text" id="edit-url" placeholder="Paste link (URL)">
+            <label style="font-size:11px; display:block;" data-i18n="addImages">Update images:</label>
+            <input type="file" id="edit-images" multiple accept="image/*">
+            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" data-i18n="update">Update</button>
         </div>
-        <div id="view-fields" class="hidden" style="padding: 10px 0;">
+        <div id="view-fields" class="hidden">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
-            <p id="view-duration" style="font-style:italic;"></p>
+            <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
             <div id="view-link-container"></div>
             <div id="view-images-container" class="image-gallery"></div>
-            <div id="request-details-ui" class="hidden">
-                <button class="primary-btn" id="request-btn" onclick="requestDetails()" data-i18n="getDetails">Get details</button>
-                <p id="request-note" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px;"></p>
-            </div>
         </div>
         <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
     </div>
 
+    <div id="rating-screen" class="card hidden">
+        <h2 id="rating-header"></h2>
+        <div class="stars" id="star-row" style="display:flex; justify-content:center; font-size:32px; color:#ddd; cursor:pointer; margin-bottom:10px;">
+            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
+        </div>
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled data-i18n="submitVote">Let's do it!</button>
+    </div>
+
     <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 101; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
-        <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;" data-i18n="innerLongPressTip">(Long press to edit item details)</p>
+        <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;" data-i18n="innerLongPressTip">(Long press to edit details)</p>
         <div id="suggestions-list-content"></div>
         <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
     </div>
@@ -166,40 +138,30 @@
             </div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
             <div class="input-row">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" placeholder="What's the plan?" oninput="updateUIState()">
-                <button class="clear-btn" onclick="clearInput()">✕</button>
+                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
+                <button style="background:none; border:none; color:#ccc; cursor:pointer;" onclick="clearInput()">✕</button>
             </div>
-
-            <button class="toggle-logistics-btn" id="toggle-suggest-details" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
+            <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
             <div id="suggest-logistics-fields" class="hidden optional-logistics">
-                <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?"></textarea>
-                <input type="date" id="suggest-date">
-                <input type="time" id="suggest-time">
+                <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
+                <div style="display:flex; gap:5px;"><input type="date" id="suggest-date" style="flex:1;"><input type="time" id="suggest-time" style="flex:1;"></div>
                 <select id="suggest-duration">
-                    <option value="" disabled selected data-i18n="chooseDuration">Choose duration</option>
+                    <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
                     <option value="1-3" data-i18n="dur1">1-3 hours</option>
                     <option value="half" data-i18n="dur2">half a day</option>
                     <option value="full" data-i18n="dur3">full day</option>
                 </select>
-                <input type="text" id="suggest-url" placeholder="Paste link here (URL)">
-                <label style="font-size:12px; display:block; margin-bottom:4px;" data-i18n="addImages">Add images:</label>
+                <input type="text" id="suggest-url" placeholder="Paste link (URL)">
                 <input type="file" id="suggest-images" multiple accept="image/*">
-                <button class="cancel-logistics-btn" onclick="cancelSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
-
             <div class="faces-container">
-                <div class="face-wrapper" id="f-all" onclick="selectAll()">
-                    <div class="heart-box">❤️</div>
-                    <p style="font-size:10px; margin-top:5px; font-weight:bold;" data-i18n="everyone">Everyone</p>
-                </div>
                 <div id="faces-render" style="display:flex; gap:8px;"></div>
+                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px;" data-i18n="everyone">Everyone</p></div>
             </div>
-            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants">Select Participants</button>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
         </div>
-
         <div class="card">
             <h2 data-i18n="futureActivities">🚀 Future Activities!</h2>
-            <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;" data-i18n="longPress">(Long press an activity to view or edit)</p>
             <div id="final-list"></div>
         </div>
     </div>
@@ -207,40 +169,34 @@
     <script>
         const i18n = {
             eng: {
-                langBtn: "HEB", chooseRating: "Rate their idea!", submitVote: "Let's do it!", editLogistics: "Edit Logistics", 
-                descPlaceholder: "Where / What we do?", saveNotify: "Save & Notify Participants", close: "Close", 
-                whoAreYou: "Who are you?", enterApp: "Let's do it!", notMe: "Not me?", hiUser: "Hi", 
-                doSomething: "let's do something together!", planPlaceholder: "What's the plan?", everyone: "Everyone", 
-                selectParticipants: "Select Participants", futureActivities: "🚀 Future Activities!", 
-                longPress: "(Long press an activity to view or edit)", getDetails: "Get details", 
-                requestNote: "Request for more details will be sent to", viewLogistics: "View Logistics",
-                invitePrefix: "Invite", everyoneInvite: "Everyone", selectionInvite: "Selection", waSuggested: "suggested:", 
-                waRateHere: "Rate it here:", waUpdate: "UPDATE:", waAt: "at", noActivities: "No confirmed activities yet.", 
-                deleteConfirm: "Remove this item?", deleteDenied: "Only the creator or Admin can remove this.",
-                waRatingMsg: "liked your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
-                chooseDuration: "Choose duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", waDur: "Duration:",
-                cancel: "Cancel", update: "Update", groupName: "Tzadok family", waConfirmed: "Activity confirmed and added to your list!",
-                waNegativeRating: "No one liked your idea.. Try another one!", mySuggestionsTitle: "My Suggestions",
-                noSuggestions: "You haven't suggested anything yet.", resendBtn: "Update & Send Again",
-                innerLongPressTip: "(Long press to edit item details)", addImages: "Add images:", viewLink: "🔗 View Link"
+                langBtn: "HEB", guideTitle: "User Guide", close: "Close",
+                g1Title: "1. Planning", g1Body: "Create ideas and add details/images to build excitement!",
+                g2Title: "2. My Suggestions", g2Body: "History panel accessed via avatar. Long-press to edit and sync with the public list.",
+                g3Title: "3. Finalizing", g3Body: "Confirmed items appear in Future Activities. Creators can update details anytime.",
+                submitVote: "Let's do it!", editLogistics: "Edit Logistics", descPlaceholder: "Description/Notes", 
+                saveNotify: "Save & Notify", whoAreYou: "Who are you?", enterApp: "Enter", notMe: "Not me?", 
+                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
+                everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
+                chooseDuration: "Duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", 
+                mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
+                selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed! Added to list.", waNegativeRating: "Try another one!",
+                waSuggested: "suggested:", innerLongPressTip: "(Long press to edit details)", update: "Update", addImages: "Images:"
             },
             heb: {
-                langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
-                descPlaceholder: "איפה / מה עושים?", saveNotify: "שמור ועדכן משתתפים", close: "סגור", 
-                whoAreYou: "מי את/ה?", enterApp: "בואו נעשה את זה!", notMe: "לא אני?", hiUser: "היי", 
-                doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", everyone: "כולם", 
-                selectParticipants: "בחרו משתתפים", futureActivities: "🚀 פעילויות עתידיות!", 
-                longPress: "(לחיצה ארוכה על פעילות לצפייה או עריכה)", getDetails: "בקש פרטים", 
-                requestNote: "בקשה לפרטים נוספים תישלח אל", viewLogistics: "פרטי הפעילות",
-                invitePrefix: "הזמן את", everyoneInvite: "כולם", selectionInvite: "הנבחרים", waSuggested: "הציע/ה:", 
-                waRateHere: "דרגו כאן:", waUpdate: "עדכון:", waAt: "ב-", noActivities: "אין עדיין פעילויות מאושרות.", 
-                deleteConfirm: "להסיר את הפריט הזה?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פריט.",
-                waRatingMsg: "אהב/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
-                chooseDuration: "בחרו משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", waDur: "משך זמן:",
-                cancel: "ביטול", update: "עדכן", groupName: "משפחת צדוק", waConfirmed: "הפעילות אושרה ונוספה לרשימה שלך!",
-                waNegativeRating: "אף אחד לא אהב את הרעיון שלך.. נסה משהו אחר!", mySuggestionsTitle: "ההצעות שלי",
-                noSuggestions: "עדיין לא הצעת רעיונות.", resendBtn: "עדכן ושלח שוב",
-                innerLongPressTip: "(לחיצה ארוכה לעריכת פרטי הפריט)", addImages: "הוספת תמונות:", viewLink: "🔗 צפייה בקישור"
+                langBtn: "ENG", guideTitle: "מדריך למשתמש", close: "סגור",
+                g1Title: "1. תכנון", g1Body: "צרו רעיונות והוסיפו פרטים/תמונות כדי להלהיב את כולם!",
+                g2Title: "2. ההצעות שלי", g2Body: "גישה להיסטוריה דרך האווטאר. לחיצה ארוכה לעריכה וסנכרון עם הרשימה הציבורית.",
+                g3Title: "3. סגירת פרטים", g3Body: "פריטים מאושרים מופיעים בפעילויות עתידיות. היוצר יכול לעדכן פרטים בכל עת.",
+                submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", 
+                saveNotify: "שמור ועדכן", whoAreYou: "מי את/ה?", enterApp: "כניסה", notMe: "לא אני?", 
+                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
+                everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
+                chooseDuration: "משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", 
+                mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
+                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר! נוסף לרשימה.", waNegativeRating: "נסו משהו אחר!",
+                waSuggested: "הציע/ה:", innerLongPressTip: "(לחיצה ארוכה לעריכת פרטים)", update: "עדכן", addImages: "תמונות:"
             }
         };
 
@@ -251,100 +207,61 @@
             { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
         ];
 
-        const starLabels = { eng: { 1: "No", 2: "Nope", 3: "Maybe", 4: "Liked!", 5: "Loved!" }, heb: { 1: "לא", 2: "לא ממש", 3: "אולי", 4: "אהבתי!", 5: "מדהים!" } };
-
         let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
-        let selected = [];
-        let currentRating = 0;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let pressTimer;
+        let selected = []; let currentRating = 0; let editingId = null; let pressTimer;
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'eng' ? 'heb' : 'eng';
-            localStorage.setItem('letsdoit_lang', currentLang);
-            updateUILanguage();
-            renderFinalList();
-        }
-
+        function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
+        
         function updateUILanguage() {
-            const langData = i18n[currentLang];
-            document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
-            const langBtn = document.getElementById('lang-toggle');
-            langBtn.innerText = langData.langBtn;
-            langBtn.style.left = currentLang === 'heb' ? '0px' : 'auto';
-            langBtn.style.right = currentLang === 'eng' ? '0px' : 'auto';
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = langData[el.getAttribute('data-i18n')]);
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = langData[el.getAttribute('data-i18n-placeholder')]);
-            if (currentUser) {
-                document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${langData.hiUser}, ${currentUser.name}</b>`;
-            }
-            updateUIState();
+            const d = i18n[currentLang]; const isHeb = currentLang === 'heb';
+            document.body.dir = isHeb ? 'rtl' : 'ltr';
+            document.getElementById('lang-toggle').innerText = d.langBtn;
+            document.getElementById('lang-toggle').style.left = isHeb ? '0px' : 'auto';
+            document.getElementById('lang-toggle').style.right = isHeb ? 'auto' : '0px';
+            document.getElementById('help-btn').style.left = isHeb ? 'auto' : '0px';
+            document.getElementById('help-btn').style.right = isHeb ? '0px' : 'auto';
+            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
+            if (currentUser) document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${d.hiUser}, ${currentUser.name}</b>`;
         }
 
         function init() {
-            updateUILanguage();
-            const params = new URLSearchParams(window.location.search);
+            updateUILanguage(); const params = new URLSearchParams(window.location.search);
             if (params.get('editLogistics')) {
                 if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-                else { showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
+                else { document.getElementById('main-app').classList.remove('hidden'); showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
                 return;
             }
-            if (params.get('rate')) {
-                document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rating-header').innerText = `${params.get('creator')} ${i18n[currentLang].waSuggested} ${params.get('rate')}`;
-                return;
-            }
+            if (params.get('rate')) { document.getElementById('rating-screen').classList.remove('hidden'); document.getElementById('rating-header').innerText = `${params.get('creator')} ${i18n[currentLang].waSuggested} ${params.get('rate')}`; return; }
             if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-            else { showMainApp(); }
+            else showMainApp();
         }
 
-        function renderSetup() {
-            document.getElementById('avatar-selector').innerHTML = family.map(f => `
-                <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
-                    <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
-                    <span>${f.name}</span>
-                </div>
-            `).join('');
-        }
-
-        function selectSelf(id) {
-            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
-            document.getElementById(`choice-${id}`).classList.add('active');
-            document.getElementById('start-btn').disabled = false;
-            window.tempId = id;
-        }
-
-        function finishSetup() {
-            currentUser = family.find(f => f.id === window.tempId);
-            localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser));
-            location.reload();
-        }
+        function renderSetup() { document.getElementById('avatar-selector').innerHTML = family.map(f => `<div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})"><img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'"><span>${f.name}</span></div>`).join(''); }
+        function selectSelf(id) { document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active')); document.getElementById(`choice-${id}`).classList.add('active'); document.getElementById('start-btn').disabled = false; window.tempId = id; }
+        function finishSetup() { currentUser = family.find(f => f.id === window.tempId); localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser)); location.reload(); }
 
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('faces-render').innerHTML = family.map(f => `
-                <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
-                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
-                    <p style="font-size:10px;">${f.name}</p>
-                </div>
-            `).join('');
+            document.getElementById('faces-render').innerHTML = family.map(f => `<div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})"><img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'"><p style="font-size:10px;">${f.name}</p></div>`).join('');
             renderFinalList();
         }
 
         function toggleFace(id) { const idx = selected.indexOf(id); idx > -1 ? selected.splice(idx, 1) : selected.push(id); updateUIState(); }
         function selectAll() { selected = (selected.length === family.length) ? [] : family.map(f => f.id); updateUIState(); }
-        function clearInput() { document.getElementById('main-input').value = ""; cancelSuggestLogistics(); updateUIState(); }
-        function toggleSuggestLogistics() { const isHidden = document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); document.getElementById('toggle-suggest-details').innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails; }
-        function cancelSuggestLogistics() { ['suggest-desc', 'suggest-date', 'suggest-time', 'suggest-duration', 'suggest-url', 'suggest-images'].forEach(id => document.getElementById(id).value = ""); document.getElementById('suggest-logistics-fields').classList.add('hidden'); document.getElementById('toggle-suggest-details').innerText = i18n[currentLang].addDetailsNow; }
-
+        function clearInput() { document.getElementById('main-input').value = ""; updateUIState(); }
+        function toggleSuggestLogistics() { document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); }
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => { const el = document.getElementById(`f-${f.id}`); if (el) el.classList.toggle('selected', selected.includes(f.id)); });
-            const btn = document.getElementById('action-btn');
-            btn.disabled = !(selected.length > 0 && val);
-            if (selected.length > 0) { const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & '); btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`; } else { btn.innerText = i18n[currentLang].selectParticipants; }
+            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
+            const btn = document.getElementById('action-btn'); btn.disabled = !(selected.length > 0 && val);
+            if (selected.length > 0) {
+                const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
+            } else btn.innerText = i18n[currentLang].selectParticipants;
         }
 
         async function sendWA() {
@@ -355,159 +272,154 @@
             const dur = document.getElementById('suggest-duration').value;
             const urlInp = document.getElementById('suggest-url').value;
             const imagesInp = document.getElementById('suggest-images').files;
-            const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
             let base64Images = [];
             for (let file of imagesInp) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
 
-            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants, modified: new Date().toISOString() };
-            myHistory = myHistory.filter(s => s.title !== title);
-            myHistory.push(suggObj);
+            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
+            myHistory = myHistory.filter(s => s.title !== title); myHistory.push(suggObj);
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
 
-            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
-            if(desc) url += `&details=${encodeURIComponent(desc)}`;
-            if(date) url += `&date=${encodeURIComponent(date)}`;
-            if(time) url += `&time=${encodeURIComponent(time)}`;
-            if(dur) url += `&duration=${encodeURIComponent(dur)}`;
-            if(urlInp) url += `&exturl=${encodeURIComponent(urlInp)}`;
+            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pNames)}`;
+            if(desc) url += `&details=${encodeURIComponent(desc)}`; if(date) url += `&date=${encodeURIComponent(date)}`; if(time) url += `&time=${encodeURIComponent(time)}`; if(dur) url += `&duration=${encodeURIComponent(dur)}`; if(urlInp) url += `&exturl=${encodeURIComponent(urlInp)}`;
 
             const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
-            const prefix = selected.length === family.length ? `🏠 *${i18n[currentLang].groupName}* \n` : "";
-            const durText = dur ? `\n⏳ ${i18n[currentLang]['dur' + (dur === '1-3' ? '1' : dur === 'half' ? '2' : '3')]}` : "";
-            const waMsg = `${prefix}🚀 *Let's Do It!* \n${currentUser.name} ${i18n[currentLang].waSuggested} ${title}\n📍 ${desc || ''}${date ? '\n📅 ' + date : ''}${time ? ' at ' + time : ''}${durText}\n\n${i18n[currentLang].waRateHere}\n${url}`;
-            
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
-            clearInput();
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' ' + i18n[currentLang].waSuggested + ' ' + title + '\n\n' + i18n[currentLang].waRateHere + '\n' + url)}`, '_blank');
+            location.reload();
         }
 
         function openSuggestions() {
-            const panel = document.getElementById('suggestions-panel');
-            const listContent = document.getElementById('suggestions-list-content');
             const sorted = myHistory.sort((a, b) => a.title.localeCompare(b.title) || new Date(b.modified) - new Date(a.modified));
-
-            listContent.innerHTML = sorted.length ? sorted.map(s => `
-                <div class="list-item" 
-                     onmousedown="startInnerPress(${s.id})" 
-                     onmouseup="endInnerPress()" 
-                     ontouchstart="startInnerPress(${s.id})" 
-                     ontouchend="endInnerPress()"
-                     style="border-left: 5px solid var(--primary);">
+            document.getElementById('suggestions-list-content').innerHTML = sorted.map(s => `
+                <div class="list-item" onmousedown="startInnerPress(${s.id})" onmouseup="endInnerPress()" ontouchstart="startInnerPress(${s.id})" ontouchend="endInnerPress()">
                     <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
-                    <div id="inner-view-${s.id}">
-                        <b>${s.title}</b><br><small>${s.participants}</small>
-                        ${s.images ? `<div class="image-gallery">${s.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
-                    </div>
-                    <div id="inner-edit-${s.id}" class="hidden" style="margin-top:10px;">
-                        <input type="text" value="${s.desc || ''}" id="hist-desc-${s.id}" placeholder="${i18n[currentLang].descPlaceholder}">
-                        <div style="display:flex; gap:5px;"><input type="date" value="${s.date || ''}" id="hist-date-${s.id}" style="flex:1;"><input type="time" value="${s.time || ''}" id="hist-time-${s.id}" style="flex:1;"></div>
-                        <select id="hist-dur-${s.id}"><option value="1-3" ${s.dur === '1-3' ? 'selected' : ''}>${i18n[currentLang].dur1}</option><option value="half" ${s.dur === 'half' ? 'selected' : ''}>${i18n[currentLang].dur2}</option><option value="full" ${s.dur === 'full' ? 'selected' : ''}>${i18n[currentLang].dur3}</option></select>
-                        <input type="text" value="${s.url || ''}" id="hist-url-${s.id}" placeholder="Link (URL)">
-                        <label style="font-size:11px; display:block;" data-i18n="addImages">Update images:</label>
+                    <div id="inner-view-${s.id}"><b>${s.title}</b><br><small>${s.participants}</small></div>
+                    <div id="inner-edit-${s.id}" class="hidden">
+                        <input type="text" value="${s.title || ''}" id="hist-title-${s.id}">
+                        <div style="display:flex; gap:5px;"><input type="date" value="${s.date || ''}" id="hist-date-${s.id}"><input type="time" value="${s.time || ''}" id="hist-time-${s.id}"></div>
+                        <select id="hist-dur-${s.id}"><option value="1-3" ${s.dur === '1-3' ? 'selected' : ''}>1-3 hours</option><option value="half" ${s.dur === 'half' ? 'selected' : ''}>half a day</option><option value="full" ${s.dur === 'full' ? 'selected' : ''}>full day</option></select>
+                        <input type="text" value="${s.url || ''}" id="hist-url-${s.id}">
                         <input type="file" id="hist-images-${s.id}" multiple accept="image/*">
-                        <button class="primary-btn" style="padding:10px; font-size:13px; margin-top:10px; background:var(--whatsapp);" onclick="updateAndSaveSuggestion(${s.id})">${i18n[currentLang].update}</button>
+                        <button class="primary-btn" style="background:var(--whatsapp);" onclick="updateAndSaveSuggestion(${s.id})">${i18n[currentLang].update}</button>
                     </div>
                 </div>
-            `).join('') : `<p style="text-align:center;">${i18n[currentLang].noSuggestions}</p>`;
-            panel.classList.remove('hidden');
+            `).join('') || `<p>${i18n[currentLang].noSuggestions}</p>`;
+            document.getElementById('suggestions-panel').classList.remove('hidden');
         }
 
         async function updateAndSaveSuggestion(id) {
-            const s = myHistory.find(item => item.id === id);
-            s.desc = document.getElementById(`hist-desc-${id}`).value;
+            const s = myHistory.find(i => i.id === id);
+            const oldTitle = s.title;
+            s.title = document.getElementById(`hist-title-${id}`).value;
             s.date = document.getElementById(`hist-date-${id}`).value;
             s.time = document.getElementById(`hist-time-${id}`).value;
             s.dur = document.getElementById(`hist-dur-${id}`).value;
             s.url = document.getElementById(`hist-url-${id}`).value;
-            
-            // Process new images if any
-            const newImgFiles = document.getElementById(`hist-images-${id}`).files;
-            if (newImgFiles.length > 0) {
-                let base64Images = [];
-                for (let file of newImgFiles) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
-                s.images = base64Images;
+            s.modified = new Date().toISOString();
+
+            const imgFiles = document.getElementById(`hist-images-${id}`).files;
+            if (imgFiles.length > 0) {
+                s.images = [];
+                for (let file of imgFiles) { s.images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
             }
 
-            s.modified = new Date().toISOString();
+            const publicIdx = activities.findIndex(a => a.title === oldTitle && a.creator === s.creator);
+            if (publicIdx > -1) {
+                activities[publicIdx].title = s.title; activities[publicIdx].dateRaw = s.date; activities[publicIdx].time = s.time;
+                activities[publicIdx].duration = s.dur; activities[publicIdx].url = s.url; activities[publicIdx].images = s.images;
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+            }
+
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
-            
-            document.getElementById('main-input').value = s.title;
-            document.getElementById('suggest-desc').value = s.desc;
-            document.getElementById('suggest-date').value = s.date;
-            document.getElementById('suggest-time').value = s.time;
-            document.getElementById('suggest-duration').value = s.dur;
-            document.getElementById('suggest-url').value = s.url || "";
-            
-            closeSuggestions(); updateUIState();
+            location.reload();
+        }
+
+        function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
+        function closeGuide() { document.getElementById('guide-panel').classList.add('hidden'); }
+        function openGuide() {
+            const d = i18n[currentLang];
+            document.getElementById('guide-content').innerHTML = `<div style="text-align:left;"><b>${d.g1Title}</b><p>${d.g1Body}</p><b>${d.g2Title}</b><p>${d.g2Body}</p><b>${d.g3Title}</b><p>${d.g3Body}</p></div>`;
+            document.getElementById('guide-panel').classList.remove('hidden');
         }
 
         function startInnerPress(id) { pressTimer = setTimeout(() => { document.getElementById(`inner-view-${id}`).classList.add('hidden'); document.getElementById(`inner-edit-${id}`).classList.remove('hidden'); }, 600); }
         function endInnerPress() { clearTimeout(pressTimer); }
         function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
-        function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
 
+        function setStars(n) { currentRating = n; document.querySelectorAll('#star-row span').forEach((s, i) => s.style.color = i < n ? '#facc15' : '#ddd'); document.getElementById('submit-vote-btn').disabled = false; }
+        
         function submitRating() {
-            const params = new URLSearchParams(window.location.search);
-            const aId = Date.now();
-            const creator = params.get('creator');
-            const title = params.get('rate');
+            const p = new URLSearchParams(window.location.search);
+            const title = p.get('rate'); const creator = p.get('creator');
             if (currentRating >= 4) {
-                activities.push({ id: aId, title, joinedBy: params.get('participants'), creator, details: params.get('details') || '', dateRaw: params.get('date') || '', time: params.get('time') || '', duration: params.get('duration') || '', url: params.get('exturl') || '', images: (myHistory.find(s => s.title === title) || {}).images || [] });
+                const hist = myHistory.find(s => s.title === title && s.creator === creator) || {};
+                activities.push({ 
+                    id: Date.now(), title, creator, joinedBy: p.get('participants'), 
+                    details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', 
+                    time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', 
+                    url: p.get('exturl') || hist.url || '', images: hist.images || [] 
+                });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 *Let\'s Do It!* \n' + currentUser.name + ' ' + i18n[currentLang].waRatingMsg + ' "' + title + '"!\n\n' + i18n[currentLang].waConfirmed)}`, '_blank');
-            } else { window.open(`https://wa.me/${(family.find(f=>f.name===creator) || {}).phone}?text=${encodeURIComponent(i18n[currentLang].waNegativeRating)}`, '_blank'); }
+                window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 ' + currentUser.name + ' ' + i18n[currentLang].waRatingMsg + ' "' + title + '"!')}`, '_blank');
+            }
             window.location.href = window.location.origin + window.location.pathname;
         }
 
         function renderFinalList() {
-            const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
-            document.getElementById('final-list').innerHTML = sorted.map(a => {
-                const canDel = currentUser && (a.creator === currentUser.name || currentUser.name === "Amir");
-                return `
-                    <div class="list-item" onclick="openEdit(${a.id})">
-                        ${canDel ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
-                        <b>${a.title}${ (a.details && a.dateRaw && a.time && a.duration) ? ' ❤️' + (a.dateRaw < todayStr ? ' ✅' : ' 🕒') : '' }</b><br>
-                        <small>${a.creator} | ${a.joinedBy}</small>
-                        ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
-                        ${a.images && a.images.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
-                        ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
-                    </div>
-                `;
-            }).join('') || `<p style="text-align:center; color:gray;">${i18n[currentLang].noActivities}</p>`;
+            document.getElementById('final-list').innerHTML = sorted.map(a => `
+                <div class="list-item" onclick="openEdit(${a.id})">
+                    ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
+                    <b>${a.title}${ (a.dateRaw) ? ' ❤️' : '' }</b><br><small>${a.creator} | ${a.joinedBy}</small>
+                    ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
+                    ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
+                </div>
+            `).join('') || `<p>${i18n[currentLang].noActivities}</p>`;
         }
-
-        function validateLogistics() { document.getElementById('save-notify-btn').disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value); }
 
         function openEdit(id) {
             editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
-            document.getElementById('modal-title').innerText = isCreator ? i18n[currentLang].editLogistics : i18n[currentLang].viewLogistics;
             document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
             document.getElementById('view-fields').classList.toggle('hidden', isCreator);
-            if (isCreator) { document.getElementById('edit-desc').value = item.details || ''; document.getElementById('edit-date').value = item.dateRaw || ''; document.getElementById('edit-time').value = item.time || ''; document.getElementById('edit-duration').value = item.duration || ''; validateLogistics(); }
-            else { 
-                document.getElementById('view-desc').innerText = item.details || "..."; document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "...";
-                document.getElementById('view-duration').innerText = `${i18n[currentLang].waDur} ${item.duration ? i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')] : '...'}`;
+            if (isCreator) { 
+                document.getElementById('edit-title').value = item.title; 
+                document.getElementById('edit-date').value = item.dateRaw; 
+                document.getElementById('edit-time').value = item.time; 
+                document.getElementById('edit-duration').value = item.duration;
+                document.getElementById('edit-url').value = item.url || '';
+            } else { 
+                document.getElementById('view-desc').innerText = item.details || "..."; 
+                document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "...";
+                document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
                 document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
-                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw)); document.getElementById('request-note').innerText = `${i18n[currentLang].requestNote} ${item.creator}`;
             }
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
-        function requestDetails() { const item = activities.find(a => a.id === editingId); window.open(`https://wa.me/${(family.find(f => f.name === item.creator) || {}).phone}?text=${encodeURIComponent('Hey ' + item.creator + '! Can you add details for "' + item.title + '"? \n\nLink:\n' + window.location.origin + window.location.pathname + '?editLogistics=' + item.id)}`, '_blank'); }
-
-        function saveAndNotify() {
-            const item = activities.find(a => a.id === editingId); item.details = document.getElementById('edit-desc').value; item.dateRaw = document.getElementById('edit-date').value; item.time = document.getElementById('edit-time').value; item.duration = document.getElementById('edit-duration').value;
+        async function saveAndNotify() {
+            const item = activities.find(a => a.id === editingId);
+            item.title = document.getElementById('edit-title').value;
+            item.dateRaw = document.getElementById('edit-date').value;
+            item.time = document.getElementById('edit-time').value;
+            item.duration = document.getElementById('edit-duration').value;
+            item.url = document.getElementById('edit-url').value;
+            
+            const imgInp = document.getElementById('edit-images').files;
+            if (imgInp.length > 0) {
+                item.images = [];
+                for (let file of imgInp) { item.images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
+            }
+            
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            window.open(`https://wa.me/${(item.joinedBy === "Everyone" ? "" : (family.find(f => f.name === item.joinedBy) || {}).phone)}?text=${encodeURIComponent('✅ *' + i18n[currentLang].waUpdate + '* ' + item.title + '\n📅 ' + item.dateRaw + ' at ' + item.time + '\n📍 ' + item.details)}`, '_blank');
-            closeEdit(); renderFinalList();
+            window.open(`https://wa.me/?text=${encodeURIComponent('✅ *Update:* ' + item.title + '\n📅 ' + item.dateRaw + ' @ ' + item.time)}`, '_blank');
+            location.reload();
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        function setStars(n) { currentRating = n; document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n)); document.getElementById('submit-vote-btn').disabled = false; }
     </script>
 </body>
 </html>
