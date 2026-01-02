@@ -18,6 +18,7 @@
         h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
         /* Setup Screen - Vertical Mobile Layout */
+        .onboarding-rocket { font-size: 50px; text-align: center; display: block; margin-bottom: 10px; }
         .avatar-options { display: grid; grid-template-columns: 1fr; gap: 15px; justify-items: center; margin: 20px 0; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 80px; height: 80px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
@@ -32,7 +33,7 @@
         
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
         input[type="text"] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
-        .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+        .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
@@ -53,6 +54,7 @@
 <body onload="init()">
 
     <div id="setup-card" class="card hidden">
+        <span class="onboarding-rocket">🚀</span>
         <h2>Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
@@ -83,7 +85,7 @@
         </div>
 
         <div class="card">
-            <h2>🚀 Let's Do It! List</h2>
+            <h2>🚀 Let's Do It!</h2>
             <div id="final-list"></div>
         </div>
     </div>
@@ -189,7 +191,6 @@
             const baseUrl = window.location.origin + window.location.pathname;
             const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}`;
             
-            // Clean message format: Rocket first, Name second, URL last.
             const msg = `🚀 Let's Do It!\n${creatorIdentity.name} suggested "${activity}".\n\nRate it here:\n${ratingUrl}`;
             
             let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
