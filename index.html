@@ -15,41 +15,61 @@
             --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 10px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; box-sizing: border-box; }
-        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        
-        /* Fixed Mobile Welcome Screen */
-        #setup-card { 
-            height: auto; 
-            max-height: 95vh; 
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            padding: 10px; 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-start; 
-            padding: 20px; 
-            gap: 15px; /* Keeps elements close */
+            align-items: center; 
+            justify-content: flex-start; /* Changed to top-align to accommodate global header */
+            margin: 0; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+
+        /* App Header Style */
+        .app-header {
+            text-align: center;
+            padding: 15px 0;
+            width: 100%;
+            max-width: 480px;
+        }
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
+        
+        #setup-card { 
+            height: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            animation: fadeIn 0.5s ease;
         }
 
         .welcome-logo-container { flex: 0 0 auto; display: flex; justify-content: center; }
         .welcome-logo-container img { max-width: 100px; height: auto; }
 
-        .avatar-options { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            overflow-y: auto; /* Allow scrolling if many family members */
-            padding: 5px;
-        }
-
+        .avatar-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 65px; height: 65px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
         .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-weight: bold; margin-top: 4px; font-size: 12px; opacity: 0.6; }
-        .avatar-choice.active span { opacity: 1; color: var(--primary); }
+        .avatar-choice span { font-weight: bold; margin-top: 4px; font-size: 13px; }
 
         @media (min-width: 768px) {
+            body { padding-top: 20px; }
             .avatar-options { grid-template-columns: repeat(4, 1fr); }
-            .card { max-width: 600px; padding: 30px; }
-            .welcome-logo-container img { max-width: 160px; }
+            .card { max-width: 600px; }
+            .app-header { max-width: 600px; }
         }
 
         h2 { font-size: 18px; font-weight: 800; margin: 5px 0; text-align: center; }
@@ -64,28 +84,34 @@
         .face-wrapper.selected { opacity: 1; }
         .face { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face { border-color: var(--primary); }
-        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 3px solid transparent; }
-        .face-wrapper.selected .heart-box { border-color: var(--heart); }
+        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; cursor: pointer; }
+        .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
 
-        .list-item { background: #f1f5f9; padding: 12px; border-radius: 18px; margin-bottom: 10px; border-left: 5px solid var(--whatsapp); position: relative; }
-        .item-actions { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 14px; }
+        .list-item { 
+            background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; 
+            border-left: 5px solid var(--whatsapp); position: relative; 
+            cursor: pointer; user-select: none; -webkit-user-select: none;
+        }
+        .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
 
         .stars { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; font-size: 15px; }
+        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; }
         .hidden { display: none !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body onload="init()">
 
+    <header class="app-header">
+        <h1>🚀 Let's Do It!</h1>
+    </header>
+
     <div id="rating-screen" class="card hidden">
-        <div class="welcome-logo-container">
-            <img src="logo.png" alt="Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
-        </div>
         <h2 id="rating-header"></h2>
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
@@ -94,19 +120,16 @@
         <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Submit Vote</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary);">
-        <h3>Edit Details</h3>
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
+        <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
         <input type="date" id="edit-date">
         <input type="time" id="edit-time">
-        <button class="primary-btn" onclick="saveAndNotify()">Save & Notify</button>
+        <button class="primary-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
     <div id="setup-card" class="card hidden">
-        <div class="welcome-logo-container">
-            <img src="logo.png" alt="Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
-        </div>
         <h2>Who are you?</h2>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Enter App</button>
@@ -116,9 +139,9 @@
         <div class="card">
             <div class="user-header">
                 <div id="user-info" class="user-info"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()">Change User</span>
+                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()">Not me?</span>
             </div>
-            <h2>Let's do something!</h2>
+            <h2>let's do something together!</h2>
             <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState()">
             <div class="faces-container">
                 <div class="face-wrapper" id="f-all" onclick="selectAll()">
@@ -131,7 +154,8 @@
         </div>
 
         <div class="card">
-            <h2>🚀 Confirmed Plans</h2>
+            <h2>🚀 Future Activities!</h2>
+            <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;">(Long press an activity to edit)</p>
             <div id="final-list"></div>
         </div>
     </div>
@@ -149,27 +173,24 @@
             2: "Probably not", 
             3: "Maybe", 
             4: "I like it!", 
-            5: "What a great idea" 
+            5: "What a great idea!" 
         };
 
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
         let editingId = null;
+        let pressTimer;
         let tempId = null;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
         function init() {
             const params = new URLSearchParams(window.location.search);
-            const rateName = params.get('rate');
-            const editId = params.get('editId');
-
-            if (rateName) {
+            if (params.get('rate')) {
                 document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${rateName}`;
+                document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
                 return;
             }
-
             if (!currentUser) {
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
@@ -180,9 +201,11 @@
                 `).join('');
             } else {
                 showMainApp();
-                if (editId) openEdit(parseInt(editId));
             }
         }
+
+        function startPress(id) { pressTimer = setTimeout(() => openEdit(id), 600); }
+        function endPress() { clearTimeout(pressTimer); }
 
         function selectSelf(id) {
             tempId = id;
@@ -197,23 +220,13 @@
             location.reload();
         }
 
-        function resetIdentity() {
-            if(confirm("Change your profile?")) {
-                localStorage.removeItem('letsdoit_user_identity');
-                location.reload();
-            }
-        }
-
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `
-                <img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'">
-                <b>Hi, ${currentUser.name}</b>
-            `;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>Hi, ${currentUser.name}</b>`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
-                    <p style="font-size:10px; font-weight:bold;">${f.name}</p>
+                    <p style="font-size:10px;">${f.name}</p>
                 </div>
             `).join('');
             renderFinalList();
@@ -233,26 +246,16 @@
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
-            document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
-            
             const btn = document.getElementById('action-btn');
-            if (selected.length === 0) {
-                btn.innerText = "Select Participants";
-                btn.disabled = true;
-            } else {
-                btn.innerText = `Invite ${selected.length === family.length ? 'Everyone' : 'Selection'}`;
-                btn.disabled = !val;
-            }
+            btn.disabled = !(selected.length > 0 && val);
+            btn.innerText = selected.length > 0 ? `Invite ${selected.length === family.length ? 'Everyone' : 'Selection'}` : "Select Participants";
         }
 
         function sendWA() {
             const activity = document.getElementById('main-input').value;
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const baseUrl = window.location.origin + window.location.pathname;
-            const url = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
-            
-            const msg = `🚀 *Let's Do It!* \n${currentUser.name} suggested: "${activity}"\n\nRate it here:\n${url}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`, '_blank');
         }
 
         function setStars(n) {
@@ -265,31 +268,22 @@
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
             if (currentRating >= 4) {
-                const newAct = {
-                    id: Date.now(),
-                    title: params.get('rate'),
-                    joinedBy: params.get('participants'),
-                    creator: params.get('creator')
-                };
-                activities.push(newAct);
+                activities.push({ id: Date.now(), title: params.get('rate'), joinedBy: params.get('participants'), creator: params.get('creator') });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                alert("Great! This was added to the list.");
+                alert("Activity saved to your list!");
             }
             window.location.href = window.location.pathname;
         }
 
         function renderFinalList() {
             document.getElementById('final-list').innerHTML = activities.map(a => `
-                <div class="list-item">
-                    <div class="item-actions">
-                        <span onclick="openEdit(${a.id})">✏️</span>
-                        <span onclick="deleteIdea(${a.id})">🗑️</span>
-                    </div>
+                <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
+                    <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
                     <b>${a.title}</b><br>
                     <small>With: ${a.joinedBy}</small>
                     ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
                 </div>
-            `).join('') || '<p style="text-align:center; color:gray;">No plans yet.</p>';
+            `).join('') || '<p style="text-align:center; color:gray;">No confirmed activities yet.</p>';
         }
 
         function openEdit(id) {
@@ -307,21 +301,14 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            
-            const msg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('✅ *UPDATE:* ' + item.title + '\n📅 ' + item.dateRaw + ' at ' + item.time + '\n📍 ' + item.details)}`, '_blank');
             closeEdit();
             renderFinalList();
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-        function deleteIdea(id) { 
-            if(confirm("Remove this plan?")) {
-                activities = activities.filter(a => a.id !== id);
-                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                renderFinalList();
-            }
-        }
+        function deleteIdea(id) { if(confirm("Remove this activity?")) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
+        function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
 </body>
 </html>
