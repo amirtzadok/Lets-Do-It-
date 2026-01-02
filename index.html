@@ -225,9 +225,10 @@
                 invitePrefix: "Invite", everyoneInvite: "Everyone", selectionInvite: "Selection", waSuggested: "suggested:", 
                 waRateHere: "Rate it here:", waUpdate: "UPDATE:", waAt: "at", noActivities: "No confirmed activities yet.", 
                 deleteConfirm: "Remove this activity?", deleteDenied: "Only the creator or Admin can remove this activity.",
-                waRatingMsg: "rated your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
+                waRatingMsg: "liked your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
                 chooseDuration: "Choose duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", waDur: "Duration:",
-                cancel: "Cancel", groupName: "Tzadok family"
+                cancel: "Cancel", groupName: "Tzadok family", waConfirmed: "Activity confirmed and added to your list!",
+                waNegativeRating: "No one liked your idea.. Try another one!"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -240,9 +241,10 @@
                 invitePrefix: "הזמן את", everyoneInvite: "כולם", selectionInvite: "הנבחרים", waSuggested: "הציע/ה:", 
                 waRateHere: "דרגו כאן:", waUpdate: "עדכון:", waAt: "ב-", noActivities: "אין עדיין פעילויות מאושרות.", 
                 deleteConfirm: "להסיר את הפעילות הזו?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פעילות.",
-                waRatingMsg: "דירג/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
+                waRatingMsg: "אהב/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
                 chooseDuration: "בחרו משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", waDur: "משך זמן:",
-                cancel: "ביטול", groupName: "משפחת צדוק"
+                cancel: "ביטול", groupName: "משפחת צדוק", waConfirmed: "הפעילות אושרה ונוספה לרשימה שלך!",
+                waNegativeRating: "אף אחד לא אהב את הרעיון שלך.. נסה משהו אחר!"
             }
         };
 
@@ -405,12 +407,8 @@
             if(sTime) url += `&time=${encodeURIComponent(sTime)}`;
             if(sDuration) url += `&duration=${encodeURIComponent(sDuration)}`;
 
-            // Logic for "Everyone" automatic routing
-            let phone = "";
-            if (selected.length === 1 && selected.length !== family.length) {
-                phone = family.find(f => f.id === selected[0]).phone;
-            }
-
+            let phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
+            
             let extraInfo = "";
             if(sDesc || sDate || sDuration) {
                 extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''} ${sDuration ? '\n⏳ ' + langData['dur' + (sDuration === '1-3' ? '1' : sDuration === 'half' ? '2' : '3')] : ''}`;
@@ -435,24 +433,34 @@
             const pText = params.get('participants');
             const aId = Date.now();
             
+            const existingDetails = params.get('details');
+            const existingDate = params.get('date');
+            const existingTime = params.get('time');
+            const existingDuration = params.get('duration');
+            const hasLogistics = !!(existingDetails || existingDate || existingTime || existingDuration);
+
+            const cObj = family.find(f => f.name === creatorName);
+            let waMsg = "";
+
             if (currentRating >= 4) {
                 activities.push({ 
-                    id: aId, 
-                    title: activityTitle, 
-                    joinedBy: pText, 
-                    creator: creatorName,
-                    details: params.get('details') || '',
-                    dateRaw: params.get('date') || '',
-                    time: params.get('time') || '',
-                    duration: params.get('duration') || ''
+                    id: aId, title: activityTitle, joinedBy: pText, creator: creatorName,
+                    details: existingDetails || '', dateRaw: existingDate || '', time: existingTime || '', duration: existingDuration || ''
                 });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 
-                const cObj = family.find(f => f.name === creatorName);
-                const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${aId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(pText)}&creator=${encodeURIComponent(creatorName)}`;
-                const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].editLogistics}:\n${logisticsUrl}`;
-                window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
+                if (hasLogistics) {
+                    waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].waConfirmed}`;
+                } else {
+                    const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${aId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(pText)}&creator=${encodeURIComponent(creatorName)}`;
+                    waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].editLogistics}:\n${logisticsUrl}`;
+                }
+            } else {
+                const appUrl = `${window.location.origin}${window.location.pathname}`;
+                waMsg = `📉 *Let's Do It!* \n${i18n[currentLang].waNegativeRating}\n\n${appUrl}`;
             }
+
+            window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
             window.location.href = window.location.origin + window.location.pathname;
         }
 
