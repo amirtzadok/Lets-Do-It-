@@ -85,7 +85,11 @@
         .input-group { margin-bottom: 12px; }
         .input-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #64748b; }
         
-        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
+        .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        
+        .clear-btn { background: #e2e8f0; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.3s; height: 46px; display: flex; align-items: center; }
+        .clear-btn:hover { background: #cbd5e1; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
@@ -159,7 +163,10 @@
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()">Not me?</span>
             </div>
             <h2>let's do something together!</h2>
-            <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState()">
+            <div class="input-row">
+                <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState()">
+                <button class="clear-btn" onclick="clearInput()">✕</button>
+            </div>
             <div class="faces-container">
                 <div class="face-wrapper" id="f-all" onclick="selectAll()">
                     <div class="heart-box">❤️</div>
@@ -205,7 +212,6 @@
             const params = new URLSearchParams(window.location.search);
             const editIdParam = params.get('editLogistics');
             
-            // Priority 1: Handle Rating Screen
             if (params.get('rate')) {
                 const greeting = document.getElementById('personalized-greeting');
                 greeting.innerText = `Hey ${params.get('participants')}!`;
@@ -216,7 +222,6 @@
                 return;
             }
 
-            // Priority 2: Handle Logistics Direct Link
             if (editIdParam) {
                 if (!currentUser) {
                     document.getElementById('setup-wrapper').classList.remove('hidden');
@@ -228,7 +233,6 @@
                 return;
             }
 
-            // Default: Setup or Main App
             if (!currentUser) {
                 document.getElementById('setup-wrapper').classList.remove('hidden');
                 renderSetup();
@@ -285,6 +289,11 @@
             updateUIState();
         }
 
+        function clearInput() {
+            document.getElementById('main-input').value = "";
+            updateUIState();
+        }
+
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
@@ -337,7 +346,6 @@
                 const creatorObj = family.find(f => f.name === creatorName);
                 const creatorPhone = creatorObj ? creatorObj.phone : "";
                 
-                // Generates direct logistics URL
                 const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
                 
@@ -346,9 +354,18 @@
             window.location.href = window.location.origin + window.location.pathname;
         }
 
+        // Updated Render Function with sorting
         function renderFinalList() {
             const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('final-list').innerHTML = activities.map(a => {
+            
+            // Create a sorted copy of activities
+            const sortedActivities = [...activities].sort((a, b) => {
+                if (!a.dateRaw) return 1;
+                if (!b.dateRaw) return -1;
+                return a.dateRaw.localeCompare(b.dateRaw);
+            });
+
+            document.getElementById('final-list').innerHTML = sortedActivities.map(a => {
                 const isPast = a.dateRaw && a.dateRaw < todayStr;
                 const clockOrCheck = isPast ? ' ✅' : ' 🕒';
                 const statusIcons = (a.details && a.dateRaw && a.time) ? ` ❤️${clockOrCheck}` : '';
@@ -373,8 +390,19 @@
 
         function openEdit(id) {
             editingId = id;
-            const item = activities.find(a => a.id === id);
-            if (!item) return;
+            let item = activities.find(a => a.id === id);
+            
+            if (!item) {
+                const params = new URLSearchParams(window.location.search);
+                item = { 
+                    id: id, 
+                    title: params.get('rate') || "New Plan", 
+                    joinedBy: params.get('participants') || "Selection", 
+                    creator: currentUser ? currentUser.name : (params.get('creator') || "Family") 
+                };
+                activities.push(item);
+            }
+            
             document.getElementById('edit-desc').value = item.details || '';
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
@@ -388,6 +416,7 @@
             item.details = document.getElementById('edit-desc').value;
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
+            
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
             
             let phone = "";
@@ -409,7 +438,6 @@
 
         function closeEdit() { 
             document.getElementById('edit-modal').classList.add('hidden'); 
-            // Cleanup URL after editing
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
         }
