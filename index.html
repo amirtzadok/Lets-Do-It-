@@ -1,13 +1,3 @@
-To address your requirements, I have removed the image upload functionality from all panels and fixed the logistics window to ensure the activity name only appears once. I also overhauled the `syncAndSaveGlobal` function to ensure that updates are reliably saved and synchronized across the app.
-
-### Key Fixes:
-
-* **Removed Image Upload:** All file inputs, image galleries, and processing logic have been removed from the suggestion, history, and confirmed list panels.
-* **Fixed Duplicate Name Field:** The unified logistics window now contains only a single "Activity Name" input at the top.
-* **Repaired Update Logic:** The saving process now correctly finds the activity by its ID or title/creator combination and updates both the private history and public list before refreshing.
-* **Added Required Labels:** The "Date", "Starting hour", and "Duration" labels remain next to their respective fields for clarity.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,6 +36,7 @@ To address your requirements, I have removed the image upload functionality from
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
+        /* Small Circular Avatars [cite: 16, 25, 35] */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -70,6 +61,7 @@ To address your requirements, I have removed the image upload functionality from
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         
+        /* High Contrast Delete Icon [cite: 42, 43] */
         .item-delete { 
             position: absolute; right: 12px; top: 12px; cursor: pointer; 
             font-size: 18px; z-index: 5; color: #ef4444;
@@ -87,8 +79,6 @@ To address your requirements, I have removed the image upload functionality from
         .face-img { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face-img { border-color: var(--primary); }
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-
-        .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
         .hidden { display: none !important; }
     </style>
@@ -305,7 +295,7 @@ To address your requirements, I have removed the image upload functionality from
 
             let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pNames)}`;
             const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\n\nRate here: ' + url)}`, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\\n\\nRate here: ' + url)}`, '_blank');
             location.reload();
         }
 
@@ -339,7 +329,7 @@ To address your requirements, I have removed the image upload functionality from
             document.getElementById('modal-edit-url').value = item.url || "";
         }
 
-        async function syncAndSaveGlobal() {
+        async function syncAndSaveGlobal() { [cite: 119, 123, 125, 126]
             const newTitle = document.getElementById('modal-edit-title').value;
             const newDesc = document.getElementById('modal-edit-desc').value;
             const newDate = document.getElementById('modal-edit-date').value;
@@ -347,7 +337,7 @@ To address your requirements, I have removed the image upload functionality from
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
 
-            // Global Sync Loop
+            // Global Sync Loop [cite: 123, 125]
             const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
                 myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, modified: new Date().toISOString() };
@@ -416,5 +406,3 @@ To address your requirements, I have removed the image upload functionality from
     </script>
 </body>
 </html>
-
-```
