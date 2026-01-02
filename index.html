@@ -36,6 +36,7 @@
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
+        /* Circular Avatars */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -60,6 +61,7 @@
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         
+        /* Contrast Delete Icon */
         .item-delete { 
             position: absolute; right: 12px; top: 12px; cursor: pointer; 
             font-size: 18px; z-index: 5; color: #ef4444;
@@ -125,6 +127,7 @@
         </div>
 
         <div id="view-fields" class="hidden">
+            <h2 id="view-title" style="color: var(--primary); margin-top: 0;"></h2>
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
             <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
@@ -337,13 +340,11 @@
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
 
-            // Update History Entry
             const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
                 myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, modified: new Date().toISOString() };
             }
 
-            // Sync confirmed list entry
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
                 activities[publicIdx] = { ...activities[publicIdx], title: newTitle, details: newDesc, dateRaw: newDate, time: newTime, duration: newDur, url: newUrl };
@@ -392,9 +393,11 @@
             else { 
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
                 document.getElementById('modal-close-btn').classList.remove('hidden');
+                // FIXED: Set title once here
+                document.getElementById('view-title').innerText = item.title;
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
-                document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
+                document.getElementById('view-duration').innerText = item.duration ? `${i18n[currentLang].labelDur}: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
             }
             document.getElementById('edit-modal').classList.remove('hidden');
