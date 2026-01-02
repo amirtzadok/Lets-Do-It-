@@ -88,7 +88,6 @@
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         
-        /* Updated Clear Button with no background */
         .clear-btn { 
             background: transparent; 
             border: none; 
@@ -364,7 +363,8 @@
                 const creatorObj = family.find(f => f.name === creatorName);
                 const creatorPhone = creatorObj ? creatorObj.phone : "";
                 
-                const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}`;
+                // Only the creator is sent this specific setup link
+                const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(participantsText)}&creator=${encodeURIComponent(creatorName)}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
                 
                 window.open(`https://wa.me/${creatorPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -407,6 +407,7 @@
             editingId = id;
             let item = activities.find(a => a.id === id);
             
+            // Check params if activity isn't in local list yet (Creator following a WhatsApp link)
             if (!item) {
                 const params = new URLSearchParams(window.location.search);
                 item = { 
@@ -415,9 +416,11 @@
                     joinedBy: params.get('participants') || "Selection", 
                     creator: params.get('creator') || (currentUser ? currentUser.name : "Family")
                 };
-                activities.push(item);
+                // Only push to list if not present
+                if (!activities.find(a => a.id === id)) activities.push(item);
             }
             
+            // Lock logic: compare current user to creator
             const isCreator = currentUser && item.creator === currentUser.name;
             
             document.getElementById('modal-title').innerText = isCreator ? "Edit Logistics" : "View Logistics";
@@ -431,6 +434,7 @@
                 document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
                 validateLogistics();
             } else {
+                // Participants see a read-only message
                 document.getElementById('view-desc').innerText = item.details || "Details coming soon!";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "Time/Date not set yet.";
             }
@@ -470,6 +474,7 @@
         }
         function deleteIdea(id) { 
             const item = activities.find(a => a.id === id);
+            // Delete permission also locked to creator
             if (currentUser && item.creator !== currentUser.name) {
                 alert("Only the creator can remove this activity.");
                 return;
