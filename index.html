@@ -227,7 +227,7 @@
                 deleteConfirm: "Remove this activity?", deleteDenied: "Only the creator or Admin can remove this activity.",
                 waRatingMsg: "rated your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
                 chooseDuration: "Choose duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", waDur: "Duration:",
-                cancel: "Cancel"
+                cancel: "Cancel", groupName: "Tzadok family"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -242,7 +242,7 @@
                 deleteConfirm: "להסיר את הפעילות הזו?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פעילות.",
                 waRatingMsg: "דירג/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
                 chooseDuration: "בחרו משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", waDur: "משך זמן:",
-                cancel: "ביטול"
+                cancel: "ביטול", groupName: "משפחת צדוק"
             }
         };
 
@@ -366,7 +366,6 @@
             btn.innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
         }
 
-        // Added to clear details when the creator cancels
         function cancelSuggestLogistics() {
             document.getElementById('suggest-desc').value = "";
             document.getElementById('suggest-date').value = "";
@@ -398,7 +397,7 @@
             const sTime = document.getElementById('suggest-time').value;
             const sDuration = document.getElementById('suggest-duration').value;
             const langData = i18n[currentLang];
-            const pText = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const pText = selected.length === family.length ? langData.everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             
             let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pText)}`;
             if(sDesc) url += `&details=${encodeURIComponent(sDesc)}`;
@@ -406,14 +405,19 @@
             if(sTime) url += `&time=${encodeURIComponent(sTime)}`;
             if(sDuration) url += `&duration=${encodeURIComponent(sDuration)}`;
 
-            let phone = (selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
-            
+            // Logic for "Everyone" automatic routing
+            let phone = "";
+            if (selected.length === 1 && selected.length !== family.length) {
+                phone = family.find(f => f.id === selected[0]).phone;
+            }
+
             let extraInfo = "";
             if(sDesc || sDate || sDuration) {
                 extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''} ${sDuration ? '\n⏳ ' + langData['dur' + (sDuration === '1-3' ? '1' : sDuration === 'half' ? '2' : '3')] : ''}`;
             }
 
-            const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}${extraInfo}\n\n${langData.waRateHere}\n${url}`;
+            const prefix = selected.length === family.length ? `🏠 *${langData.groupName}* \n` : "";
+            const waMsg = `${prefix}🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}${extraInfo}\n\n${langData.waRateHere}\n${url}`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
         }
 
