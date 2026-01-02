@@ -87,12 +87,13 @@
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
+        input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
         
         .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
 
         .optional-logistics { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
         .toggle-logistics-btn { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-bottom: 5px; width: 100%; text-align: start; }
+        .cancel-logistics-btn { background: none; border: none; color: var(--heart); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-top: 5px; display: block; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
@@ -142,11 +143,18 @@
             <textarea id="edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
             <input type="date" id="edit-date" oninput="validateLogistics()">
             <input type="time" id="edit-time" oninput="validateLogistics()">
+            <select id="edit-duration" oninput="validateLogistics()">
+                <option value="" disabled selected data-i18n="chooseDuration">Choose duration</option>
+                <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                <option value="half" data-i18n="dur2">half a day</option>
+                <option value="full" data-i18n="dur3">full day</option>
+            </select>
             <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled data-i18n="saveNotify">Save & Notify Participants</button>
         </div>
         <div id="view-fields" class="hidden" style="padding: 10px 0;">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
+            <p id="view-duration" style="font-style:italic;"></p>
             <div id="request-details-ui" class="hidden">
                 <button class="primary-btn" id="request-btn" onclick="requestDetails()" data-i18n="getDetails">Get details</button>
                 <p id="request-note" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px;"></p>
@@ -178,6 +186,13 @@
                 <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?"></textarea>
                 <input type="date" id="suggest-date">
                 <input type="time" id="suggest-time">
+                <select id="suggest-duration">
+                    <option value="" disabled selected data-i18n="chooseDuration">Choose duration</option>
+                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                    <option value="half" data-i18n="dur2">half a day</option>
+                    <option value="full" data-i18n="dur3">full day</option>
+                </select>
+                <button class="cancel-logistics-btn" onclick="cancelSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
 
             <div class="faces-container">
@@ -210,7 +225,9 @@
                 invitePrefix: "Invite", everyoneInvite: "Everyone", selectionInvite: "Selection", waSuggested: "suggested:", 
                 waRateHere: "Rate it here:", waUpdate: "UPDATE:", waAt: "at", noActivities: "No confirmed activities yet.", 
                 deleteConfirm: "Remove this activity?", deleteDenied: "Only the creator or Admin can remove this activity.",
-                waRatingMsg: "rated your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details"
+                waRatingMsg: "rated your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
+                chooseDuration: "Choose duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", waDur: "Duration:",
+                cancel: "Cancel"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -223,7 +240,9 @@
                 invitePrefix: "הזמן את", everyoneInvite: "כולם", selectionInvite: "הנבחרים", waSuggested: "הציע/ה:", 
                 waRateHere: "דרגו כאן:", waUpdate: "עדכון:", waAt: "ב-", noActivities: "אין עדיין פעילויות מאושרות.", 
                 deleteConfirm: "להסיר את הפעילות הזו?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פעילות.",
-                waRatingMsg: "דירג/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים"
+                waRatingMsg: "דירג/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
+                chooseDuration: "בחרו משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", waDur: "משך זמן:",
+                cancel: "ביטול"
             }
         };
 
@@ -336,9 +355,7 @@
 
         function clearInput() { 
             document.getElementById('main-input').value = ""; 
-            document.getElementById('suggest-desc').value = "";
-            document.getElementById('suggest-date').value = "";
-            document.getElementById('suggest-time').value = "";
+            cancelSuggestLogistics();
             updateUIState(); 
         }
 
@@ -347,6 +364,16 @@
             const btn = document.getElementById('toggle-suggest-details');
             const isHidden = fields.classList.toggle('hidden');
             btn.innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
+        }
+
+        // Added to clear details when the creator cancels
+        function cancelSuggestLogistics() {
+            document.getElementById('suggest-desc').value = "";
+            document.getElementById('suggest-date').value = "";
+            document.getElementById('suggest-time').value = "";
+            document.getElementById('suggest-duration').value = "";
+            document.getElementById('suggest-logistics-fields').classList.add('hidden');
+            document.getElementById('toggle-suggest-details').innerText = i18n[currentLang].addDetailsNow;
         }
 
         function updateUIState() {
@@ -369,6 +396,7 @@
             const sDesc = document.getElementById('suggest-desc').value;
             const sDate = document.getElementById('suggest-date').value;
             const sTime = document.getElementById('suggest-time').value;
+            const sDuration = document.getElementById('suggest-duration').value;
             const langData = i18n[currentLang];
             const pText = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             
@@ -376,12 +404,13 @@
             if(sDesc) url += `&details=${encodeURIComponent(sDesc)}`;
             if(sDate) url += `&date=${encodeURIComponent(sDate)}`;
             if(sTime) url += `&time=${encodeURIComponent(sTime)}`;
+            if(sDuration) url += `&duration=${encodeURIComponent(sDuration)}`;
 
             let phone = (selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
             
             let extraInfo = "";
-            if(sDesc || sDate) {
-                extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''}`;
+            if(sDesc || sDate || sDuration) {
+                extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''} ${sDuration ? '\n⏳ ' + langData['dur' + (sDuration === '1-3' ? '1' : sDuration === 'half' ? '2' : '3')] : ''}`;
             }
 
             const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}${extraInfo}\n\n${langData.waRateHere}\n${url}`;
@@ -410,7 +439,8 @@
                     creator: creatorName,
                     details: params.get('details') || '',
                     dateRaw: params.get('date') || '',
-                    time: params.get('time') || ''
+                    time: params.get('time') || '',
+                    duration: params.get('duration') || ''
                 });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 
@@ -426,7 +456,7 @@
             const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => {
-                const status = (a.details && a.dateRaw && a.time) ? ` ❤️${a.dateRaw < todayStr ? ' ✅' : ' 🕒'}` : '';
+                const status = (a.details && a.dateRaw && a.time && a.duration) ? ` ❤️${a.dateRaw < todayStr ? ' ✅' : ' 🕒'}` : '';
                 const canDel = currentUser && (a.creator === currentUser.name || currentUser.name === "Amir");
                 return `
                     <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()" onclick="openEdit(${a.id})">
@@ -441,7 +471,7 @@
 
         function validateLogistics() {
             const btn = document.getElementById('save-notify-btn');
-            btn.disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value);
+            btn.disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value && document.getElementById('edit-duration').value);
         }
 
         function openEdit(id) {
@@ -460,11 +490,14 @@
                 document.getElementById('edit-desc').value = item.details || '';
                 document.getElementById('edit-date').value = item.dateRaw || '';
                 document.getElementById('edit-time').value = item.time || '';
+                document.getElementById('edit-duration').value = item.duration || '';
                 validateLogistics();
             } else {
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "...";
-                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw));
+                const durText = item.duration ? i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')] : "...";
+                document.getElementById('view-duration').innerText = `${i18n[currentLang].waDur} ${durText}`;
+                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw && item.duration));
                 document.getElementById('request-note').innerText = `${i18n[currentLang].requestNote} ${item.creator}`;
             }
             document.getElementById('edit-modal').classList.remove('hidden');
@@ -483,9 +516,11 @@
             item.details = document.getElementById('edit-desc').value;
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
+            item.duration = document.getElementById('edit-duration').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
             let phone = (item.joinedBy !== "Everyone" && !item.joinedBy.includes("&")) ? (family.find(f => f.name === item.joinedBy.trim()) || {}).phone : "";
-            const waMsg = `✅ *${i18n[currentLang].waUpdate}* ${item.title}\n📅 ${item.dateRaw} ${i18n[currentLang].waAt} ${item.time}\n📍 ${item.details}\n\nSee activities:\n${window.location.origin}${window.location.pathname}`;
+            const durText = i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')];
+            const waMsg = `✅ *${i18n[currentLang].waUpdate}* ${item.title}\n📅 ${item.dateRaw} ${i18n[currentLang].waAt} ${item.time}\n⏳ ${durText}\n📍 ${item.details}\n\nSee activities:\n${window.location.origin}${window.location.pathname}`;
             window.open(`https://wa.me/${phone || ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit(); renderFinalList();
         }
