@@ -87,9 +87,12 @@
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
         
         .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
+
+        .optional-logistics { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
+        .toggle-logistics-btn { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-bottom: 5px; width: 100%; text-align: start; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
@@ -169,6 +172,14 @@
                 <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" placeholder="What's the plan?" oninput="updateUIState()">
                 <button class="clear-btn" onclick="clearInput()">✕</button>
             </div>
+
+            <button class="toggle-logistics-btn" id="toggle-suggest-details" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
+            <div id="suggest-logistics-fields" class="hidden optional-logistics">
+                <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?"></textarea>
+                <input type="date" id="suggest-date">
+                <input type="time" id="suggest-time">
+            </div>
+
             <div class="faces-container">
                 <div class="face-wrapper" id="f-all" onclick="selectAll()">
                     <div class="heart-box">❤️</div>
@@ -199,7 +210,7 @@
                 invitePrefix: "Invite", everyoneInvite: "Everyone", selectionInvite: "Selection", waSuggested: "suggested:", 
                 waRateHere: "Rate it here:", waUpdate: "UPDATE:", waAt: "at", noActivities: "No confirmed activities yet.", 
                 deleteConfirm: "Remove this activity?", deleteDenied: "Only the creator or Admin can remove this activity.",
-                waRatingMsg: "rated your idea"
+                waRatingMsg: "rated your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -212,7 +223,7 @@
                 invitePrefix: "הזמן את", everyoneInvite: "כולם", selectionInvite: "הנבחרים", waSuggested: "הציע/ה:", 
                 waRateHere: "דרגו כאן:", waUpdate: "עדכון:", waAt: "ב-", noActivities: "אין עדיין פעילויות מאושרות.", 
                 deleteConfirm: "להסיר את הפעילות הזו?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פעילות.",
-                waRatingMsg: "דירג/ה את הרעיון שלך"
+                waRatingMsg: "דירג/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים"
             }
         };
 
@@ -323,7 +334,20 @@
             updateUIState();
         }
 
-        function clearInput() { document.getElementById('main-input').value = ""; updateUIState(); }
+        function clearInput() { 
+            document.getElementById('main-input').value = ""; 
+            document.getElementById('suggest-desc').value = "";
+            document.getElementById('suggest-date').value = "";
+            document.getElementById('suggest-time').value = "";
+            updateUIState(); 
+        }
+
+        function toggleSuggestLogistics() {
+            const fields = document.getElementById('suggest-logistics-fields');
+            const btn = document.getElementById('toggle-suggest-details');
+            const isHidden = fields.classList.toggle('hidden');
+            btn.innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
+        }
 
         function updateUIState() {
             const val = document.getElementById('main-input').value;
@@ -342,11 +366,25 @@
 
         function sendWA() {
             const activity = document.getElementById('main-input').value;
+            const sDesc = document.getElementById('suggest-desc').value;
+            const sDate = document.getElementById('suggest-date').value;
+            const sTime = document.getElementById('suggest-time').value;
             const langData = i18n[currentLang];
             const pText = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pText)}`;
-            let phone = (selected.length === 1 && selected[0] !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
-            const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}\n\n${langData.waRateHere}\n${url}`;
+            
+            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pText)}`;
+            if(sDesc) url += `&details=${encodeURIComponent(sDesc)}`;
+            if(sDate) url += `&date=${encodeURIComponent(sDate)}`;
+            if(sTime) url += `&time=${encodeURIComponent(sTime)}`;
+
+            let phone = (selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
+            
+            let extraInfo = "";
+            if(sDesc || sDate) {
+                extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''}`;
+            }
+
+            const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}${extraInfo}\n\n${langData.waRateHere}\n${url}`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
         }
 
@@ -363,9 +401,19 @@
             const activityTitle = params.get('rate');
             const pText = params.get('participants');
             const aId = Date.now();
+            
             if (currentRating >= 4) {
-                activities.push({ id: aId, title: activityTitle, joinedBy: pText, creator: creatorName });
+                activities.push({ 
+                    id: aId, 
+                    title: activityTitle, 
+                    joinedBy: pText, 
+                    creator: creatorName,
+                    details: params.get('details') || '',
+                    dateRaw: params.get('date') || '',
+                    time: params.get('time') || ''
+                });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+                
                 const cObj = family.find(f => f.name === creatorName);
                 const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${aId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(pText)}&creator=${encodeURIComponent(creatorName)}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].editLogistics}:\n${logisticsUrl}`;
