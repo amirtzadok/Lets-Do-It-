@@ -88,18 +88,7 @@
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         
-        .clear-btn { 
-            background: transparent; 
-            border: none; 
-            padding: 8px; 
-            cursor: pointer; 
-            font-size: 20px; 
-            color: #94a3b8; 
-            transition: 0.2s; 
-            height: 46px; 
-            display: flex; 
-            align-items: center; 
-        }
+        .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
         .clear-btn:hover { color: var(--heart); }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
@@ -161,6 +150,11 @@
         <div id="view-fields" class="hidden" style="padding: 10px 0;">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
+            
+            <div id="request-details-ui" class="hidden">
+                <button class="primary-btn" id="request-btn" onclick="requestDetails()">Get details</button>
+                <p id="request-note" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px;"></p>
+            </div>
         </div>
         <button class="secondary-btn" onclick="closeEdit()">Close</button>
     </div>
@@ -363,7 +357,6 @@
                 const creatorObj = family.find(f => f.name === creatorName);
                 const creatorPhone = creatorObj ? creatorObj.phone : "";
                 
-                // Only the creator is sent this specific setup link
                 const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(participantsText)}&creator=${encodeURIComponent(creatorName)}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
                 
@@ -407,7 +400,6 @@
             editingId = id;
             let item = activities.find(a => a.id === id);
             
-            // Check params if activity isn't in local list yet (Creator following a WhatsApp link)
             if (!item) {
                 const params = new URLSearchParams(window.location.search);
                 item = { 
@@ -416,11 +408,9 @@
                     joinedBy: params.get('participants') || "Selection", 
                     creator: params.get('creator') || (currentUser ? currentUser.name : "Family")
                 };
-                // Only push to list if not present
                 if (!activities.find(a => a.id === id)) activities.push(item);
             }
             
-            // Lock logic: compare current user to creator
             const isCreator = currentUser && item.creator === currentUser.name;
             
             document.getElementById('modal-title').innerText = isCreator ? "Edit Logistics" : "View Logistics";
@@ -434,12 +424,24 @@
                 document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
                 validateLogistics();
             } else {
-                // Participants see a read-only message
+                const hasLogistics = item.details && item.dateRaw && item.time;
                 document.getElementById('view-desc').innerText = item.details || "Details coming soon!";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "Time/Date not set yet.";
+                
+                // Toggle request button if info is missing
+                document.getElementById('request-details-ui').classList.toggle('hidden', !!hasLogistics);
+                document.getElementById('request-note').innerText = `Request for more details will be sent to ${item.creator}`;
             }
             
             document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function requestDetails() {
+            const item = activities.find(a => a.id === editingId);
+            const creatorObj = family.find(f => f.name === item.creator);
+            const phone = creatorObj ? creatorObj.phone : "";
+            const msg = `Hey ${item.creator}! Can you please add more details (where/when) for "${item.title}"? Thanks!`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function saveAndNotify() {
@@ -472,9 +474,9 @@
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
         }
+
         function deleteIdea(id) { 
             const item = activities.find(a => a.id === id);
-            // Delete permission also locked to creator
             if (currentUser && item.creator !== currentUser.name) {
                 alert("Only the creator can remove this activity.");
                 return;
