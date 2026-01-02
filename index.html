@@ -28,13 +28,12 @@
             box-sizing: border-box; 
         }
 
-        /* Centering container for the Welcome Screen */
         #setup-wrapper {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            flex-grow: 1; /* Takes up remaining height to center vertically */
+            flex-grow: 1;
             width: 100%;
         }
 
@@ -106,9 +105,9 @@
         }
         .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
 
-        .stars { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
+        .stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; }
+        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; margin-bottom: 5px; }
         .hidden { display: none !important; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -122,11 +121,11 @@
     </header>
 
     <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header" style="font-weight: 500;"></h2>
+        <h2 id="rating-header" style="font-weight: 500; margin-bottom: 20px;"></h2>
+        <div id="star-desc" class="star-label">Rate their idea!</div>
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
-        <div id="star-desc" class="star-label">Choose your rating</div>
         <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
     </div>
 
@@ -211,6 +210,9 @@
 
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
+                
+                // Set the specific "Rate [Creator]'s idea!" text
+                document.getElementById('star-desc').innerText = `Rate ${params.get('creator')}'s idea!`;
                 return;
             }
             if (!currentUser) {
@@ -299,6 +301,8 @@
         function setStars(n) {
             currentRating = n;
             document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n));
+            
+            // Updates to show the specific reaction label (e.g., "What a great idea!") when stars are clicked
             document.getElementById('star-desc').innerText = starLabels[n];
             document.getElementById('submit-vote-btn').disabled = false;
         }
