@@ -329,7 +329,7 @@
             document.getElementById('modal-edit-url').value = item.url || "";
         }
 
-        async function syncAndSaveGlobal() { [cite: 123, 125, 152]
+        async function syncAndSaveGlobal() {
             const newTitle = document.getElementById('modal-edit-title').value;
             const newDesc = document.getElementById('modal-edit-desc').value;
             const newDate = document.getElementById('modal-edit-date').value;
@@ -337,13 +337,13 @@
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
 
-            // Update History Entry [cite: 123]
+            // Update History Entry
             const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
                 myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, modified: new Date().toISOString() };
             }
 
-            // Sync confirmed list entry [cite: 125]
+            // Sync confirmed list entry
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
                 activities[publicIdx] = { ...activities[publicIdx], title: newTitle, details: newDesc, dateRaw: newDate, time: newTime, duration: newDur, url: newUrl };
