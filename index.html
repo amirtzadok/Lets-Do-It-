@@ -53,7 +53,15 @@
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        input[type="file"] { font-size: 12px; margin-bottom: 10px; }
+        
+        .optional-logistics { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
+        .toggle-logistics-btn { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; text-decoration: underline; margin-bottom: 5px; width: 100%; text-align: start; }
+        
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
+        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
+        .face-wrapper.selected { opacity: 1; }
+        .face { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
@@ -83,21 +91,19 @@
         <button class="primary-btn" onclick="closeGuide()" data-i18n="close">Got it!</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Logistics</h3>
         <div id="edit-fields">
-            <input type="text" id="edit-title" placeholder="Activity Name">
-            <div style="display:flex; gap:5px;"><input type="date" id="edit-date" style="flex:1;"><input type="time" id="edit-time" style="flex:1;"></div>
-            <select id="edit-duration">
+            <textarea id="edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
+            <input type="date" id="edit-date" oninput="validateLogistics()">
+            <input type="time" id="edit-time" oninput="validateLogistics()">
+            <select id="edit-duration" oninput="validateLogistics()">
                 <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
                 <option value="1-3" data-i18n="dur1">1-3 hours</option>
                 <option value="half" data-i18n="dur2">half a day</option>
                 <option value="full" data-i18n="dur3">full day</option>
             </select>
-            <input type="text" id="edit-url" placeholder="Paste link (URL)">
-            <label style="font-size:11px; display:block;" data-i18n="addImages">Update images:</label>
-            <input type="file" id="edit-images" multiple accept="image/*">
-            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" data-i18n="update">Update</button>
+            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled data-i18n="saveNotify">Save & Notify</button>
         </div>
         <div id="view-fields" class="hidden">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
@@ -119,7 +125,6 @@
 
     <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 101; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
-        <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;" data-i18n="innerLongPressTip">(Long press to edit details)</p>
         <div id="suggestions-list-content"></div>
         <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
     </div>
@@ -170,10 +175,10 @@
         const i18n = {
             eng: {
                 langBtn: "HEB", guideTitle: "User Guide", close: "Close",
-                g1Title: "1. Planning", g1Body: "Create ideas and add details/images to build excitement!",
-                g2Title: "2. My Suggestions", g2Body: "History panel accessed via avatar. Long-press to edit and sync with the public list.",
-                g3Title: "3. Finalizing", g3Body: "Confirmed items appear in Future Activities. Creators can update details anytime.",
-                submitVote: "Let's do it!", editLogistics: "Edit Logistics", descPlaceholder: "Description/Notes", 
+                g1Title: "1. Planning", g1Body: "Create ideas, pick members, and add photos/links to build excitement!",
+                g2Title: "2. My Suggestions", g2Body: "Click your avatar for history. Long-press to edit and sync details with the final list.",
+                g3Title: "3. Finalizing", g3Body: "High ratings automatically add items to the list. You can update logistics anytime.",
+                submitVote: "Let's do it!", editLogistics: "Edit Logistics", descPlaceholder: "Where / What we do?", 
                 saveNotify: "Save & Notify", whoAreYou: "Who are you?", enterApp: "Enter", notMe: "Not me?", 
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
                 everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
@@ -181,14 +186,14 @@
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
                 waRatingMsg: "liked your idea", waConfirmed: "Confirmed! Added to list.", waNegativeRating: "Try another one!",
-                waSuggested: "suggested:", innerLongPressTip: "(Long press to edit details)", update: "Update", addImages: "Images:"
+                waSuggested: "suggested:", innerLongPressTip: "(Long press to edit details)", update: "Update"
             },
             heb: {
                 langBtn: "ENG", guideTitle: "מדריך למשתמש", close: "סגור",
-                g1Title: "1. תכנון", g1Body: "צרו רעיונות והוסיפו פרטים/תמונות כדי להלהיב את כולם!",
-                g2Title: "2. ההצעות שלי", g2Body: "גישה להיסטוריה דרך האווטאר. לחיצה ארוכה לעריכה וסנכרון עם הרשימה הציבורית.",
-                g3Title: "3. סגירת פרטים", g3Body: "פריטים מאושרים מופיעים בפעילויות עתידיות. היוצר יכול לעדכן פרטים בכל עת.",
-                submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", 
+                g1Title: "1. תכנון", g1Body: "צרו רעיונות, בחרו משתתפים והוסיפו תמונות/קישורים כדי להלהיב את כולם!",
+                g2Title: "2. ההצעות שלי", g2Body: "לחצו על האווטאר להיסטוריה. לחיצה ארוכה לעריכה וסנכרון הפרטים עם הרשימה הסופית.",
+                g3Title: "3. סגירת פרטים", g3Body: "דירוג גבוה מוסיף פריטים לרשימה אוטומטית. ניתן לעדכן פרטים בכל שלב.",
+                submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", descPlaceholder: "איפה / מה עושים?", 
                 saveNotify: "שמור ועדכן", whoAreYou: "מי את/ה?", enterApp: "כניסה", notMe: "לא אני?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
@@ -196,7 +201,7 @@
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
                 waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר! נוסף לרשימה.", waNegativeRating: "נסו משהו אחר!",
-                waSuggested: "הציע/ה:", innerLongPressTip: "(לחיצה ארוכה לעריכת פרטים)", update: "עדכן", addImages: "תמונות:"
+                waSuggested: "הציע/ה:", innerLongPressTip: "(לחיצה ארוכה לעריכת פרטים)", update: "עדכן"
             }
         };
 
@@ -296,10 +301,10 @@
                     <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
                     <div id="inner-view-${s.id}"><b>${s.title}</b><br><small>${s.participants}</small></div>
                     <div id="inner-edit-${s.id}" class="hidden">
-                        <input type="text" value="${s.title || ''}" id="hist-title-${s.id}">
-                        <div style="display:flex; gap:5px;"><input type="date" value="${s.date || ''}" id="hist-date-${s.id}"><input type="time" value="${s.time || ''}" id="hist-time-${s.id}"></div>
-                        <select id="hist-dur-${s.id}"><option value="1-3" ${s.dur === '1-3' ? 'selected' : ''}>1-3 hours</option><option value="half" ${s.dur === 'half' ? 'selected' : ''}>half a day</option><option value="full" ${s.dur === 'full' ? 'selected' : ''}>full day</option></select>
-                        <input type="text" value="${s.url || ''}" id="hist-url-${s.id}">
+                        <input type="text" value="${s.desc || ''}" id="hist-desc-${s.id}" placeholder="${i18n[currentLang].descPlaceholder}">
+                        <input type="date" value="${s.date || ''}" id="hist-date-${s.id}">
+                        <input type="time" value="${s.time || ''}" id="hist-time-${s.id}">
+                        <input type="text" value="${s.url || ''}" id="hist-url-${s.id}" placeholder="Link (URL)">
                         <input type="file" id="hist-images-${s.id}" multiple accept="image/*">
                         <button class="primary-btn" style="background:var(--whatsapp);" onclick="updateAndSaveSuggestion(${s.id})">${i18n[currentLang].update}</button>
                     </div>
@@ -310,11 +315,9 @@
 
         async function updateAndSaveSuggestion(id) {
             const s = myHistory.find(i => i.id === id);
-            const oldTitle = s.title;
-            s.title = document.getElementById(`hist-title-${id}`).value;
+            s.desc = document.getElementById(`hist-desc-${id}`).value;
             s.date = document.getElementById(`hist-date-${id}`).value;
             s.time = document.getElementById(`hist-time-${id}`).value;
-            s.dur = document.getElementById(`hist-dur-${id}`).value;
             s.url = document.getElementById(`hist-url-${id}`).value;
             s.modified = new Date().toISOString();
 
@@ -324,10 +327,14 @@
                 for (let file of imgFiles) { s.images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
             }
 
-            const publicIdx = activities.findIndex(a => a.title === oldTitle && a.creator === s.creator);
+            // SYNCHRONIZATION: Update public list if this activity exists there
+            const publicIdx = activities.findIndex(a => a.title === s.title && a.creator === s.creator);
             if (publicIdx > -1) {
-                activities[publicIdx].title = s.title; activities[publicIdx].dateRaw = s.date; activities[publicIdx].time = s.time;
-                activities[publicIdx].duration = s.dur; activities[publicIdx].url = s.url; activities[publicIdx].images = s.images;
+                activities[publicIdx].details = s.desc;
+                activities[publicIdx].dateRaw = s.date;
+                activities[publicIdx].time = s.time;
+                activities[publicIdx].url = s.url;
+                activities[publicIdx].images = s.images;
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
             }
 
@@ -336,13 +343,8 @@
         }
 
         function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
+        function openGuide() { openEditModalWithGuide(); } // Dummy for brevity, guide logic is similar to Suggestions
         function closeGuide() { document.getElementById('guide-panel').classList.add('hidden'); }
-        function openGuide() {
-            const d = i18n[currentLang];
-            document.getElementById('guide-content').innerHTML = `<div style="text-align:left;"><b>${d.g1Title}</b><p>${d.g1Body}</p><b>${d.g2Title}</b><p>${d.g2Body}</p><b>${d.g3Title}</b><p>${d.g3Body}</p></div>`;
-            document.getElementById('guide-panel').classList.remove('hidden');
-        }
-
         function startInnerPress(id) { pressTimer = setTimeout(() => { document.getElementById(`inner-view-${id}`).classList.add('hidden'); document.getElementById(`inner-edit-${id}`).classList.remove('hidden'); }, 600); }
         function endInnerPress() { clearTimeout(pressTimer); }
         function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
@@ -356,9 +358,12 @@
                 const hist = myHistory.find(s => s.title === title && s.creator === creator) || {};
                 activities.push({ 
                     id: Date.now(), title, creator, joinedBy: p.get('participants'), 
-                    details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', 
-                    time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', 
-                    url: p.get('exturl') || hist.url || '', images: hist.images || [] 
+                    details: p.get('details') || hist.desc || '', 
+                    dateRaw: p.get('date') || hist.date || '', 
+                    time: p.get('time') || hist.time || '', 
+                    duration: p.get('duration') || hist.dur || '', 
+                    url: p.get('exturl') || hist.url || '', 
+                    images: hist.images || [] 
                 });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 ' + currentUser.name + ' ' + i18n[currentLang].waRatingMsg + ' "' + title + '"!')}`, '_blank');
@@ -367,59 +372,51 @@
         }
 
         function renderFinalList() {
+            const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => `
                 <div class="list-item" onclick="openEdit(${a.id})">
                     ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
-                    <b>${a.title}${ (a.dateRaw) ? ' ❤️' : '' }</b><br><small>${a.creator} | ${a.joinedBy}</small>
+                    <b>${a.title}${ (a.details && a.dateRaw) ? ' ❤️' : '' }</b><br><small>${a.creator} | ${a.joinedBy}</small>
                     ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
                     ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
+                    ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
                 </div>
             `).join('') || `<p>${i18n[currentLang].noActivities}</p>`;
         }
 
         function openEdit(id) {
             editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
+            document.getElementById('modal-title').innerText = isCreator ? i18n[currentLang].editLogistics : i18n[currentLang].viewLogistics;
             document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
             document.getElementById('view-fields').classList.toggle('hidden', isCreator);
-            if (isCreator) { 
-                document.getElementById('edit-title').value = item.title; 
-                document.getElementById('edit-date').value = item.dateRaw; 
-                document.getElementById('edit-time').value = item.time; 
-                document.getElementById('edit-duration').value = item.duration;
-                document.getElementById('edit-url').value = item.url || '';
-            } else { 
+            if (isCreator) { document.getElementById('edit-desc').value = item.details; document.getElementById('edit-date').value = item.dateRaw; document.getElementById('edit-time').value = item.time; }
+            else { 
                 document.getElementById('view-desc').innerText = item.details || "..."; 
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "...";
-                document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
                 document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
-        async function saveAndNotify() {
+        function validateLogistics() { document.getElementById('save-notify-btn').disabled = !document.getElementById('edit-desc').value; }
+        function saveAndNotify() {
             const item = activities.find(a => a.id === editingId);
-            item.title = document.getElementById('edit-title').value;
-            item.dateRaw = document.getElementById('edit-date').value;
-            item.time = document.getElementById('edit-time').value;
-            item.duration = document.getElementById('edit-duration').value;
-            item.url = document.getElementById('edit-url').value;
-            
-            const imgInp = document.getElementById('edit-images').files;
-            if (imgInp.length > 0) {
-                item.images = [];
-                for (let file of imgInp) { item.images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
-            }
-            
+            item.details = document.getElementById('edit-desc').value; item.dateRaw = document.getElementById('edit-date').value; item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            window.open(`https://wa.me/?text=${encodeURIComponent('✅ *Update:* ' + item.title + '\n📅 ' + item.dateRaw + ' @ ' + item.time)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('✅ *Update:* ' + item.title + '\n📍 ' + item.details)}`, '_blank');
             location.reload();
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
+        function openGuide() {
+            const d = i18n[currentLang];
+            document.getElementById('guide-content').innerHTML = `<div class="guide-step"><b>${d.g1Title}</b><p>${d.g1Body}</p></div><div class="guide-step"><b>${d.g2Title}</b><p>${d.g2Body}</p></div><div class="guide-step"><b>${d.g3Title}</b><p>${d.g3Body}</p></div>`;
+            document.getElementById('guide-panel').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
