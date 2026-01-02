@@ -13,6 +13,7 @@
             --heart: #f43f5e;
             --bg: #f8fafc;
             --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --completed: #fee2e2; /* Pale red for completed activities */
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
@@ -59,13 +60,18 @@
         #setup-card .primary-btn { width: 66%; }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .complete-btn { background: var(--heart); margin-top: 10px; }
 
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
-        .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 12px; cursor: pointer; font-size: 18px; }
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; transition: transform 0.1s, background-color 0.3s; user-select: none; }
+        .list-item.is-completed { background-color: var(--completed); border-left-color: var(--heart); }
+        .list-item:active { transform: scale(0.98); }
+        .item-actions { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 18px; }
 
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
         .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 20px; min-height: 20px; }
+
+        .field-label { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
 
         .hidden { display: none !important; }
         .reset-link { font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; }
@@ -82,19 +88,23 @@
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
-        <div id="star-desc" class="star-label">Choose your avatar to vote</div>
+        <div id="star-desc" class="star-label">Choose your rating</div>
         
-        <div class="avatar-options" id="voter-selector" style="grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
-        
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 20px;">Submit Vote</button>
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 20px;">Let's do it!</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary); width: 90%; max-width: 450px;">
         <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
+        
+        <div class="field-label">📅 Date</div>
         <input type="date" id="edit-date">
+        
+        <div class="field-label">🕒 Time</div>
         <input type="time" id="edit-time">
-        <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Joined Participants</button>
+        
+        <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
+        <button class="primary-btn complete-btn" onclick="markComplete()">Mark as Complete</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
@@ -147,27 +157,20 @@
         let creatorIdentity = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
-        let voterId = null;
         let editingId = null;
+        let longPressTimer;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
         function init() {
             const urlParams = new URLSearchParams(window.location.search);
             const rateName = urlParams.get('rate');
+            const editId = urlParams.get('editId');
 
             if (rateName) {
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('setup-card').classList.add('hidden');
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
-                
-                // Render small avatars for the voter to pick who they are
-                document.getElementById('voter-selector').innerHTML = family.map(f => `
-                    <div class="avatar-choice" id="voter-${f.id}" onclick="selectVoter(${f.id})">
-                        <img src="${f.img}" class="avatar-btn" style="width:50px; height:50px;" onerror="this.src='https://via.placeholder.com/50'">
-                        <span style="font-size:10px;">${f.name}</span>
-                    </div>
-                `).join('');
                 return;
             }
 
@@ -181,68 +184,78 @@
                 `).join('');
             } else {
                 showMainApp();
+                if (editId) openEdit(parseInt(editId));
             }
         }
 
-        // --- RATING & NOTIFY CREATOR ---
-        function selectVoter(id) {
-            voterId = id;
-            document.querySelectorAll('#voter-selector .avatar-choice').forEach(el => el.classList.remove('active'));
-            document.getElementById(`voter-${id}`).classList.add('active');
-            checkVoteReady();
-        }
-
+        // --- RATING LOGIC ---
         function setStars(n) {
             currentRating = n;
             const stars = document.querySelectorAll('#star-row span');
             stars.forEach((s, i) => s.classList.toggle('active', i < n));
             document.getElementById('star-desc').innerText = starLabels[n];
-            checkVoteReady();
+            document.getElementById('submit-vote-btn').disabled = false;
         }
 
         const starLabels = { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "LET'S DO IT!" };
-
-        function checkVoteReady() {
-            if (currentRating > 0 && voterId !== null) {
-                document.getElementById('submit-vote-btn').disabled = false;
-            }
-        }
 
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
             const idea = params.get('rate');
             const creatorName = params.get('creator');
-            const participant = family.find(f => f.id === voterId);
+            const participants = params.get('participants') || 'Someone';
 
             if (currentRating >= 4) {
-                activities.push({ 
+                const newActivity = { 
                     id: Date.now(), 
                     title: idea, 
                     dateAdded: new Date().toLocaleDateString(),
                     creator: creatorName,
-                    joinedBy: participant.name
-                });
+                    joinedBy: participants,
+                    completed: false
+                };
+                activities.push(newActivity);
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 
-                // Updated Message Format
                 const creatorObj = family.find(f => f.name === creatorName);
                 if (creatorObj) {
-                    const appUrl = window.location.origin + window.location.pathname;
-                    const msg = `${participant.name} joined your suggestion to ${idea}\n🚀 Time to edit your activity details.\n\nOpen app to edit: ${appUrl}`;
+                    const baseUrl = window.location.origin + window.location.pathname;
+                    const directEditUrl = `${baseUrl}?editId=${newActivity.id}`;
+                    const msg = `${participants} joined your suggestion to ${idea}\n🚀 Time to edit your activity details.\n\nEdit here: ${directEditUrl}`;
                     window.open(`https://wa.me/${creatorObj.phone}?text=${encodeURIComponent(msg)}`, '_blank');
                 }
             }
             window.location.href = window.location.pathname;
         }
 
-        // --- LOGISTICS & CALENDAR ---
+        // --- LONG PRESS LOGIC ---
+        function handlePressStart(id) {
+            longPressTimer = setTimeout(() => openEdit(id), 600);
+        }
+        function handlePressEnd() {
+            clearTimeout(longPressTimer);
+        }
+
+        // --- LOGISTICS & COMPLETION ---
         function openEdit(id) {
             editingId = id;
             const item = activities.find(a => a.id === id);
+            if (!item) return;
             document.getElementById('edit-desc').value = item.details || '';
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
+            document.getElementById('edit-notify-btn').innerText = `Save & Notify ${item.joinedBy || 'Participants'}`;
             document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function markComplete() {
+            const idx = activities.findIndex(a => a.id === editingId);
+            if (idx > -1) {
+                activities[idx].completed = true;
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+                closeEdit();
+                renderFinalList();
+            }
         }
 
         function saveAndNotify() {
@@ -321,8 +334,9 @@
         function sendWA() {
             const activity = document.getElementById('main-input').value;
             const chosen = family.filter(f => selected.includes(f.id));
+            const participants = selected.length === family.length ? "Everyone" : chosen.map(f => f.name).join(' & ');
             const baseUrl = window.location.origin + window.location.pathname;
-            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(creatorIdentity.name)}`;
+            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(creatorIdentity.name)}&participants=${encodeURIComponent(participants)}`;
             
             const msg = `🚀 Let's Do It!\n${creatorIdentity.name} suggested "${activity}".\n\nRate it here:\n${ratingUrl}`;
             let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -332,15 +346,26 @@
 
         function renderFinalList() {
             document.getElementById('final-list').innerHTML = activities.map(a => `
-                <div class="list-item">
-                    <div class="item-actions"><span onclick="openEdit(${a.id})">📝</span> <span onclick="deleteIdea(${a.id})">🗑️</span></div>
+                <div class="list-item ${a.completed ? 'is-completed' : ''}" 
+                     onmousedown="handlePressStart(${a.id})" 
+                     onmouseup="handlePressEnd()" 
+                     ontouchstart="handlePressStart(${a.id})" 
+                     ontouchend="handlePressEnd()">
+                    <div class="item-actions"><span onclick="deleteIdea(${a.id})">🗑️</span></div>
                     <div style="font-weight:bold;">${a.title}</div>
-                    <div style="font-size:11px; color:#64748b;">Joined by: ${a.joinedBy}</div>
+                    <div style="font-size:11px; color:#64748b;">Joined by: ${a.joinedBy} ${a.completed ? ' (Completed ✅)' : ''}</div>
                 </div>
             `).join('') || '<p style="color:#94a3b8; font-size:12px; text-align:center;">No activities yet.</p>';
         }
 
-        function deleteIdea(id) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); }
+        function deleteIdea(id) { 
+            // Delete Confirmation Logic
+            if (confirm("Are you sure you want to delete this activity?")) {
+                activities = activities.filter(a => a.id !== id); 
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
+                renderFinalList(); 
+            }
+        }
     </script>
 </body>
 </html>
