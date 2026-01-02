@@ -203,29 +203,39 @@
 
         function init() {
             const params = new URLSearchParams(window.location.search);
+            
+            // Check if we are opening a specific activity for editing (Logistics Panel)
+            const editIdParam = params.get('editLogistics');
+            
             if (params.get('rate')) {
                 const greeting = document.getElementById('personalized-greeting');
                 greeting.innerText = `Hey ${params.get('participants')}!`;
                 greeting.classList.remove('hidden');
-
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
-                
-                // Set the specific "Rate [Creator]'s idea!" text
                 document.getElementById('star-desc').innerText = `Rate ${params.get('creator')}'s idea!`;
                 return;
             }
+
             if (!currentUser) {
                 document.getElementById('setup-wrapper').classList.remove('hidden');
-                document.getElementById('avatar-selector').innerHTML = family.map(f => `
-                    <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
-                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
-                        <span>${f.name}</span>
-                    </div>
-                `).join('');
+                renderSetup();
             } else {
                 showMainApp();
+                // If the URL contains a request to edit logistics, open the modal
+                if (editIdParam) {
+                    openEdit(parseInt(editIdParam));
+                }
             }
+        }
+
+        function renderSetup() {
+            document.getElementById('avatar-selector').innerHTML = family.map(f => `
+                <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
+                    <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                    <span>${f.name}</span>
+                </div>
+            `).join('');
         }
 
         function startPress(id) { pressTimer = setTimeout(() => openEdit(id), 600); }
@@ -271,14 +281,10 @@
             const val = document.getElementById('main-input').value;
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
             const btn = document.getElementById('action-btn');
-            
             btn.disabled = !(selected.length > 0 && val);
-            
-            if (selected.length === 0) {
-                btn.innerText = "Select Participants";
-            } else if (selected.length === family.length) {
-                btn.innerText = "Invite Everyone";
-            } else {
+            if (selected.length === 0) btn.innerText = "Select Participants";
+            else if (selected.length === family.length) btn.innerText = "Invite Everyone";
+            else {
                 const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
                 btn.innerText = `Invite ${names}`;
             }
@@ -288,12 +294,7 @@
             const activity = document.getElementById('main-input').value;
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
-            
-            let phone = "";
-            if (selected.length === 1) {
-                phone = family.find(f => f.id === selected[0]).phone;
-            }
-
+            let phone = (selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
             const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} suggested: ${activity}\n\nRate it here:\n${url}`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
         }
@@ -301,25 +302,32 @@
         function setStars(n) {
             currentRating = n;
             document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n));
-            
-            // Updates to show the specific reaction label (e.g., "What a great idea!") when stars are clicked
             document.getElementById('star-desc').innerText = starLabels[n];
             document.getElementById('submit-vote-btn').disabled = false;
         }
 
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
+            const creatorName = params.get('creator');
+            const activityTitle = params.get('rate');
+            const activityId = Date.now();
+
             if (currentRating >= 4) {
-                activities.push({ 
-                    id: Date.now(), 
-                    title: params.get('rate'), 
-                    joinedBy: params.get('participants'), 
-                    creator: params.get('creator') 
-                });
+                // Save to local storage for the rater
+                activities.push({ id: activityId, title: activityTitle, joinedBy: params.get('participants'), creator: creatorName });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                alert("Activity saved to your list!");
+
+                // Find creator's phone number
+                const creatorObj = family.find(f => f.name === creatorName);
+                const creatorPhone = creatorObj ? creatorObj.phone : "";
+
+                // Create link for the creator to open the logistics panel
+                const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}`;
+                const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
+                
+                window.open(`https://wa.me/${creatorPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
             }
-            window.location.href = window.location.pathname;
+            window.location.href = window.location.origin + window.location.pathname;
         }
 
         function renderFinalList() {
@@ -336,6 +344,7 @@
         function openEdit(id) {
             editingId = id;
             const item = activities.find(a => a.id === id);
+            if (!item) return;
             document.getElementById('edit-desc').value = item.details || '';
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
@@ -349,7 +358,6 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            
             const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit();
