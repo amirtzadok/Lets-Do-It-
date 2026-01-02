@@ -17,12 +17,15 @@
         .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
-        /* Setup Screen */
-        .avatar-options { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .avatar-btn { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; opacity: 0.5; transition: 0.3s; }
-        .avatar-btn.active { border-color: var(--primary); opacity: 1; transform: scale(1.1); }
+        /* Setup Screen - Vertical Mobile Layout */
+        .avatar-options { display: grid; grid-template-columns: 1fr; gap: 15px; justify-items: center; margin: 20px 0; }
+        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
+        .avatar-btn { width: 80px; height: 80px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
+        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
+        .avatar-choice span { font-weight: bold; margin-top: 5px; font-size: 14px; opacity: 0.6; }
+        .avatar-choice.active span { opacity: 1; color: var(--primary); }
 
-        /* App UI */
+        /* Main App UI */
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
@@ -31,12 +34,12 @@
         input[type="text"] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
         .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; }
 
-        .faces-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 20px 0; }
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
         .face-wrapper.selected { opacity: 1; transform: translateY(-5px); }
-        .face { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face { width: 55px; height: 55px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face { border-color: var(--primary); }
-        .heart-box { width: 60px; height: 60px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid transparent; }
+        .heart-box { width: 55px; height: 55px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
         .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; }
@@ -50,10 +53,9 @@
 <body>
 
     <div id="setup-card" class="card hidden">
-        <h2>Who are you?</h2>
-        <p style="text-align: center; color: #64748b; font-size: 14px;">Choose your face so Let's Do It! remembers you.</p>
+        <h2>Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Start Planning</button>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
     </div>
 
     <div id="main-app" class="hidden" style="width: 100%; max-width: 480px;">
@@ -74,7 +76,7 @@
                     <div class="heart-box">❤️</div>
                     <p style="font-size:10px; margin-top:5px; font-weight:bold; color:var(--heart);">Everyone</p>
                 </div>
-                <div id="faces-render" style="display:flex; gap:12px;"></div>
+                <div id="faces-render" style="display:flex; gap:10px;"></div>
             </div>
             
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
@@ -103,7 +105,10 @@
             if (!creatorIdentity) {
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
-                    <img src="${f.img}" class="avatar-btn" onclick="selectSelf(${f.id})" id="self-${f.id}" onerror="this.src='https://via.placeholder.com/60'">
+                    <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
+                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                        <span>${f.name}</span>
+                    </div>
                 `).join('');
             } else {
                 showMainApp();
@@ -112,8 +117,8 @@
 
         function selectSelf(id) {
             tempSelectedId = id;
-            document.querySelectorAll('.avatar-btn').forEach(img => img.classList.remove('active'));
-            document.getElementById(`self-${id}`).classList.add('active');
+            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
+            document.getElementById(`choice-${id}`).classList.add('active');
             document.getElementById('start-btn').disabled = false;
         }
 
@@ -141,7 +146,7 @@
             
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
-                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/60'">
+                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
                     <p style="font-size:10px; margin-top:5px; font-weight:bold;">${f.name}</p>
                 </div>
             `).join('');
