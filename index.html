@@ -41,17 +41,21 @@
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
         .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-size: 11px; margin-top: 4px; font-weight: bold; }
 
-        @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 768px) { .card, .app-header { max-width: 600px; } }
+        @media (min-width: 768px) {
+            body { padding-top: 20px; }
+            .card, .app-header { max-width: 600px; }
+        }
 
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        input[type="file"] { font-size: 12px; margin-bottom: 10px; }
+        
+        .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .logistics-label { font-size: 12px; color: #64748b; min-width: 80px; font-weight: bold; }
+        body[dir="rtl"] .logistics-label { text-align: right; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
@@ -60,7 +64,6 @@
         .item-delete { position: absolute; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
 
-        /* Small creator avatar inside list items */
         .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
 
         .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
@@ -70,9 +73,14 @@
         .face-wrapper.selected .face-img { border-color: var(--primary); }
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-        .image-gallery { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; }
-        .image-gallery img { height: 60px; border-radius: 8px; border: 1px solid #ddd; }
+        .image-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; }
+        .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover; cursor: pointer; transition: 0.2s; }
+        .gallery-thumb:hover { transform: scale(1.05); }
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
+
+        /* Fullscreen Image Overlay */
+        #img-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
+        #img-overlay img { max-width: 95%; max-height: 95%; border-radius: 10px; }
 
         .hidden { display: none !important; }
     </style>
@@ -85,50 +93,53 @@
         <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
     </header>
 
-    <div id="guide-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 200; border: 2px solid var(--primary); width: 95%; max-width: 450px;">
-        <h2 data-i18n="guideTitle">How it works</h2>
-        <div id="guide-content"></div>
-        <button class="primary-btn" onclick="closeGuide()" data-i18n="close">Got it!</button>
-    </div>
+    <div id="img-overlay" class="hidden" onclick="this.classList.add('hidden')"><img id="enlarged-img" src=""></div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
         <div id="unified-edit-fields">
             <input type="text" id="modal-edit-title" placeholder="Activity Name">
-            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Notes/Description"></textarea>
-            <div style="display:flex; gap:5px;">
-                <input type="date" id="modal-edit-date" style="flex:1;">
-                <input type="time" id="modal-edit-time" style="flex:1;">
+            
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelDate">Date</span>
+                <input type="date" id="modal-edit-date" style="flex:1; margin-bottom:0;">
             </div>
-            <select id="modal-edit-duration">
-                <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
-                <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                <option value="half" data-i18n="dur2">half a day</option>
-                <option value="full" data-i18n="dur3">full day</option>
-            </select>
+            
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
+                <input type="time" id="modal-edit-time" style="flex:1; margin-bottom:0;">
+            </div>
+
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelDur">Duration</span>
+                <select id="modal-edit-duration" style="flex:1; margin-bottom:0;">
+                    <option value="" disabled selected data-i18n="chooseDuration">Select</option>
+                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                    <option value="half" data-i18n="dur2">half a day</option>
+                    <option value="full" data-i18n="dur3">full day</option>
+                </select>
+            </div>
+
             <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
+            <label style="font-size:11px; display:block; font-weight:bold; margin-bottom:4px;" data-i18n="addImages">Upload Images:</label>
             <input type="file" id="modal-edit-images" multiple accept="image/*">
+            
+            <div id="edit-gallery-preview" class="image-gallery"></div>
+            
             <div style="display:flex; gap:8px; margin-top:10px;">
                 <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
                 <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
             </div>
         </div>
+
         <div id="view-fields" class="hidden">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
             <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
             <div id="view-link-container"></div>
-            <div id="view-images-container" class="image-gallery"></div>
+            <div id="view-gallery" class="image-gallery"></div>
+            <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
         </div>
-        <button id="modal-close-btn" class="secondary-btn hidden" onclick="closeEdit()" data-i18n="close">Close</button>
-    </div>
-
-    <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header"></h2>
-        <div class="stars" id="star-row" style="display:flex; justify-content:center; font-size:32px; color:#ddd; cursor:pointer; margin-bottom:10px;">
-            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
-        </div>
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled data-i18n="submitVote">Let's do it!</button>
     </div>
 
     <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 99; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
@@ -150,20 +161,30 @@
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
             </div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
-            <div class="input-row">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
-                <button style="background:none; border:none; color:#ccc; cursor:pointer;" onclick="clearInput()">✕</button>
+            <div class="input-row" style="display:flex; gap:8px;">
+                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="flex:1;">
+                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;" onclick="clearInput()">✕</button>
             </div>
             <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
             <div id="suggest-logistics-fields" class="hidden optional-logistics">
                 <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
-                <div style="display:flex; gap:5px;"><input type="date" id="suggest-date" style="flex:1;"><input type="time" id="suggest-time" style="flex:1;"></div>
-                <select id="suggest-duration">
-                    <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
-                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                    <option value="half" data-i18n="dur2">half a day</option>
-                    <option value="full" data-i18n="dur3">full day</option>
-                </select>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelDate">Date</span>
+                    <input type="date" id="suggest-date" style="flex:1; margin-bottom:0;">
+                </div>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
+                    <input type="time" id="suggest-time" style="flex:1; margin-bottom:0;">
+                </div>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelDur">Duration</span>
+                    <select id="suggest-duration" style="flex:1; margin-bottom:0;">
+                        <option value="" disabled selected data-i18n="chooseDuration">Select</option>
+                        <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                        <option value="half" data-i18n="dur2">half a day</option>
+                        <option value="full" data-i18n="dur3">full day</option>
+                    </select>
+                </div>
                 <input type="text" id="suggest-url" placeholder="Paste link (URL)">
                 <input type="file" id="suggest-images" multiple accept="image/*">
                 <button class="secondary-btn" onclick="toggleSuggestLogistics()" data-i18n="cancel">Cancel</button>
@@ -187,7 +208,8 @@
                 editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?", 
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
                 everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
-                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Duration",
+                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Select",
+                labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
                 waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!"
@@ -197,7 +219,8 @@
                 editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
-                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "משך זמן",
+                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
+                labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
                 waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
@@ -215,7 +238,7 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let currentRating = 0; let editingId = null; let pressTimer;
+        let selected = []; let editingId = null; let pressTimer;
 
         function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
         
@@ -233,13 +256,13 @@
         }
 
         function init() {
-            updateUILanguage(); const params = new URLSearchParams(window.location.search);
+            updateUILanguage();
+            const params = new URLSearchParams(window.location.search);
             if (params.get('editLogistics')) {
                 if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-                else { document.getElementById('main-app').classList.remove('hidden'); showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
+                else { showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
                 return;
             }
-            if (params.get('rate')) { document.getElementById('rating-screen').classList.remove('hidden'); document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`; return; }
             if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
             else showMainApp();
         }
@@ -269,6 +292,8 @@
             } else btn.innerText = i18n[currentLang].selectParticipants;
         }
 
+        function enlarge(src) { document.getElementById('enlarged-img').src = src; document.getElementById('img-overlay').classList.remove('hidden'); }
+
         async function sendWA() {
             const title = document.getElementById('main-input').value;
             const desc = document.getElementById('suggest-desc').value;
@@ -287,8 +312,6 @@
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
 
             let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pNames)}`;
-            if(desc) url += `&details=${encodeURIComponent(desc)}`; if(date) url += `&date=${encodeURIComponent(date)}`; if(time) url += `&time=${encodeURIComponent(time)}`; if(dur) url += `&duration=${encodeURIComponent(dur)}`; if(urlInp) url += `&exturl=${encodeURIComponent(urlInp)}`;
-
             const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\n\nRate here: ' + url)}`, '_blank');
             location.reload();
@@ -305,29 +328,22 @@
             document.getElementById('suggestions-panel').classList.remove('hidden');
         }
 
-        function startInnerPress(id) { 
-            pressTimer = setTimeout(() => { 
-                editingId = id; 
-                const s = myHistory.find(i => i.id === id);
-                populateModal(s);
-                document.getElementById('edit-modal').classList.remove('hidden');
-            }, 600); 
-        }
+        function startInnerPress(id) { pressTimer = setTimeout(() => { editingId = id; const s = myHistory.find(i => i.id === id); populateModal(s); document.getElementById('edit-modal').classList.remove('hidden'); }, 600); }
         function endInnerPress() { clearTimeout(pressTimer); }
         function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
 
         function populateModal(item) {
             document.getElementById('modal-edit-title').value = item.title || "";
-            document.getElementById('modal-edit-desc').value = item.details || item.desc || "";
             document.getElementById('modal-edit-date').value = item.dateRaw || item.date || "";
             document.getElementById('modal-edit-time').value = item.time || "";
             document.getElementById('modal-edit-duration').value = item.duration || item.dur || "";
             document.getElementById('modal-edit-url').value = item.url || "";
+            const preview = document.getElementById('edit-gallery-preview');
+            preview.innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
         }
 
         async function syncAndSaveGlobal() {
             const newTitle = document.getElementById('modal-edit-title').value;
-            const newDesc = document.getElementById('modal-edit-desc').value;
             const newDate = document.getElementById('modal-edit-date').value;
             const newTime = document.getElementById('modal-edit-time').value;
             const newDur = document.getElementById('modal-edit-duration').value;
@@ -343,7 +359,7 @@
             const histIdx = myHistory.findIndex(h => h.id === editingId || (h.title === newTitle && h.creator === currentUser.name));
             if (histIdx > -1) {
                 const h = myHistory[histIdx];
-                h.title = newTitle; h.desc = newDesc; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
+                h.title = newTitle; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
                 if(newImages) h.images = newImages;
                 h.modified = new Date().toISOString();
             }
@@ -351,7 +367,7 @@
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
                 const a = activities[publicIdx];
-                a.title = newTitle; a.details = newDesc; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
+                a.title = newTitle; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
                 if(newImages) a.images = newImages;
             }
 
@@ -369,20 +385,13 @@
             const title = p.get('rate'); const creator = p.get('creator');
             if (currentRating >= 4) {
                 const hist = myHistory.find(s => s.title === title && s.creator === creator) || {};
-                activities.push({ 
-                    id: Date.now(), title, creator, joinedBy: p.get('participants'), 
-                    details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', 
-                    time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', 
-                    url: p.get('exturl') || hist.url || '', images: hist.images || [] 
-                });
+                activities.push({ id: Date.now(), title, creator, joinedBy: p.get('participants'), details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', url: p.get('exturl') || hist.url || '', images: hist.images || [] });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 Liked your idea: "' + title + '"!')}`, '_blank');
             }
             window.location.href = window.location.origin + window.location.pathname;
         }
 
         function renderFinalList() {
-            const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => {
                 const creatorObj = family.find(f => f.name === a.creator);
@@ -392,7 +401,7 @@
                     <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/25'">
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
                     ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
-                    ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
+                    ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}" class="gallery-thumb" onclick="event.stopPropagation(); enlarge('${img}')">`).join('')}</div>` : ''}
                 </div>
             `;
             }).join('') || `<p>No confirmed activities yet</p>`;
@@ -405,12 +414,11 @@
             if (isCreator) { editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); }
             else { 
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
-                document.getElementById('modal-close-btn').classList.remove('hidden');
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
                 document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
-                document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
+                document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
         }
@@ -418,7 +426,6 @@
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        function openGuide() { alert('Planning: Create ideas & build excitement!\nGlobal Sync: History updates sync with public list.\nFinalizing: Confirm items in Future Activities.'); }
     </script>
 </body>
 </html>
