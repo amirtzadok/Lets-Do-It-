@@ -33,11 +33,9 @@
             border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
             top: 50%; transform: translateY(-50%);
         }
-        #help-btn { font-size: 16px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Small Circular Avatars */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -52,14 +50,26 @@
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        input[type="file"] { font-size: 12px; margin-bottom: 10px; }
+        
+        .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .logistics-label { font-size: 12px; color: #64748b; min-width: 90px; font-weight: bold; }
+        body[dir="rtl"] .logistics-label { text-align: right; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
-        .item-delete { position: absolute; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
+        
+        .item-delete { 
+            position: absolute; right: 12px; top: 12px; cursor: pointer; 
+            font-size: 18px; z-index: 5; color: #ef4444;
+            background: white; border-radius: 50%; width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
+
+        .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
 
         .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
@@ -68,8 +78,6 @@
         .face-wrapper.selected .face-img { border-color: var(--primary); }
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-        .image-gallery { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; }
-        .image-gallery img { height: 60px; border-radius: 8px; border: 1px solid #ddd; }
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
         .hidden { display: none !important; }
@@ -78,60 +86,54 @@
 <body onload="init()">
 
     <header class="app-header">
-        <button id="help-btn" class="header-btn" onclick="openGuide()">?</button>
         <h1 id="app-name-display">🚀 Let's Do It!</h1>
         <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
     </header>
 
-    <div id="guide-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 200; border: 2px solid var(--primary); width: 95%; max-width: 450px;">
-        <h2 data-i18n="guideTitle">How it works</h2>
-        <div id="guide-content"></div>
-        <button class="primary-btn" onclick="closeGuide()" data-i18n="close">Got it!</button>
-    </div>
-
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
         <div id="unified-edit-fields">
             <input type="text" id="modal-edit-title" placeholder="Activity Name">
             <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
-            <div style="display:flex; gap:5px;">
-                <input type="date" id="modal-edit-date" style="flex:1;">
-                <input type="time" id="modal-edit-time" style="flex:1;">
+            
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelDate">Date</span>
+                <input type="date" id="modal-edit-date" style="flex:1; margin-bottom:0;">
             </div>
-            <select id="modal-edit-duration">
-                <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
-                <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                <option value="half" data-i18n="dur2">half a day</option>
-                <option value="full" data-i18n="dur3">full day</option>
-            </select>
+            
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
+                <input type="time" id="modal-edit-time" style="flex:1; margin-bottom:0;">
+            </div>
+
+            <div class="logistics-row">
+                <span class="logistics-label" data-i18n="labelDur">Duration</span>
+                <select id="modal-edit-duration" style="flex:1; margin-bottom:0;">
+                    <option value="" disabled selected data-i18n="chooseDuration">Select</option>
+                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                    <option value="half" data-i18n="dur2">half a day</option>
+                    <option value="full" data-i18n="dur3">full day</option>
+                </select>
+            </div>
+
             <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
-            <label style="font-size:11px; display:block;" data-i18n="addImages">Images:</label>
-            <input type="file" id="modal-edit-images" multiple accept="image/*">
             
             <div style="display:flex; gap:8px; margin-top:10px;">
                 <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
                 <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
             </div>
         </div>
+
         <div id="view-fields" class="hidden">
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
             <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
             <div id="view-link-container"></div>
-            <div id="view-images-container" class="image-gallery"></div>
+            <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
         </div>
-        <button id="modal-close-btn" class="secondary-btn hidden" onclick="closeEdit()" data-i18n="close">Close</button>
     </div>
 
-    <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header"></h2>
-        <div class="stars" id="star-row" style="display:flex; justify-content:center; font-size:32px; color:#ddd; cursor:pointer; margin-bottom:10px;">
-            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
-        </div>
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled data-i18n="submitVote">Let's do it!</button>
-    </div>
-
-    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 99; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
         <div id="suggestions-list-content"></div>
         <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
@@ -150,29 +152,36 @@
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
             </div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
-            <div class="input-row">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
-                <button style="background:none; border:none; color:#ccc; cursor:pointer;" onclick="clearInput()">✕</button>
+            <div class="input-row" style="display:flex; gap:8px;">
+                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="flex:1;">
+                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;" onclick="clearInput()">✕</button>
             </div>
             <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
             <div id="suggest-logistics-fields" class="hidden optional-logistics">
                 <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
-                <div style="display:flex; gap:5px;"><input type="date" id="suggest-date" style="flex:1;"><input type="time" id="suggest-time" style="flex:1;"></div>
-                <select id="suggest-duration">
-                    <option value="" disabled selected data-i18n="chooseDuration">Duration</option>
-                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                    <option value="half" data-i18n="dur2">half a day</option>
-                    <option value="full" data-i18n="dur3">full day</option>
-                </select>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelDate">Date</span>
+                    <input type="date" id="suggest-date" style="flex:1; margin-bottom:0;">
+                </div>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
+                    <input type="time" id="suggest-time" style="flex:1; margin-bottom:0;">
+                </div>
+                <div class="logistics-row">
+                    <span class="logistics-label" data-i18n="labelDur">Duration</span>
+                    <select id="suggest-duration" style="flex:1; margin-bottom:0;">
+                        <option value="" disabled selected data-i18n="chooseDuration">Select</option>
+                        <option value="1-3" data-i18n="dur1">1-3 hours</option>
+                        <option value="half" data-i18n="dur2">half a day</option>
+                        <option value="full" data-i18n="dur3">full day</option>
+                    </select>
+                </div>
                 <input type="text" id="suggest-url" placeholder="Paste link (URL)">
-                <input type="file" id="suggest-images" multiple accept="image/*">
                 <button class="secondary-btn" onclick="toggleSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
-            <div class="faces-container">
-                <div class="face-grid">
-                    <div id="faces-render" style="display:contents;"></div>
-                    <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
-                </div>
+            <div class="face-grid">
+                <div id="faces-render" style="display:contents;"></div>
+                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
             </div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
         </div>
@@ -185,25 +194,26 @@
     <script>
         const i18n = {
             eng: {
-                langBtn: "HEB", guideTitle: "User Guide", close: "Close", update: "Update", cancel: "Cancel",
+                langBtn: "HEB", close: "Close", update: "Update", cancel: "Cancel",
                 editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?", 
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
                 everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
-                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Duration",
+                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Select",
+                labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!",
-                innerLongPressTip: "(Long press to edit details)", addImages: "Images:"
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!"
             },
             heb: {
-                langBtn: "ENG", guideTitle: "מדריך למשתמש", close: "סגור", update: "עדכן", cancel: "ביטול",
+                langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
                 editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
-                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "משך זמן",
+                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
+                labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", innerLongPressTip: "(לחיצה ארוכה לעריכת פרטים)", addImages: "תמונות:"
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
             }
         };
 
@@ -218,7 +228,7 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let currentRating = 0; let editingId = null; let pressTimer;
+        let selected = []; let editingId = null;
 
         function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
         
@@ -228,21 +238,19 @@
             document.getElementById('lang-toggle').innerText = d.langBtn;
             document.getElementById('lang-toggle').style.left = isHeb ? '0px' : 'auto';
             document.getElementById('lang-toggle').style.right = isHeb ? 'auto' : '0px';
-            document.getElementById('help-btn').style.left = isHeb ? 'auto' : '0px';
-            document.getElementById('help-btn').style.right = isHeb ? '0px' : 'auto';
             document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
             if (currentUser) document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${d.hiUser}, ${currentUser.name}</b>`;
         }
 
         function init() {
-            updateUILanguage(); const params = new URLSearchParams(window.location.search);
+            updateUILanguage();
+            const params = new URLSearchParams(window.location.search);
             if (params.get('editLogistics')) {
                 if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-                else { document.getElementById('main-app').classList.remove('hidden'); showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
+                else { showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
                 return;
             }
-            if (params.get('rate')) { document.getElementById('rating-screen').classList.remove('hidden'); document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`; return; }
             if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
             else showMainApp();
         }
@@ -279,19 +287,13 @@
             const time = document.getElementById('suggest-time').value;
             const dur = document.getElementById('suggest-duration').value;
             const urlInp = document.getElementById('suggest-url').value;
-            const imagesInp = document.getElementById('suggest-images').files;
             const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
-            let base64Images = [];
-            for (let file of imagesInp) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
-
-            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
+            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
             myHistory.push(suggObj);
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
 
             let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pNames)}`;
-            if(desc) url += `&details=${encodeURIComponent(desc)}`; if(date) url += `&date=${encodeURIComponent(date)}`; if(time) url += `&time=${encodeURIComponent(time)}`; if(dur) url += `&duration=${encodeURIComponent(dur)}`; if(urlInp) url += `&exturl=${encodeURIComponent(urlInp)}`;
-
             const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\n\nRate here: ' + url)}`, '_blank');
             location.reload();
@@ -300,7 +302,7 @@
         function openSuggestions() {
             const sorted = myHistory.sort((a, b) => a.title.localeCompare(b.title) || new Date(b.modified) - new Date(a.modified));
             document.getElementById('suggestions-list-content').innerHTML = sorted.map(s => `
-                <div class="list-item" onmousedown="startInnerPress(${s.id})" onmouseup="endInnerPress()" ontouchstart="startInnerPress(${s.id})" ontouchend="endInnerPress()">
+                <div class="list-item" onclick="openInnerEdit(${s.id})">
                     <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
                     <div><b>${s.title}</b><br><small>${s.participants}</small></div>
                 </div>
@@ -308,17 +310,14 @@
             document.getElementById('suggestions-panel').classList.remove('hidden');
         }
 
-        function startInnerPress(id) { 
-            pressTimer = setTimeout(() => { 
-                editingId = id; 
-                const s = myHistory.find(i => i.id === id);
-                populateModal(s);
-                document.getElementById('edit-modal').classList.remove('hidden');
-                // Ensure z-index is higher than suggestions panel [cite: 55]
-                document.getElementById('edit-modal').style.zIndex = "1000";
-            }, 600); 
+        function openInnerEdit(id) { 
+            editingId = id; 
+            const s = myHistory.find(i => i.id === id);
+            populateModal(s);
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').style.zIndex = "1000";
         }
-        function endInnerPress() { clearTimeout(pressTimer); }
+
         function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
 
         function populateModal(item) {
@@ -330,34 +329,24 @@
             document.getElementById('modal-edit-url').value = item.url || "";
         }
 
-        async function syncAndSaveGlobal() {
+        async function syncAndSaveGlobal() { [cite: 123, 125, 152]
             const newTitle = document.getElementById('modal-edit-title').value;
             const newDesc = document.getElementById('modal-edit-desc').value;
             const newDate = document.getElementById('modal-edit-date').value;
             const newTime = document.getElementById('modal-edit-time').value;
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
-            
-            const imgFiles = document.getElementById('modal-edit-images').files;
-            let newImages = null;
-            if (imgFiles.length > 0) {
-                newImages = [];
-                for (let file of imgFiles) { newImages.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
-            }
 
-            const histIdx = myHistory.findIndex(h => h.id === editingId || (h.title === newTitle && h.creator === currentUser.name));
+            // Update History Entry [cite: 123]
+            const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
-                const h = myHistory[histIdx];
-                h.title = newTitle; h.desc = newDesc; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
-                if(newImages) h.images = newImages;
-                h.modified = new Date().toISOString();
+                myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, modified: new Date().toISOString() };
             }
 
+            // Sync confirmed list entry [cite: 125]
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
-                const a = activities[publicIdx];
-                a.title = newTitle; a.details = newDesc; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
-                if(newImages) a.images = newImages;
+                activities[publicIdx] = { ...activities[publicIdx], title: newTitle, details: newDesc, dateRaw: newDate, time: newTime, duration: newDur, url: newUrl };
             }
 
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
@@ -374,28 +363,25 @@
             const title = p.get('rate'); const creator = p.get('creator');
             if (currentRating >= 4) {
                 const hist = myHistory.find(s => s.title === title && s.creator === creator) || {};
-                activities.push({ 
-                    id: Date.now(), title, creator, joinedBy: p.get('participants'), 
-                    details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', 
-                    time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', 
-                    url: p.get('exturl') || hist.url || '', images: hist.images || [] 
-                });
+                activities.push({ id: Date.now(), title, creator, joinedBy: p.get('participants'), details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', url: p.get('exturl') || hist.url || '' });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 Liked your idea: "' + title + '"!')}`, '_blank');
             }
             window.location.href = window.location.origin + window.location.pathname;
         }
 
         function renderFinalList() {
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
-            document.getElementById('final-list').innerHTML = sorted.map(a => `
+            document.getElementById('final-list').innerHTML = sorted.map(a => {
+                const creatorObj = family.find(f => f.name === a.creator);
+                return `
                 <div class="list-item" onclick="openEdit(${a.id})">
                     ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
+                    <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/25'">
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
                     ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
-                    ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
                 </div>
-            `).join('') || `<p>No confirmed activities yet</p>`;
+            `;
+            }).join('') || `<p>No confirmed activities yet</p>`;
         }
 
         function openEdit(id) {
@@ -410,7 +396,6 @@
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
                 document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
-                document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
             document.getElementById('edit-modal').style.zIndex = "1000";
@@ -419,12 +404,6 @@
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        function openGuide() {
-            const d = i18n[currentLang];
-            document.getElementById('guide-content').innerHTML = `<div style="text-align:left;"><b>Planning</b><p>${d.g1Title}</p><b>Global Sync</b><p>${d.g2Body}</p></div>`;
-            document.getElementById('guide-panel').classList.remove('hidden');
-        }
-        function closeGuide() { document.getElementById('guide-panel').classList.add('hidden'); }
     </script>
 </body>
 </html>
