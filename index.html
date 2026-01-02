@@ -19,73 +19,77 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; }
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Mobile "No-Scroll" Welcome Screen Logic */
+        /* Fixed Mobile Welcome Screen (No Scrolling) */
         #setup-card { 
-            height: 90vh; 
+            height: 92vh; /* Fixed height to prevent scrolling */
             display: flex; 
             flex-direction: column; 
-            justify-content: space-between; 
-            padding: 25px; 
+            justify-content: space-around; /* Distribute space evenly */
+            padding: 20px; 
             overflow: hidden;
+            text-align: center;
         }
 
-        .welcome-logo-container { flex: 0 1 auto; display: flex; justify-content: center; }
-        .welcome-logo-container img { max-width: 140px; height: auto; object-fit: contain; }
+        .welcome-logo-container { flex: 0 1 auto; }
+        .welcome-logo-container img { max-width: 130px; height: auto; }
 
+        /* 2x2 Grid for Mobile Avatars */
         .avatar-options { 
-            flex: 1 1 auto; 
             display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 10px; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px; 
             justify-items: center; 
-            align-content: center;
+            align-items: center;
+            margin: 10px 0;
         }
 
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 70px; height: 70px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
+        .avatar-btn { width: 75px; height: 75px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
         .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-weight: bold; margin-top: 4px; font-size: 13px; opacity: 0.6; }
+        .avatar-choice span { font-weight: bold; margin-top: 5px; font-size: 13px; opacity: 0.6; }
         .avatar-choice.active span { opacity: 1; color: var(--primary); }
 
         @media (min-width: 768px) {
             body { padding: 40px; }
             .card { max-width: 800px; padding: 40px; }
-            #setup-card { height: auto; min-height: 600px; }
-            .avatar-options { grid-template-columns: repeat(4, 1fr) !important; gap: 30px; } 
-            .welcome-logo-container img { max-width: 200px; }
+            #setup-card { height: auto; min-height: 550px; justify-content: center; gap: 30px; }
+            .avatar-options { grid-template-columns: repeat(4, 1fr); gap: 30px; } 
+            .welcome-logo-container img { max-width: 180px; }
             #setup-card .primary-btn { width: 33.33%; }
         }
 
-        h2 { font-size: 20px; font-weight: 800; margin: 10px 0; text-align: center; }
+        h2 { font-size: 19px; font-weight: 800; margin: 5px 0; }
 
-        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        /* Main App UI */
+        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 10px; }
-        .clear-x { position: absolute; right: 12px; top: 22px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
+        .input-wrapper { position: relative; width: 100%; margin-bottom: 12px; }
+        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 8px; }
+        .clear-x { position: absolute; right: 12px; top: 20px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
 
-        .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
         .face-wrapper.selected { opacity: 1; transform: translateY(-5px); }
-        .face { width: 55px; height: 55px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face { border-color: var(--primary); }
-        .heart-box { width: 55px; height: 55px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 3px solid transparent; }
+        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
-        .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; display: block; margin: 0 auto; }
-        #setup-card .primary-btn { width: 75%; flex: 0 0 auto; }
+        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 17px; display: block; margin: 0 auto; transition: 0.2s; }
+        #setup-card .primary-btn { width: 85%; }
+        .primary-btn:active { transform: scale(0.98); }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; transition: transform 0.1s, background-color 0.3s; user-select: none; }
-        .list-item:active { transform: scale(0.98); }
+        .list-item.is-completed { background-color: var(--completed); border-left-color: var(--heart); }
         .item-actions { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 18px; }
 
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 20px; min-height: 20px; }
+        .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; min-height: 20px; }
 
         .field-label { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
 
@@ -99,15 +103,15 @@
         <div class="welcome-logo-container">
             <img src="logo.png" alt="Let's Do It Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
         </div>
-        <h2 id="rating-header" style="text-align:center; font-size:18px;"></h2>
-        <p id="rating-prompt" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:20px;">Rate their idea!</p>
+        <h2 id="rating-header" style="text-align:center; font-size:17px;"></h2>
+        <p id="rating-prompt" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:15px;">Rate their idea!</p>
         
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
         <div id="star-desc" class="star-label">Choose your rating</div>
         
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 20px;">Let's do it!</button>
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary); width: 90%; max-width: 450px;">
@@ -195,7 +199,7 @@
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
                     <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
-                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/75'">
                         <span>${f.name}</span>
                     </div>
                 `).join('');
@@ -303,12 +307,12 @@
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-info').innerHTML = `
-                <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/40'">
+                <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/35'">
                 <span style="font-weight:bold; font-size:14px;">Hi, ${creatorIdentity.name}</span>
             `;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
-                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
+                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/50'">
                     <p style="font-size:10px; margin-top:5px; font-weight:bold;">${f.name}</p>
                 </div>
             `).join('');
