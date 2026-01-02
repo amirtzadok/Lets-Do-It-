@@ -205,6 +205,7 @@
             const params = new URLSearchParams(window.location.search);
             const editIdParam = params.get('editLogistics');
             
+            // Priority 1: Handle Rating Screen
             if (params.get('rate')) {
                 const greeting = document.getElementById('personalized-greeting');
                 greeting.innerText = `Hey ${params.get('participants')}!`;
@@ -215,12 +216,24 @@
                 return;
             }
 
+            // Priority 2: Handle Logistics Direct Link
+            if (editIdParam) {
+                if (!currentUser) {
+                    document.getElementById('setup-wrapper').classList.remove('hidden');
+                    renderSetup();
+                } else {
+                    showMainApp();
+                    openEdit(parseInt(editIdParam));
+                }
+                return;
+            }
+
+            // Default: Setup or Main App
             if (!currentUser) {
                 document.getElementById('setup-wrapper').classList.remove('hidden');
                 renderSetup();
             } else {
                 showMainApp();
-                if (editIdParam) openEdit(parseInt(editIdParam));
             }
         }
 
@@ -290,10 +303,8 @@
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
             
-            // Logic for "Everyone" selection
             let waUrl = "";
             if (selected.length === family.length) {
-                // Attempts to open search for "Tzadok family"
                 waUrl = `https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested to Everyone: ' + activity + '\n\nRate it here:\n' + url)}`;
             } else if (selected.length === 1) {
                 let phone = family.find(f => f.id === selected[0]).phone;
@@ -325,6 +336,8 @@
 
                 const creatorObj = family.find(f => f.name === creatorName);
                 const creatorPhone = creatorObj ? creatorObj.phone : "";
+                
+                // Generates direct logistics URL
                 const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
                 
@@ -379,10 +392,7 @@
             
             let phone = "";
             const participantNames = item.joinedBy.split(' & ');
-            
-            // Logic for "Everyone" vs individual participant
             if (item.joinedBy === "Everyone") {
-                // Opens WhatsApp to select "Tzadok family" group
                 phone = ""; 
             } else if (participantNames.length === 1) {
                 const pObj = family.find(f => f.name === participantNames[0]);
@@ -390,7 +400,6 @@
             }
 
             const appUrl = `${window.location.origin}${window.location.pathname}`;
-            const groupMention = item.joinedBy === "Everyone" ? "Tzadok family group" : item.joinedBy;
             const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}\n\nSee your future activities:\n${appUrl}`;
             
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -398,7 +407,12 @@
             renderFinalList();
         }
 
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+        function closeEdit() { 
+            document.getElementById('edit-modal').classList.add('hidden'); 
+            // Cleanup URL after editing
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
         function deleteIdea(id) { if(confirm("Remove this activity?")) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
