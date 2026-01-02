@@ -428,7 +428,6 @@
                 document.getElementById('view-desc').innerText = item.details || "Details coming soon!";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "Time/Date not set yet.";
                 
-                // Toggle request button if info is missing
                 document.getElementById('request-details-ui').classList.toggle('hidden', !!hasLogistics);
                 document.getElementById('request-note').innerText = `Request for more details will be sent to ${item.creator}`;
             }
@@ -436,11 +435,16 @@
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
+        // Updated function to include the logistics URL in the request message
         function requestDetails() {
             const item = activities.find(a => a.id === editingId);
             const creatorObj = family.find(f => f.name === item.creator);
             const phone = creatorObj ? creatorObj.phone : "";
-            const msg = `Hey ${item.creator}! Can you please add more details (where/when) for "${item.title}"? Thanks!`;
+            
+            // Generate the direct logistics URL for the creator
+            const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${item.id}&rate=${encodeURIComponent(item.title)}&participants=${encodeURIComponent(item.joinedBy)}&creator=${encodeURIComponent(item.creator)}`;
+            
+            const msg = `Hey ${item.creator}! Can you please add more details (where/when) for "${item.title}"? \n\nYou can set them here:\n${logisticsUrl}`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
