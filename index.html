@@ -18,7 +18,6 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Desktop specific adjustments */
         @media (min-width: 768px) {
             body { padding: 40px; }
             .card { max-width: 800px; padding: 40px; }
@@ -30,11 +29,9 @@
 
         h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
-        /* Shared Logo UI */
         .logo-container { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; padding-top: 20px; }
         .logo-container img { width: 160px; height: auto; }
 
-        /* Setup Screen */
         .avatar-options { display: grid; grid-template-columns: 1fr; gap: 15px; justify-items: center; margin: 20px 0; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 80px; height: 80px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
@@ -42,7 +39,6 @@
         .avatar-choice span { font-weight: bold; margin-top: 5px; font-size: 14px; opacity: 0.6; }
         .avatar-choice.active span { opacity: 1; color: var(--primary); }
 
-        /* Main App UI */
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
@@ -59,7 +55,6 @@
         .heart-box { width: 55px; height: 55px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
-        /* Buttons & List */
         .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; display: block; margin: 0 auto; }
         #setup-card .primary-btn { width: 66%; }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
@@ -68,7 +63,6 @@
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
         .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 12px; cursor: pointer; font-size: 18px; }
 
-        /* Rating UI */
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
         .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 20px; min-height: 20px; }
@@ -88,15 +82,19 @@
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
-        <div id="star-desc" class="star-label">Choose your rating</div>
-        <button class="primary-btn" onclick="submitRating()">Submit Vote</button>
+        <div id="star-desc" class="star-label">Choose your avatar to vote</div>
+        
+        <div class="avatar-options" id="voter-selector" style="grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+        
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 20px;">Submit Vote</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary); width: 90%; max-width: 450px;">
         <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
         <input type="date" id="edit-date">
-        <input type="time" id="edit-time"> <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Joined Participants</button>
+        <input type="time" id="edit-time">
+        <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Joined Participants</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
@@ -149,19 +147,27 @@
         let creatorIdentity = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
+        let voterId = null;
         let editingId = null;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
         function init() {
             const urlParams = new URLSearchParams(window.location.search);
             const rateName = urlParams.get('rate');
-            const creator = urlParams.get('creator');
 
             if (rateName) {
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('setup-card').classList.add('hidden');
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
+                
+                // Render small avatars for the voter to pick who they are
+                document.getElementById('voter-selector').innerHTML = family.map(f => `
+                    <div class="avatar-choice" id="voter-${f.id}" onclick="selectVoter(${f.id})">
+                        <img src="${f.img}" class="avatar-btn" style="width:50px; height:50px;" onerror="this.src='https://via.placeholder.com/50'">
+                        <span style="font-size:10px;">${f.name}</span>
+                    </div>
+                `).join('');
                 return;
             }
 
@@ -178,20 +184,35 @@
             }
         }
 
-        // --- RATING LOGIC ---
-        const starLabels = { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "LET'S DO IT!" };
+        // --- RATING & NOTIFY CREATOR ---
+        function selectVoter(id) {
+            voterId = id;
+            document.querySelectorAll('#voter-selector .avatar-choice').forEach(el => el.classList.remove('active'));
+            document.getElementById(`voter-${id}`).classList.add('active');
+            checkVoteReady();
+        }
+
         function setStars(n) {
             currentRating = n;
             const stars = document.querySelectorAll('#star-row span');
             stars.forEach((s, i) => s.classList.toggle('active', i < n));
             document.getElementById('star-desc').innerText = starLabels[n];
+            checkVoteReady();
+        }
+
+        const starLabels = { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "LET'S DO IT!" };
+
+        function checkVoteReady() {
+            if (currentRating > 0 && voterId !== null) {
+                document.getElementById('submit-vote-btn').disabled = false;
+            }
         }
 
         function submitRating() {
-            if (currentRating === 0) return alert("Pick stars!");
             const params = new URLSearchParams(window.location.search);
             const idea = params.get('rate');
             const creatorName = params.get('creator');
+            const participant = family.find(f => f.id === voterId);
 
             if (currentRating >= 4) {
                 activities.push({ 
@@ -199,21 +220,22 @@
                     title: idea, 
                     dateAdded: new Date().toLocaleDateString(),
                     creator: creatorName,
-                    participants: params.get('participants') || 'Tzadok Family'
+                    joinedBy: participant.name
                 });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
                 
-                // Notify creator logic
+                // Updated Message Format
                 const creatorObj = family.find(f => f.name === creatorName);
                 if (creatorObj) {
-                    const msg = `Hey ${creatorName}! Your activity "${idea}" was joined! 🚀 Time to edit your activity details.`;
+                    const appUrl = window.location.origin + window.location.pathname;
+                    const msg = `${participant.name} joined your suggestion to ${idea}\n🚀 Time to edit your activity details.\n\nOpen app to edit: ${appUrl}`;
                     window.open(`https://wa.me/${creatorObj.phone}?text=${encodeURIComponent(msg)}`, '_blank');
                 }
             }
             window.location.href = window.location.pathname;
         }
 
-        // --- LOGISTICS & AUTOMATED CALENDAR ---
+        // --- LOGISTICS & CALENDAR ---
         function openEdit(id) {
             editingId = id;
             const item = activities.find(a => a.id === id);
@@ -231,7 +253,6 @@
             item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
 
-            // Default Calendar Logic
             const dateStr = (item.dateRaw || "").replace(/-/g, '');
             const timeStr = (item.time || "1000").replace(/:/g, '');
             const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.title)}&dates=${dateStr}T${timeStr}00/${dateStr}T${parseInt(timeStr)+1}00&details=${encodeURIComponent(item.details || '')}&location=Israel&sf=true&output=xml`;
@@ -300,9 +321,8 @@
         function sendWA() {
             const activity = document.getElementById('main-input').value;
             const chosen = family.filter(f => selected.includes(f.id));
-            const participants = selected.length === family.length ? "Everyone" : chosen.map(f => f.name).join(' & ');
             const baseUrl = window.location.origin + window.location.pathname;
-            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(creatorIdentity.name)}&participants=${encodeURIComponent(participants)}`;
+            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(creatorIdentity.name)}`;
             
             const msg = `🚀 Let's Do It!\n${creatorIdentity.name} suggested "${activity}".\n\nRate it here:\n${ratingUrl}`;
             let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -315,6 +335,7 @@
                 <div class="list-item">
                     <div class="item-actions"><span onclick="openEdit(${a.id})">📝</span> <span onclick="deleteIdea(${a.id})">🗑️</span></div>
                     <div style="font-weight:bold;">${a.title}</div>
+                    <div style="font-size:11px; color:#64748b;">Joined by: ${a.joinedBy}</div>
                 </div>
             `).join('') || '<p style="color:#94a3b8; font-size:12px; text-align:center;">No activities yet.</p>';
         }
