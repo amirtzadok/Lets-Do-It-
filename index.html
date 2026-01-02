@@ -1,94 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Let's Do It!</title>
-    
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="logo.png">
-    <link rel="icon" sizes="192x192" href="logo.png">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    
-    <style>
-        :root {
-            --primary: #2563eb;
-            --whatsapp: #58d368;
-            --heart: #f43f5e;
-            --bg: #f8fafc;
-            --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --completed: #fee2e2;
-        }
-
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; }
-        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        
-        /* Fixed Mobile Welcome Screen (No Scrolling) */
-        #setup-card { 
-            height: 85vh; /* Tightened height to ensure no overflow */
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            padding: 15px; 
-            overflow: hidden;
-            text-align: center;
-        }
-
-        .welcome-logo-container { flex: 0 0 auto; margin-top: 5px; }
-        .welcome-logo-container img { max-width: 150px; height: auto; display: block; margin: 0 auto; } 
-
-        h2.setup-title { 
-            font-size: 22px; 
-            font-weight: 800; 
-            margin: 5px 0 10px 0; 
-        } 
-
-        /* Compact 2x2 Grid for Mobile Avatars */
-        .avatar-options { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            justify-items: center; 
-            align-items: center;
-            margin: 0;
-            flex-grow: 1; /* Allows grid to take available space */
-        }
-
-        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 85px; height: 85px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
-        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-weight: bold; margin-top: 2px; font-size: 14px; opacity: 0.6; }
-        .avatar-choice.active span { opacity: 1; color: var(--primary); }
-
-        @media (min-width: 768px) {
-            body { padding: 40px; }
-            .card { max-width: 800px; padding: 40px; }
-            #setup-card { height: auto; min-height: 500px; justify-content: center; gap: 20px; }
-            .avatar-options { grid-template-columns: repeat(4, 1fr); gap: 30px; } 
-            .welcome-logo-container img { max-width: 220px; }
-            #setup-card .primary-btn { width: 33.33%; }
-        }
-
-        /* Buttons & List */
-        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 17px; display: block; margin: 0 auto; transition: 0.2s; }
-        #setup-card .primary-btn { width: 85%; flex: 0 0 auto; margin-top: 5px; } 
-        .primary-btn:active { transform: scale(0.98); }
-        .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; transition: transform 0.1s; user-select: none; }
-        .item-actions { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 18px; }
-        .status-icons { font-size: 14px; margin-left: 8px; }
-
-        /* Shared Components */
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
-        .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; min-height: 20px; }
-        .hidden { display: none !important; }
-    </style>
-</head>
 <body onload="init()">
+
+    <div id="rating-screen" class="card hidden">
+        <div class="welcome-logo-container">
+            <img src="logo.png" alt="Let's Do It Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
+        </div>
+        <h2 id="rating-header" style="text-align:center; font-size:17px;"></h2>
+        <p id="rating-prompt" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:15px;">Rate their idea!</p>
+        
+        <div class="stars" id="star-row">
+            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
+        </div>
+        <div id="star-desc" class="star-label">Choose your rating</div>
+        
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
+    </div>
 
     <div id="setup-card" class="card hidden">
         <div class="welcome-logo-container">
@@ -99,21 +24,55 @@
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
     </div>
 
+    <div id="main-app" class="hidden">
+        <div class="card">
+            <div class="user-header">
+                <div id="user-info" class="user-info"></div>
+                <span class="reset-link" onclick="resetIdentity()">Not me?</span>
+            </div>
+            <h2>Let's do something together!</h2>
+            
+            <div class="input-wrapper">
+                <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState(); toggleX('main-input', 'main-clear')">
+                <button id="main-clear" class="clear-x" onclick="clearField('main-input', 'main-clear'); updateUIState()">✕</button>
+            </div>
+
+            <div class="faces-container">
+                <div class="face-wrapper" id="f-all" onclick="selectAll()">
+                    <div class="heart-box">❤️</div>
+                    <p style="font-size:10px; margin-top:5px; font-weight:bold; color:var(--heart);">Everyone</p>
+                </div>
+                <div id="faces-render" style="display:flex; gap:10px;"></div>
+            </div>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
+        </div>
+
+        <div class="card">
+            <h2>🚀 Let's Do It!</h2>
+            <div id="final-list"></div>
+        </div>
+    </div>
+
     <script>
-        const family = [
-            { id: 1, name: "Amir", phone: "972547880404", img: "amir.png" },
-            { id: 2, name: "Rani", phone: "972542428664", img: "rani.png" },
-            { id: 3, name: "Lia", phone: "972526765297", img: "lia.png" },
-            { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
-        ];
-
-        let creatorIdentity = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
-        let selected = [];
-        let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
-
+        // Ensure init() correctly hides/shows screens
         function init() {
-            // Simplified check for welcome screen vs main app
+            const urlParams = new URLSearchParams(window.location.search);
+            const rateName = urlParams.get('rate');
+            const creator = urlParams.get('creator');
+            const editId = urlParams.get('editId');
+
+            // 1. Check for rating screen first
+            if (rateName) {
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('setup-card').classList.add('hidden');
+                document.getElementById('rating-screen').classList.remove('hidden');
+                document.getElementById('rating-header').innerText = `${creator} created an activity for "${rateName}"`;
+                return;
+            }
+
+            // 2. Check if user is logged in
             if (!creatorIdentity) {
+                document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
                     <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
@@ -122,22 +81,13 @@
                     </div>
                 `).join('');
             } else {
-                // Show main app (omitted for brevity)
+                // 3. User is logged in, show main app
+                document.getElementById('setup-card').classList.add('hidden');
+                showMainApp();
+                if (editId) openEdit(parseInt(editId));
             }
         }
-
-        function selectSelf(id) {
-            tempSelectedId = id;
-            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
-            document.getElementById(`choice-${id}`).classList.add('active');
-            document.getElementById('start-btn').disabled = false;
-        }
-
-        function finishSetup() {
-            creatorIdentity = family.find(f => f.id === tempSelectedId);
-            localStorage.setItem('letsdoit_user_identity', JSON.stringify(creatorIdentity));
-            location.reload();
-        }
+        
+        // ... rest of your script functions (selectSelf, finishSetup, etc.)
     </script>
 </body>
-</html>
