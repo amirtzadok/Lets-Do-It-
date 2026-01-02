@@ -88,8 +88,20 @@
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         
-        .clear-btn { background: #e2e8f0; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.3s; height: 46px; display: flex; align-items: center; }
-        .clear-btn:hover { background: #cbd5e1; }
+        /* Updated Clear Button with no background */
+        .clear-btn { 
+            background: transparent; 
+            border: none; 
+            padding: 8px; 
+            cursor: pointer; 
+            font-size: 20px; 
+            color: #94a3b8; 
+            transition: 0.2s; 
+            height: 46px; 
+            display: flex; 
+            align-items: center; 
+        }
+        .clear-btn:hover { color: var(--heart); }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
@@ -134,18 +146,24 @@
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
-        <h3>Edit Logistics</h3>
-        <textarea id="edit-desc" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
-        <div class="input-group">
-            <span class="input-label">📅 Date</span>
-            <input type="date" id="edit-date" oninput="validateLogistics()">
+        <h3 id="modal-title">Edit Logistics</h3>
+        <div id="edit-fields">
+            <textarea id="edit-desc" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
+            <div class="input-group">
+                <span class="input-label">📅 Date</span>
+                <input type="date" id="edit-date" oninput="validateLogistics()">
+            </div>
+            <div class="input-group">
+                <span class="input-label">🕒 Time</span>
+                <input type="time" id="edit-time" oninput="validateLogistics()">
+            </div>
+            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled>Save & Notify Participants</button>
         </div>
-        <div class="input-group">
-            <span class="input-label">🕒 Time</span>
-            <input type="time" id="edit-time" oninput="validateLogistics()">
+        <div id="view-fields" class="hidden" style="padding: 10px 0;">
+            <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
+            <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
         </div>
-        <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled>Save & Notify Participants</button>
-        <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
+        <button class="secondary-btn" onclick="closeEdit()">Close</button>
     </div>
 
     <div id="setup-wrapper" class="hidden">
@@ -179,7 +197,7 @@
 
         <div class="card">
             <h2>🚀 Future Activities!</h2>
-            <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;">(Long press an activity to edit)</p>
+            <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;">(Long press an activity to view or edit)</p>
             <div id="final-list"></div>
         </div>
     </div>
@@ -354,11 +372,8 @@
             window.location.href = window.location.origin + window.location.pathname;
         }
 
-        // Updated Render Function with sorting
         function renderFinalList() {
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // Create a sorted copy of activities
             const sortedActivities = [...activities].sort((a, b) => {
                 if (!a.dateRaw) return 1;
                 if (!b.dateRaw) return -1;
@@ -373,7 +388,7 @@
                     <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
                         <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
                         <b>${a.title}${statusIcons}</b><br>
-                        <small>With: ${a.joinedBy}</small>
+                        <small>Creator: ${a.creator} | With: ${a.joinedBy}</small>
                         ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
                     </div>
                 `;
@@ -398,16 +413,28 @@
                     id: id, 
                     title: params.get('rate') || "New Plan", 
                     joinedBy: params.get('participants') || "Selection", 
-                    creator: currentUser ? currentUser.name : (params.get('creator') || "Family") 
+                    creator: params.get('creator') || (currentUser ? currentUser.name : "Family")
                 };
                 activities.push(item);
             }
             
-            document.getElementById('edit-desc').value = item.details || '';
-            document.getElementById('edit-date').value = item.dateRaw || '';
-            document.getElementById('edit-time').value = item.time || '';
-            document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
-            validateLogistics();
+            const isCreator = currentUser && item.creator === currentUser.name;
+            
+            document.getElementById('modal-title').innerText = isCreator ? "Edit Logistics" : "View Logistics";
+            document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
+            document.getElementById('view-fields').classList.toggle('hidden', isCreator);
+
+            if (isCreator) {
+                document.getElementById('edit-desc').value = item.details || '';
+                document.getElementById('edit-date').value = item.dateRaw || '';
+                document.getElementById('edit-time').value = item.time || '';
+                document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
+                validateLogistics();
+            } else {
+                document.getElementById('view-desc').innerText = item.details || "Details coming soon!";
+                document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "Time/Date not set yet.";
+            }
+            
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -441,7 +468,18 @@
             const cleanUrl = window.location.origin + window.location.pathname;
             window.history.replaceState({}, document.title, cleanUrl);
         }
-        function deleteIdea(id) { if(confirm("Remove this activity?")) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
+        function deleteIdea(id) { 
+            const item = activities.find(a => a.id === id);
+            if (currentUser && item.creator !== currentUser.name) {
+                alert("Only the creator can remove this activity.");
+                return;
+            }
+            if(confirm("Remove this activity?")) { 
+                activities = activities.filter(a => a.id !== id); 
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
+                renderFinalList(); 
+            } 
+        }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
 </body>
