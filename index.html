@@ -289,9 +289,20 @@
             const activity = document.getElementById('main-input').value;
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
-            let phone = (selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
-            const waMsg = `🚀 *Let's Do It!* \n${currentUser.name} suggested: ${activity}\n\nRate it here:\n${url}`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+            
+            // Logic for "Everyone" selection
+            let waUrl = "";
+            if (selected.length === family.length) {
+                // Attempts to open search for "Tzadok family"
+                waUrl = `https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested to Everyone: ' + activity + '\n\nRate it here:\n' + url)}`;
+            } else if (selected.length === 1) {
+                let phone = family.find(f => f.id === selected[0]).phone;
+                waUrl = `https://wa.me/${phone}?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`;
+            } else {
+                waUrl = `https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`;
+            }
+            
+            window.open(waUrl, '_blank');
         }
 
         function setStars(n) {
@@ -323,9 +334,11 @@
         }
 
         function renderFinalList() {
+            const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('final-list').innerHTML = activities.map(a => {
-                // Icons appear if logistics are fully set
-                const statusIcons = (a.details && a.dateRaw && a.time) ? ' ❤️🕒' : '';
+                const isPast = a.dateRaw && a.dateRaw < todayStr;
+                const clockOrCheck = isPast ? ' ✅' : ' 🕒';
+                const statusIcons = (a.details && a.dateRaw && a.time) ? ` ❤️${clockOrCheck}` : '';
                 return `
                     <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
                         <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
@@ -366,12 +379,20 @@
             
             let phone = "";
             const participantNames = item.joinedBy.split(' & ');
-            if (participantNames.length === 1 && item.joinedBy !== "Everyone") {
+            
+            // Logic for "Everyone" vs individual participant
+            if (item.joinedBy === "Everyone") {
+                // Opens WhatsApp to select "Tzadok family" group
+                phone = ""; 
+            } else if (participantNames.length === 1) {
                 const pObj = family.find(f => f.name === participantNames[0]);
                 if (pObj) phone = pObj.phone;
             }
 
-            const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
+            const appUrl = `${window.location.origin}${window.location.pathname}`;
+            const groupMention = item.joinedBy === "Everyone" ? "Tzadok family group" : item.joinedBy;
+            const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}\n\nSee your future activities:\n${appUrl}`;
+            
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit();
             renderFinalList();
