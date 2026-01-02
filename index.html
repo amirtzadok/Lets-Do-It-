@@ -22,7 +22,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: flex-start; 
+            justify-content: flex-start;
             margin: 0; 
             min-height: 100vh; 
             box-sizing: border-box; 
@@ -223,16 +223,7 @@
             const params = new URLSearchParams(window.location.search);
             const editIdParam = params.get('editLogistics');
             
-            if (params.get('rate')) {
-                const greeting = document.getElementById('personalized-greeting');
-                greeting.innerText = `Hey ${params.get('participants')}!`;
-                greeting.classList.remove('hidden');
-                document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
-                document.getElementById('star-desc').innerText = `Rate ${params.get('creator')}'s idea!`;
-                return;
-            }
-
+            // Priority 1: Handle Logistics Direct Link
             if (editIdParam) {
                 if (!currentUser) {
                     document.getElementById('setup-wrapper').classList.remove('hidden');
@@ -241,6 +232,17 @@
                     showMainApp();
                     openEdit(parseInt(editIdParam));
                 }
+                return;
+            }
+
+            // Priority 2: Handle Rating Screen
+            if (params.get('rate')) {
+                const greeting = document.getElementById('personalized-greeting');
+                greeting.innerText = `Hey ${params.get('participants')}!`;
+                greeting.classList.remove('hidden');
+                document.getElementById('rating-screen').classList.remove('hidden');
+                document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
+                document.getElementById('star-desc').innerText = `Rate ${params.get('creator')}'s idea!`;
                 return;
             }
 
@@ -378,7 +380,6 @@
                 const clockOrCheck = isPast ? ' ✅' : ' 🕒';
                 const statusIcons = (a.details && a.dateRaw && a.time) ? ` ❤️${clockOrCheck}` : '';
                 
-                // Permission Check: Show trash icon if user is Creator OR Amir (Admin)
                 const isAdmin = currentUser && currentUser.name === "Amir";
                 const isCreator = currentUser && a.creator === currentUser.name;
                 const deleteHtml = (isCreator || isAdmin) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : '';
@@ -406,6 +407,7 @@
             editingId = id;
             let item = activities.find(a => a.id === id);
             
+            // Reconstruct activity from URL params if missing locally
             if (!item) {
                 const params = new URLSearchParams(window.location.search);
                 item = { 
@@ -445,7 +447,9 @@
             const item = activities.find(a => a.id === editingId);
             const creatorObj = family.find(f => f.name === item.creator);
             const phone = creatorObj ? creatorObj.phone : "";
+            
             const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${item.id}&rate=${encodeURIComponent(item.title)}&participants=${encodeURIComponent(item.joinedBy)}&creator=${encodeURIComponent(item.creator)}`;
+            
             const msg = `Hey ${item.creator}! Can you please add more details (where/when) for "${item.title}"? \n\nYou can set them here:\n${logisticsUrl}`;
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
