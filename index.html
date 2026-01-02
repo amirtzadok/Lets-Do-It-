@@ -15,11 +15,20 @@
 
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        h2 { font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 15px; }
+        h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
 
+        /* Setup Screen */
+        .avatar-options { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+        .avatar-btn { width: 60px; height: 60px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; opacity: 0.5; transition: 0.3s; }
+        .avatar-btn.active { border-color: var(--primary); opacity: 1; transform: scale(1.1); }
+
+        /* App UI */
+        .user-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        input[type="text"], input[type="date"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
-        .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
+        input[type="text"] { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; }
+        .clear-x { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 20px 0; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
@@ -29,65 +38,40 @@
         .heart-box { width: 60px; height: 60px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
-        .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .cal-btn { background: #4285F4; margin-top: 10px; }
-
-        .discovery-card { background: #eff6ff; border:none; }
-        .cat-row { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .cat-btn { flex: 0 0 auto; padding: 10px 15px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; font-weight: 700; font-size: 13px; cursor: pointer; }
-        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .suggest-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-        .use-btn { float: right; background: white; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
-
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 15px; border-left: 5px solid var(--whatsapp); position: relative; }
-        .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 10px; }
-        .action-icon { cursor: pointer; font-size: 18px; opacity: 0.6; }
-        .details-text { font-size: 13px; color: #64748b; margin-top: 5px; white-space: pre-wrap; }
-
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
-        .stars span.active { color: #facc15; }
+        
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="rating-screen" class="card hidden">
-        <h2 style="text-align:center">Rate the Idea!</h2>
-        <p id="rate-idea-name" style="text-align:center; font-size:18px; font-weight:bold; color:#334155;"></p>
-        <div class="stars" id="star-row">
-            <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
-        </div>
-        <div id="star-desc" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:20px;">Choose your rating</div>
-        <button class="primary-btn" onclick="submitRating()">Submit My Vote</button>
+    <div id="setup-card" class="card hidden">
+        <h2>Who are you?</h2>
+        <p style="text-align: center; color: #64748b; font-size: 14px;">Choose your face so the app remembers you!</p>
+        <div class="avatar-options" id="avatar-selector"></div>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Start Planning</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary); width: 95%; max-width: 450px;">
-        <h3>Edit Logistics</h3>
-        <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
-        <input type="date" id="edit-date">
-        <input type="text" id="edit-time" placeholder="Time (e.g. 10:00 or Afternoon)">
-        <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
-        <button class="primary-btn cal-btn" id="gcal-btn">Add to Google Calendar</button>
-        <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
-    </div>
-
-    <div id="main-app">
+    <div id="main-app" class="hidden" style="width: 100%; max-width: 480px;">
         <div class="card">
-            <h2>New Activity</h2>
+            <div id="user-header" class="user-header"></div>
+            <h2>Let's do something together!</h2>
+            
             <div class="input-wrapper">
                 <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState(); toggleX('main-input', 'main-clear')">
                 <button id="main-clear" class="clear-x" onclick="clearField('main-input', 'main-clear'); updateUIState()">✕</button>
             </div>
+
             <div class="faces-container">
                 <div class="face-wrapper" id="f-all" onclick="selectAll()">
                     <div class="heart-box">❤️</div>
                     <p style="font-size:10px; margin-top:5px; font-weight:bold; color:var(--heart);">Everyone</p>
                 </div>
-                <div id="faces-render" style="display:flex; gap:10px;"></div>
+                <div id="faces-render" style="display:flex; gap:12px;"></div>
             </div>
+            
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
         </div>
 
@@ -95,184 +79,121 @@
             <h2>🚀 Let's Do It! List</h2>
             <div id="final-list"></div>
         </div>
-
-        <div class="card discovery-card">
-            <h3 style="margin-top:0;">🔍 Discover Activities</h3>
-            <div class="input-wrapper">
-                <input type="text" id="search-input" placeholder="Search (e.g. Pool, Zoo, Hike)..." oninput="toggleX('search-input', 'search-clear'); runSearch()">
-                <button id="search-clear" class="clear-x" style="top:50%" onclick="clearField('search-input', 'search-clear'); setCat('outdoor')">✕</button>
-            </div>
-            <div class="cat-row">
-                <button class="cat-btn active" id="btn-outdoor" onclick="setCat('outdoor')">🌳 Outdoor</button>
-                <button class="cat-btn" id="btn-indoor" onclick="setCat('indoor')">🏠 Indoor</button>
-                <button class="cat-btn" id="btn-food" onclick="setCat('food')">🍦 Food</button>
-            </div>
-            <div id="results-list"></div>
-        </div>
     </div>
 
     <script>
         const family = [
-            { id: 1, name: "Amir", img: "amir.png" },
-            { id: 2, name: "Rani", img: "rani.png" },
-            { id: 3, name: "Lia", img: "lia.png" },
-            { id: 4, name: "Gal", img: "gal.png" }
+            { id: 1, name: "Amir", phone: "972547880404", img: "amir.png" },
+            { id: 2, name: "Rani", phone: "972542428664", img: "rani.png" },
+            { id: 3, name: "Lia", phone: "972526765297", img: "lia.png" },
+            { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
         ];
 
-        const db = [
-            { n: "Alexander Stream Hike", cat: "outdoor", d: "12m", info: "Hike with turtles and shaded spots.", tags: ["hike", "nature", "walk", "animals"] },
-            { n: "Michmoret Beach", cat: "outdoor", d: "20m", info: "Clean sandy beach for swimming and sunset walks.", tags: ["beach", "swimming", "sea", "pool", "water"] },
-            { n: "Cinema City Hadera", cat: "indoor", d: "15m", info: "VIP seating and latest movies.", tags: ["movie", "cinema", "indoor"] },
-            { n: "Bowling Netanya", cat: "indoor", d: "22m", info: "Fun lanes and arcade.", tags: ["bowling", "game", "indoor"] },
-            { n: "Coffee Cart at Yanuv", cat: "food", d: "10m", info: "Great pastries and Friday coffee vibes.", tags: ["coffee", "breakfast", "pastry"] },
-            { n: "Pizza in Yad Hana", cat: "food", d: "2m", info: "Our favorite thin-crust pizza spot.", tags: ["pizza", "dinner", "food"] },
-            { n: "Haifa Zoo", cat: "outdoor", d: "45m", info: "Variety of animals and walking trails.", tags: ["zoo", "animals", "trip"] },
-            { n: "Local Swimming Pool", cat: "outdoor", d: "5m", info: "Cool off in the community pool.", tags: ["pool", "swimming", "water"] }
-        ];
-
+        let creatorIdentity = JSON.parse(localStorage.getItem('tzadok_user_identity'));
         let selected = [];
-        let currentRating = 0;
-        let editingId = null;
+        let tempSelectedId = null;
         let activities = JSON.parse(localStorage.getItem('tzadok_final_list')) || [];
 
         function init() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const rateName = urlParams.get('rate');
-            const pParam = urlParams.get('p');
-            
-            if (rateName) {
-                document.getElementById('main-app').classList.add('hidden');
-                document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
+            if (!creatorIdentity) {
+                // Show setup screen
+                document.getElementById('setup-card').classList.remove('hidden');
+                document.getElementById('avatar-selector').innerHTML = family.map(f => `
+                    <img src="${f.img}" class="avatar-btn" onclick="selectSelf(${f.id})" id="self-${f.id}" onerror="this.src='https://via.placeholder.com/60'">
+                `).join('');
+            } else {
+                showMainApp();
             }
+        }
 
+        // --- SETUP LOGIC ---
+        function selectSelf(id) {
+            tempSelectedId = id;
+            document.querySelectorAll('.avatar-btn').forEach(img => img.classList.remove('active'));
+            document.getElementById(`self-${id}`).classList.add('active');
+            document.getElementById('start-btn').disabled = false;
+        }
+
+        function finishSetup() {
+            const user = family.find(f => f.id === tempSelectedId);
+            localStorage.setItem('tzadok_user_identity', JSON.stringify(user));
+            creatorIdentity = user;
+            document.getElementById('setup-card').classList.add('hidden');
+            showMainApp();
+        }
+
+        // --- MAIN APP ---
+        function showMainApp() {
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('user-header').innerHTML = `
+                <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/40'">
+                <span>Welcome back, ${creatorIdentity.name}!</span>
+            `;
+            
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/60'">
                     <p style="font-size:10px; margin-top:5px; font-weight:bold;">${f.name}</p>
                 </div>
             `).join('');
-            setCat('outdoor');
-            renderFinalList();
-        }
-
-        function setStars(n) {
-            currentRating = n;
-            const stars = document.querySelectorAll('#star-row span');
-            stars.forEach((s, i) => s.classList.toggle('active', i < n));
-        }
-
-        function submitRating() {
-            if (currentRating === 0) return alert("Pick stars!");
-            const urlParams = new URLSearchParams(window.location.search);
-            const idea = urlParams.get('rate');
-            const pNames = urlParams.get('p') || "Participants";
-
-            if (currentRating >= 4) {
-                activities.push({ id: Date.now(), title: idea, dateAdded: new Date().toLocaleDateString(), savedParticipants: pNames });
-                localStorage.setItem('tzadok_final_list', JSON.stringify(activities));
-            }
-            window.location.href = window.location.pathname;
-        }
-
-        function openEdit(id) {
-            editingId = id;
-            const item = activities.find(a => a.id === id);
-            document.getElementById('edit-desc').value = item.details || '';
-            document.getElementById('edit-date').value = item.dateRaw || '';
-            document.getElementById('edit-time').value = item.time || '';
-            
-            const btn = document.getElementById('edit-notify-btn');
-            btn.innerText = `Save & Notify ${item.savedParticipants}`;
-            
-            document.getElementById('gcal-btn').onclick = () => {
-                const date = (item.dateRaw || "").replace(/-/g, '');
-                const time = (item.time || "1000").replace(/:/g, '');
-                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.title)}&dates=${date}T${time}00/${date}T${parseInt(time)+1}00&details=${encodeURIComponent(item.details || '')}&location=Israel&sf=true&output=xml`;
-                window.open(url, '_blank');
-            };
-            document.getElementById('edit-modal').classList.remove('hidden');
-        }
-
-        function saveAndNotify() {
-            const idx = activities.findIndex(a => a.id === editingId);
-            const item = activities[idx];
-            item.details = document.getElementById('edit-desc').value;
-            item.dateRaw = document.getElementById('edit-date').value;
-            item.time = document.getElementById('edit-time').value;
-            
-            localStorage.setItem('tzadok_final_list', JSON.stringify(activities));
-            
-            const msg = `UPDATE for ${item.savedParticipants}: *${item.title}*\n📅 When: ${item.dateRaw} @ ${item.time}\n📍 Where: ${item.details}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-            
-            closeEdit();
             renderFinalList();
         }
 
         function toggleX(inp, btn) { document.getElementById(btn).style.display = document.getElementById(inp).value ? 'flex' : 'none'; }
         function clearField(inp, btn) { document.getElementById(inp).value = ''; toggleX(inp, btn); }
-        function toggleFace(id) { const i = selected.indexOf(id); i > -1 ? selected.splice(i, 1) : selected.push(id); updateUIState(); }
-        function selectAll() { selected = selected.length === family.length ? [] : family.map(f => f.id); updateUIState(); }
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+        function toggleFace(id) {
+            const i = selected.indexOf(id);
+            i > -1 ? selected.splice(i, 1) : selected.push(id);
+            updateUIState();
+        }
+
+        function selectAll() {
+            selected = (selected.length === family.length) ? [] : family.map(f => f.id);
+            updateUIState();
+        }
 
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             const btn = document.getElementById('action-btn');
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
             document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
-            
-            if (selected.length === 0) { btn.innerText = "Select Participants"; btn.disabled = true; }
-            else { 
+
+            if (selected.length === 0) {
+                btn.innerText = "Select Participants";
+                btn.disabled = true;
+            } else {
                 const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `Let's Invite ${names}`; btn.disabled = !val; 
+                btn.innerText = `Let's Invite ${names}`;
+                btn.disabled = !val;
             }
         }
 
-        function runSearch() {
-            const q = document.getElementById('search-input').value.toLowerCase();
-            const filtered = db.filter(a => a.n.toLowerCase().includes(q) || a.info.toLowerCase().includes(q) || a.tags.some(tag => tag.includes(q)));
-            renderList(filtered);
-        }
-
-        function setCat(cat) {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-'+cat).classList.add('active');
-            renderList(db.filter(a => a.cat === cat));
-        }
-
-        function renderList(list) {
-            const area = document.getElementById('results-list');
-            if(list.length === 0) { area.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:13px; margin-top:20px;">No ideas found.</p>'; return; }
-            area.innerHTML = list.map(item => `
-                <div class="suggest-card">
-                    <button class="use-btn" onclick="document.getElementById('main-input').value='${item.n}'; toggleX('main-input', 'main-clear'); updateUIState(); window.scrollTo(0,0)">Use This</button>
-                    <div style="font-weight:800; font-size:16px;">${item.n}</div>
-                    <div style="font-size:13px; color:#475569;">${item.info} | 📍 ${item.d} from Yad Hana</div>
-                </div>
-            `).join('');
+        function sendWA() {
+            const activity = document.getElementById('main-input').value;
+            const chosen = family.filter(f => selected.includes(f.id));
+            const appUrl = window.location.href.split('?')[0]; 
+            
+            // Format: "[Creator Name] suggested [activity]. Rate it..."
+            const msg = `${creatorIdentity.name} suggested "${activity}". Rate it here: ${appUrl}?rate=${encodeURIComponent(activity)}`;
+            
+            let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            
+            // Direct chat if only one person selected
+            if (chosen.length === 1) {
+                waUrl = `https://wa.me/${chosen[0].phone}?text=${encodeURIComponent(msg)}`;
+            }
+            
+            window.open(waUrl, '_blank');
         }
 
         function renderFinalList() {
             document.getElementById('final-list').innerHTML = activities.map(a => `
                 <div class="list-item">
-                    <div class="item-actions"><span onclick="openEdit(${a.id})">📝</span> <span onclick="deleteIdea(${a.id})">🗑️</span></div>
                     <div style="font-weight:bold;">${a.title}</div>
-                    <div class="details-text">${a.dateRaw ? '📅 ' + a.dateRaw : ''} ${a.time ? ' @ ' + a.time : ''}</div>
                 </div>
-            `).join('') || '<p style="color:#94a3b8; font-size:13px;">Empty list</p>';
+            `).join('') || '<p style="color:#94a3b8; font-size:13px; text-align:center;">No activities yet.</p>';
         }
-
-        function sendWA() {
-            const val = document.getElementById('main-input').value;
-            const baseUrl = window.location.origin + window.location.pathname;
-            const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(val)}&p=${encodeURIComponent(names)}`;
-            const msg = `${names}: Amir suggests: "${val}". Rate it: ${ratingUrl}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function deleteIdea(id) { activities = activities.filter(a => a.id !== id); localStorage.setItem('tzadok_final_list', JSON.stringify(activities)); renderFinalList(); }
 
         init();
     </script>
