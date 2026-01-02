@@ -61,10 +61,9 @@
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         
-        /* High Contrast Delete Icon [cite: 41, 42, 43] */
         .item-delete { 
             position: absolute; right: 12px; top: 12px; cursor: pointer; 
-            font-size: 18px; z-index: 5; color: #ef4444; /* High contrast red */
+            font-size: 18px; z-index: 5; color: #ef4444;
             background: white; border-radius: 50%; width: 24px; height: 24px;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -80,9 +79,16 @@
         .face-wrapper.selected .face-img { border-color: var(--primary); }
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
+        /* Image Gallery with Green Checkmarks */
         .image-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; }
-        .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover; cursor: pointer; transition: 0.2s; }
-        .gallery-thumb:hover { transform: scale(1.05); }
+        .thumb-wrapper { position: relative; flex-shrink: 0; }
+        .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover; cursor: pointer; }
+        .check-badge { 
+            position: absolute; top: -5px; right: -5px; background: #22c55e; color: white; 
+            width: 18px; height: 18px; border-radius: 50%; font-size: 10px; 
+            display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;
+        }
+
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
         #img-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
@@ -127,9 +133,9 @@
 
             <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
             <label style="font-size:11px; display:block; font-weight:bold; margin-bottom:4px;" data-i18n="addImages">Upload Images:</label>
-            <input type="file" id="modal-edit-images" multiple accept="image/*">
+            <input type="file" id="modal-edit-images" multiple accept="image/*" onchange="handleImageSelection(this, 'modal-preview')">
             
-            <div id="edit-gallery-preview" class="image-gallery"></div>
+            <div id="modal-preview" class="image-gallery"></div>
             
             <div style="display:flex; gap:8px; margin-top:10px;">
                 <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
@@ -191,7 +197,8 @@
                     </select>
                 </div>
                 <input type="text" id="suggest-url" placeholder="Paste link (URL)">
-                <input type="file" id="suggest-images" multiple accept="image/*">
+                <input type="file" id="suggest-images" multiple accept="image/*" onchange="handleImageSelection(this, 'main-preview')">
+                <div id="main-preview" class="image-gallery"></div>
                 <button class="secondary-btn" onclick="toggleSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
             <div class="face-grid">
@@ -244,7 +251,7 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let editingId = null;
+        let selected = []; let editingId = null; let currentImages = [];
 
         function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
         
@@ -298,6 +305,28 @@
 
         function enlarge(src) { document.getElementById('enlarged-img').src = src; document.getElementById('img-overlay').classList.remove('hidden'); }
 
+        async function handleImageSelection(input, previewId) {
+            const files = input.files;
+            currentImages = [];
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = "";
+            
+            for (let file of files) {
+                const data = await new Promise(r => {
+                    let reader = new FileReader();
+                    reader.onload = e => r(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                currentImages.push(data);
+                preview.innerHTML += `
+                    <div class="thumb-wrapper">
+                        <img src="${data}" class="gallery-thumb" onclick="enlarge('${data}')">
+                        <div class="check-badge">v</div>
+                    </div>
+                `;
+            }
+        }
+
         async function sendWA() {
             const title = document.getElementById('main-input').value;
             const desc = document.getElementById('suggest-desc').value;
@@ -305,20 +334,9 @@
             const time = document.getElementById('suggest-time').value;
             const dur = document.getElementById('suggest-duration').value;
             const urlInp = document.getElementById('suggest-url').value;
-            const imagesInp = document.getElementById('suggest-images').files;
             const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
-            // Robust Base64 Image Processing 
-            let base64Images = [];
-            for (let file of imagesInp) { 
-                base64Images.push(await new Promise(r => { 
-                    let reader = new FileReader(); 
-                    reader.onload = e => r(e.target.result); 
-                    reader.readAsDataURL(file); 
-                })); 
-            }
-
-            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
+            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: currentImages, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
             myHistory.push(suggObj);
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
 
@@ -351,47 +369,43 @@
 
         function populateModal(item) {
             document.getElementById('modal-edit-title').value = item.title || "";
+            document.getElementById('modal-edit-desc').value = item.details || item.desc || "";
             document.getElementById('modal-edit-date').value = item.dateRaw || item.date || "";
             document.getElementById('modal-edit-time').value = item.time || "";
             document.getElementById('modal-edit-duration').value = item.duration || item.dur || "";
             document.getElementById('modal-edit-url').value = item.url || "";
-            const preview = document.getElementById('edit-gallery-preview');
-            preview.innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
+            currentImages = item.images || [];
+            const preview = document.getElementById('modal-preview');
+            preview.innerHTML = currentImages.map(img => `
+                <div class="thumb-wrapper">
+                    <img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">
+                    <div class="check-badge">v</div>
+                </div>
+            `).join('');
         }
 
         async function syncAndSaveGlobal() {
             const newTitle = document.getElementById('modal-edit-title').value;
+            const newDesc = document.getElementById('modal-edit-desc').value;
             const newDate = document.getElementById('modal-edit-date').value;
             const newTime = document.getElementById('modal-edit-time').value;
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
-            
-            const imgFiles = document.getElementById('modal-edit-images').files;
-            let newImages = [];
-            if (imgFiles.length > 0) {
-                for (let file of imgFiles) { 
-                    newImages.push(await new Promise(r => { 
-                        let reader = new FileReader(); 
-                        reader.onload = e => r(e.target.result); 
-                        reader.readAsDataURL(file); 
-                    })); 
-                }
-            }
 
-            // Sync Globally [cite: 123, 124, 125]
-            const histIdx = myHistory.findIndex(h => h.id === editingId || (h.title === newTitle && h.creator === currentUser.name));
+            // Update History Entry
+            const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
                 const h = myHistory[histIdx];
-                h.title = newTitle; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
-                if(newImages.length > 0) h.images = newImages;
-                h.modified = new Date().toISOString();
+                h.title = newTitle; h.desc = newDesc; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
+                h.images = currentImages; h.modified = new Date().toISOString();
             }
 
+            // Sync confirmed list entry with the same creator and title
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
                 const a = activities[publicIdx];
-                a.title = newTitle; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
-                if(newImages.length > 0) a.images = newImages;
+                a.title = newTitle; a.details = newDesc; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
+                a.images = currentImages;
             }
 
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
@@ -442,7 +456,11 @@
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
                 document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
-                document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
+                document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `
+                    <div class="thumb-wrapper">
+                        <img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">
+                    </div>
+                `).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
             document.getElementById('edit-modal').style.zIndex = "1000";
