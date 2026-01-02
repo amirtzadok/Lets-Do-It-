@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Let's Do It - Tzadok Family</title>
+    <title>Let's Do It!</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -23,7 +23,8 @@
         .avatar-btn.active { border-color: var(--primary); opacity: 1; transform: scale(1.1); }
 
         /* App UI */
-        .user-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
         .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         
         .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
@@ -43,20 +44,24 @@
         
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
         .hidden { display: none !important; }
+        .reset-link { font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div id="setup-card" class="card hidden">
         <h2>Who are you?</h2>
-        <p style="text-align: center; color: #64748b; font-size: 14px;">Choose your face so the app remembers you!</p>
+        <p style="text-align: center; color: #64748b; font-size: 14px;">Choose your face so Let's Do It! remembers you.</p>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Start Planning</button>
     </div>
 
     <div id="main-app" class="hidden" style="width: 100%; max-width: 480px;">
         <div class="card">
-            <div id="user-header" class="user-header"></div>
+            <div class="user-header">
+                <div id="user-info" class="user-info"></div>
+                <span class="reset-link" onclick="resetIdentity()">Not me?</span>
+            </div>
             <h2>Let's do something together!</h2>
             
             <div class="input-wrapper">
@@ -89,14 +94,13 @@
             { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
         ];
 
-        let creatorIdentity = JSON.parse(localStorage.getItem('tzadok_user_identity'));
+        let creatorIdentity = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let tempSelectedId = null;
-        let activities = JSON.parse(localStorage.getItem('tzadok_final_list')) || [];
+        let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
         function init() {
             if (!creatorIdentity) {
-                // Show setup screen
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
                     <img src="${f.img}" class="avatar-btn" onclick="selectSelf(${f.id})" id="self-${f.id}" onerror="this.src='https://via.placeholder.com/60'">
@@ -106,7 +110,6 @@
             }
         }
 
-        // --- SETUP LOGIC ---
         function selectSelf(id) {
             tempSelectedId = id;
             document.querySelectorAll('.avatar-btn').forEach(img => img.classList.remove('active'));
@@ -116,18 +119,24 @@
 
         function finishSetup() {
             const user = family.find(f => f.id === tempSelectedId);
-            localStorage.setItem('tzadok_user_identity', JSON.stringify(user));
+            localStorage.setItem('letsdoit_user_identity', JSON.stringify(user));
             creatorIdentity = user;
             document.getElementById('setup-card').classList.add('hidden');
             showMainApp();
         }
 
-        // --- MAIN APP ---
+        function resetIdentity() {
+            if(confirm("Change user profile?")) {
+                localStorage.removeItem('letsdoit_user_identity');
+                location.reload();
+            }
+        }
+
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-header').innerHTML = `
+            document.getElementById('user-info').innerHTML = `
                 <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/40'">
-                <span>Welcome back, ${creatorIdentity.name}!</span>
+                <span style="font-weight:bold; font-size:14px;">Hi, ${creatorIdentity.name}</span>
             `;
             
             document.getElementById('faces-render').innerHTML = family.map(f => `
@@ -163,8 +172,8 @@
                 btn.innerText = "Select Participants";
                 btn.disabled = true;
             } else {
-                const names = selected.length === family.length ? "Tzadok Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `Let's Invite ${names}`;
+                const names = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `Invite ${names}`;
                 btn.disabled = !val;
             }
         }
@@ -174,16 +183,12 @@
             const chosen = family.filter(f => selected.includes(f.id));
             const appUrl = window.location.href.split('?')[0]; 
             
-            // Format: "[Creator Name] suggested [activity]. Rate it..."
             const msg = `${creatorIdentity.name} suggested "${activity}". Rate it here: ${appUrl}?rate=${encodeURIComponent(activity)}`;
             
             let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-            
-            // Direct chat if only one person selected
             if (chosen.length === 1) {
                 waUrl = `https://wa.me/${chosen[0].phone}?text=${encodeURIComponent(msg)}`;
             }
-            
             window.open(waUrl, '_blank');
         }
 
@@ -192,7 +197,7 @@
                 <div class="list-item">
                     <div style="font-weight:bold;">${a.title}</div>
                 </div>
-            `).join('') || '<p style="color:#94a3b8; font-size:13px; text-align:center;">No activities yet.</p>';
+            `).join('') || '<p style="color:#94a3b8; font-size:12px; text-align:center;">No activities yet.</p>';
         }
 
         init();
