@@ -28,31 +28,38 @@
             box-sizing: border-box; 
         }
 
-        #setup-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1;
-            width: 100%;
-        }
-
+        /* App Header Style */
         .app-header {
-            text-align: center;
-            padding: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
             max-width: 480px;
+            padding: 15px 0;
+            position: relative;
         }
         .app-header h1 {
             font-size: 24px;
             font-weight: 900;
             color: var(--primary);
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
+
+        /* Language Button Styles */
+        .lang-btn {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .lang-btn:hover { background: var(--bg); }
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
@@ -82,14 +89,7 @@
         .user-info { display: flex; align-items: center; gap: 10px; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
-        .input-group { margin-bottom: 12px; }
-        .input-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #64748b; }
-        
-        .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        
-        .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
-        .clear-btn:hover { color: var(--heart); }
+        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
 
         .faces-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; }
@@ -109,9 +109,9 @@
         }
         .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
 
-        .stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 32px; color: #ddd; cursor: pointer; }
+        .stars { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; margin-bottom: 5px; }
+        .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; }
         .hidden { display: none !important; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -120,82 +120,127 @@
 <body onload="init()">
 
     <header class="app-header">
-        <h1>🚀 Let's Do It!</h1>
-        <div id="personalized-greeting" style="font-weight: bold; color: #475569; margin-top: 5px;" class="hidden"></div>
+        <h1 id="app-name-display">🚀 Let's Do It!</h1>
+        <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()"></button>
     </header>
 
     <div id="rating-screen" class="card hidden">
-        <h2 id="rating-header" style="font-weight: 500; margin-bottom: 20px;"></h2>
-        <div id="star-desc" class="star-label">Rate their idea!</div>
+        <h2 id="rating-header"></h2>
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
-        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
+        <div id="star-desc" class="star-label" data-i18n="chooseRating">Choose your rating</div>
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;" data-i18n="submitVote">Submit Vote</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
-        <h3 id="modal-title">Edit Logistics</h3>
-        <div id="edit-fields">
-            <textarea id="edit-desc" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
-            <div class="input-group">
-                <span class="input-label">📅 Date</span>
-                <input type="date" id="edit-date" oninput="validateLogistics()">
-            </div>
-            <div class="input-group">
-                <span class="input-label">🕒 Time</span>
-                <input type="time" id="edit-time" oninput="validateLogistics()">
-            </div>
-            <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled>Save & Notify Participants</button>
-        </div>
-        <div id="view-fields" class="hidden" style="padding: 10px 0;">
-            <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
-            <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
-            
-            <div id="request-details-ui" class="hidden">
-                <button class="primary-btn" id="request-btn" onclick="requestDetails()">Get details</button>
-                <p id="request-note" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px;"></p>
-            </div>
-        </div>
-        <button class="secondary-btn" onclick="closeEdit()">Close</button>
+        <h3 data-i18n="editLogistics">Edit Logistics</h3>
+        <textarea id="edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?"></textarea>
+        <input type="date" id="edit-date">
+        <input type="time" id="edit-time">
+        <button class="primary-btn" onclick="saveAndNotify()" data-i18n="saveNotify">Save & Notify Participants</button>
+        <button class="secondary-btn" onclick="closeEdit()" data-i18n="cancel">Cancel</button>
     </div>
 
-    <div id="setup-wrapper" class="hidden">
-        <div id="setup-card" class="card">
-            <h2>Who are you?</h2>
-            <div class="avatar-options" id="avatar-selector"></div>
-            <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
-        </div>
+    <div id="setup-card" class="card hidden">
+        <h2 data-i18n="whoAreYou">Who are you?</h2>
+        <div class="avatar-options" id="avatar-selector"></div>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp">Enter App</button>
     </div>
 
     <div id="main-app" class="hidden">
         <div class="card">
             <div class="user-header">
                 <div id="user-info" class="user-info"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()">Not me?</span>
+                <span id="not-me-btn" style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
             </div>
-            <h2>let's do something together!</h2>
-            <div class="input-row">
-                <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState()">
-                <button class="clear-btn" onclick="clearInput()">✕</button>
-            </div>
+            <h2 data-i18n="doSomething">let's do something together!</h2>
+            <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" placeholder="What's the plan?" oninput="updateUIState()">
             <div class="faces-container">
                 <div class="face-wrapper" id="f-all" onclick="selectAll()">
                     <div class="heart-box">❤️</div>
-                    <p style="font-size:10px; margin-top:5px; font-weight:bold;">Everyone</p>
+                    <p id="everyone-label" style="font-size:10px; margin-top:5px; font-weight:bold;" data-i18n="everyone">Everyone</p>
                 </div>
                 <div id="faces-render" style="display:flex; gap:8px;"></div>
             </div>
-            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants">Select Participants</button>
         </div>
 
         <div class="card">
-            <h2>🚀 Future Activities!</h2>
-            <p style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;">(Long press an activity to view or edit)</p>
+            <h2 data-i18n="futureActivities">🚀 Future Activities!</h2>
+            <p id="long-press-tip" style="font-size: 10px; text-align: center; color: #94a3b8; margin-bottom: 10px;" data-i18n="longPress">(Long press an activity to edit)</p>
             <div id="final-list"></div>
         </div>
     </div>
 
     <script>
+        // Localization data
+        const i18n = {
+            eng: {
+                langBtn: "HEB",
+                chooseRating: "Choose your rating",
+                submitVote: "Submit Vote",
+                editLogistics: "Edit Logistics",
+                descPlaceholder: "Where / What we do?",
+                saveNotify: "Save & Notify Participants",
+                cancel: "Cancel",
+                whoAreYou: "Who are you?",
+                enterApp: "Enter App",
+                notMe: "Not me?",
+                hiUser: "Hi",
+                doSomething: "let's do something together!",
+                planPlaceholder: "What's the plan?",
+                everyone: "Everyone",
+                selectParticipants: "Select Participants",
+                futureActivities: "🚀 Future Activities!",
+                longPress: "(Long press an activity to edit)",
+                invitePrefix: "Invite",
+                everyoneInvite: "Everyone",
+                selectionInvite: "Selection",
+                waSuggested: "suggested:",
+                waRateHere: "Rate it here:",
+                waUpdate: "UPDATE:",
+                waAt: "at",
+                noActivities: "No confirmed activities yet.",
+                deleteConfirm: "Remove this activity?",
+                alertSaved: "Activity saved to your list!"
+            },
+            heb: {
+                langBtn: "ENG",
+                chooseRating: "בחרו את הדירוג שלכם",
+                submitVote: "שלח הצבעה",
+                editLogistics: "ערוך פרטים",
+                descPlaceholder: "איפה / מה עושים?",
+                saveNotify: "שמור ועדכן משתתפים",
+                cancel: "ביטול",
+                whoAreYou: "מי את/ה?",
+                enterApp: "כניסה לאפליקציה",
+                notMe: "לא אני?",
+                hiUser: "היי",
+                doSomething: "בואו נעשה משהו ביחד!",
+                planPlaceholder: "מה התכנון?",
+                everyone: "כולם",
+                selectParticipants: "בחרו משתתפים",
+                futureActivities: "🚀 פעילויות עתידיות!",
+                longPress: "(לחיצה ארוכה על פעילות לעריכה)",
+                invitePrefix: "הזמן את",
+                everyoneInvite: "כולם",
+                selectionInvite: "הנבחרים",
+                waSuggested: "הציע/ה:",
+                waRateHere: "דרגו כאן:",
+                waUpdate: "עדכון:",
+                waAt: "ב-",
+                noActivities: "אין עדיין פעילויות מאושרות.",
+                deleteConfirm: "להסיר את הפעילות הזו?",
+                alertSaved: "הפעילות נשמרה ברשימה!"
+            }
+        };
+
+        const starLabels = {
+            eng: { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "What a great idea!" },
+            heb: { 1: "לא תודה", 2: "כנראה שלא", 3: "אולי", 4: "אוהב את זה!", 5: "רעיון מעולה!" }
+        };
+
         const family = [
             { id: 1, name: "Amir", phone: "972547880404", img: "amir.png" },
             { id: 2, name: "Rani", phone: "972542428664", img: "rani.png" },
@@ -203,14 +248,7 @@
             { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
         ];
 
-        const starLabels = { 
-            1: "No thanks", 
-            2: "Probably not", 
-            3: "Maybe", 
-            4: "I like it!", 
-            5: "What a great idea!" 
-        };
-
+        let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
@@ -219,48 +257,71 @@
         let tempId = null;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
-        function init() {
-            const params = new URLSearchParams(window.location.search);
-            const editIdParam = params.get('editLogistics');
+        function toggleLanguage() {
+            currentLang = currentLang === 'eng' ? 'heb' : 'eng';
+            localStorage.setItem('letsdoit_lang', currentLang);
+            updateUILanguage();
+            renderFinalList(); // Re-render list to update text direction
+        }
+
+        function updateUILanguage() {
+            const langData = i18n[currentLang];
+            const isHeb = currentLang === 'heb';
             
-            // Priority 1: Handle Logistics Direct Link
-            if (editIdParam) {
-                if (!currentUser) {
-                    document.getElementById('setup-wrapper').classList.remove('hidden');
-                    renderSetup();
-                } else {
-                    showMainApp();
-                    openEdit(parseInt(editIdParam));
-                }
-                return;
+            // Set Page Direction
+            document.body.dir = isHeb ? 'rtl' : 'ltr';
+
+            // Position Language Button
+            const langBtn = document.getElementById('lang-toggle');
+            langBtn.innerText = langData.langBtn;
+            if (isHeb) {
+                langBtn.style.right = 'auto';
+                langBtn.style.left = '0px';
+            } else {
+                langBtn.style.left = 'auto';
+                langBtn.style.right = '0px';
             }
 
-            // Priority 2: Handle Rating Screen
+            // Update text for all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = langData[key];
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = langData[key];
+            });
+
+            // Update user info greeting if user is logged in
+            if (currentUser) {
+                document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${langData.hiUser}, ${currentUser.name}</b>`;
+            }
+
+            updateUIState(); // Refresh action button text
+        }
+
+        function init() {
+            updateUILanguage();
+            const params = new URLSearchParams(window.location.search);
             if (params.get('rate')) {
-                const greeting = document.getElementById('personalized-greeting');
-                greeting.innerText = `Hey ${params.get('participants')}!`;
-                greeting.classList.remove('hidden');
                 document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rating-header').innerText = `${params.get('creator')} wants to: ${params.get('rate')}`;
-                document.getElementById('star-desc').innerText = `Rate ${params.get('creator')}'s idea!`;
+                const wantsText = i18n[currentLang].waSuggested.replace(':', '');
+                document.getElementById('rating-header').innerText = `${params.get('creator')} ${wantsText}: ${params.get('rate')}`;
                 return;
             }
-
             if (!currentUser) {
-                document.getElementById('setup-wrapper').classList.remove('hidden');
-                renderSetup();
+                document.getElementById('setup-card').classList.remove('hidden');
+                document.getElementById('avatar-selector').innerHTML = family.map(f => `
+                    <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
+                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                        <span>${f.name}</span>
+                    </div>
+                `).join('');
             } else {
                 showMainApp();
             }
-        }
-
-        function renderSetup() {
-            document.getElementById('avatar-selector').innerHTML = family.map(f => `
-                <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
-                    <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
-                    <span>${f.name}</span>
-                </div>
-            `).join('');
         }
 
         function startPress(id) { pressTimer = setTimeout(() => openEdit(id), 600); }
@@ -281,7 +342,8 @@
 
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>Hi, ${currentUser.name}</b>`;
+            const langData = i18n[currentLang];
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${langData.hiUser}, ${currentUser.name}</b>`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
@@ -302,204 +364,102 @@
             updateUIState();
         }
 
-        function clearInput() {
-            document.getElementById('main-input').value = "";
-            updateUIState();
-        }
-
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
+            family.forEach(f => {
+                const el = document.getElementById(`f-${f.id}`);
+                if (el) el.classList.toggle('selected', selected.includes(f.id));
+            });
             const btn = document.getElementById('action-btn');
+            const langData = i18n[currentLang];
             btn.disabled = !(selected.length > 0 && val);
-            if (selected.length === 0) btn.innerText = "Select Participants";
-            else if (selected.length === family.length) btn.innerText = "Invite Everyone";
-            else {
-                const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `Invite ${names}`;
+            
+            if (selected.length > 0) {
+                const inviteTarget = selected.length === family.length ? langData.everyoneInvite : langData.selectionInvite;
+                btn.innerText = `${langData.invitePrefix} ${inviteTarget}`;
+            } else {
+                btn.innerText = langData.selectParticipants;
             }
         }
 
         function sendWA() {
             const activity = document.getElementById('main-input').value;
-            const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
+            const langData = i18n[currentLang];
+            const participantsText = selected.length === family.length ? langData.everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participantsText)}`;
             
-            let waUrl = "";
-            if (selected.length === family.length) {
-                waUrl = `https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested to Everyone: ' + activity + '\n\nRate it here:\n' + url)}`;
-            } else if (selected.length === 1) {
-                let phone = family.find(f => f.id === selected[0]).phone;
-                waUrl = `https://wa.me/${phone}?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`;
-            } else {
-                waUrl = `https://wa.me/?text=${encodeURIComponent('🚀 *Let\'s Do It!* \n' + currentUser.name + ' suggested: ' + activity + '\n\nRate it here:\n' + url)}`;
-            }
-            
-            window.open(waUrl, '_blank');
+            const message = `🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}\n\n${langData.waRateHere}\n${url}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         }
 
         function setStars(n) {
             currentRating = n;
             document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n));
-            document.getElementById('star-desc').innerText = starLabels[n];
+            document.getElementById('star-desc').innerText = starLabels[currentLang][n];
             document.getElementById('submit-vote-btn').disabled = false;
         }
 
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
-            const creatorName = params.get('creator');
-            const activityTitle = params.get('rate');
-            const participantsText = params.get('participants');
-            const activityId = Date.now();
-
             if (currentRating >= 4) {
-                activities.push({ id: activityId, title: activityTitle, joinedBy: participantsText, creator: creatorName });
+                activities.push({ id: Date.now(), title: params.get('rate'), joinedBy: params.get('participants'), creator: params.get('creator') });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-
-                const creatorObj = family.find(f => f.name === creatorName);
-                const creatorPhone = creatorObj ? creatorObj.phone : "";
-                
-                const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(participantsText)}&creator=${encodeURIComponent(creatorName)}`;
-                const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
-                
-                window.open(`https://wa.me/${creatorPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+                alert(i18n[currentLang].alertSaved);
             }
-            window.location.href = window.location.origin + window.location.pathname;
+            window.location.href = window.location.pathname;
         }
 
         function renderFinalList() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const sortedActivities = [...activities].sort((a, b) => {
-                if (!a.dateRaw) return 1;
-                if (!b.dateRaw) return -1;
-                return a.dateRaw.localeCompare(b.dateRaw);
-            });
+            const langData = i18n[currentLang];
+            const container = document.getElementById('final-list');
+            if (activities.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:gray;">${langData.noActivities}</p>`;
+                return;
+            }
 
-            document.getElementById('final-list').innerHTML = sortedActivities.map(a => {
-                const isPast = a.dateRaw && a.dateRaw < todayStr;
-                const clockOrCheck = isPast ? ' ✅' : ' 🕒';
-                const statusIcons = (a.details && a.dateRaw && a.time) ? ` ❤️${clockOrCheck}` : '';
-                
-                const isAdmin = currentUser && currentUser.name === "Amir";
-                const isCreator = currentUser && a.creator === currentUser.name;
-                const deleteHtml = (isCreator || isAdmin) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : '';
-
-                return `
-                    <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
-                        ${deleteHtml}
-                        <b>${a.title}${statusIcons}</b><br>
-                        <small>Creator: ${a.creator} | With: ${a.joinedBy}</small>
-                        ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
-                    </div>
-                `;
-            }).join('') || '<p style="text-align:center; color:gray;">No confirmed activities yet.</p>';
-        }
-
-        function validateLogistics() {
-            const desc = document.getElementById('edit-desc').value.trim();
-            const date = document.getElementById('edit-date').value;
-            const time = document.getElementById('edit-time').value;
-            const btn = document.getElementById('save-notify-btn');
-            btn.disabled = !(desc && date && time);
+            container.innerHTML = activities.map(a => `
+                <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
+                    <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
+                    <b>${a.title}</b><br>
+                    <small>${currentLang === 'eng' ? 'With' : 'עם'}: ${a.joinedBy}</small>
+                    ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
+                </div>
+            `).join('');
         }
 
         function openEdit(id) {
             editingId = id;
-            let item = activities.find(a => a.id === id);
-            
-            // Reconstruct activity from URL params if missing locally
-            if (!item) {
-                const params = new URLSearchParams(window.location.search);
-                item = { 
-                    id: id, 
-                    title: params.get('rate') || "New Plan", 
-                    joinedBy: params.get('participants') || "Selection", 
-                    creator: params.get('creator') || (currentUser ? currentUser.name : "Family")
-                };
-                if (!activities.find(a => a.id === id)) activities.push(item);
-            }
-            
-            const isCreator = currentUser && item.creator === currentUser.name;
-            
-            document.getElementById('modal-title').innerText = isCreator ? "Edit Logistics" : "View Logistics";
-            document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
-            document.getElementById('view-fields').classList.toggle('hidden', isCreator);
-
-            if (isCreator) {
-                document.getElementById('edit-desc').value = item.details || '';
-                document.getElementById('edit-date').value = item.dateRaw || '';
-                document.getElementById('edit-time').value = item.time || '';
-                document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
-                validateLogistics();
-            } else {
-                const hasLogistics = item.details && item.dateRaw && item.time;
-                document.getElementById('view-desc').innerText = item.details || "Details coming soon!";
-                document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "Time/Date not set yet.";
-                
-                document.getElementById('request-details-ui').classList.toggle('hidden', !!hasLogistics);
-                document.getElementById('request-note').innerText = `Request for more details will be sent to ${item.creator}`;
-            }
-            
+            const item = activities.find(a => a.id === id);
+            document.getElementById('edit-desc').value = item.details || '';
+            document.getElementById('edit-date').value = item.dateRaw || '';
+            document.getElementById('edit-time').value = item.time || '';
             document.getElementById('edit-modal').classList.remove('hidden');
-        }
-
-        function requestDetails() {
-            const item = activities.find(a => a.id === editingId);
-            const creatorObj = family.find(f => f.name === item.creator);
-            const phone = creatorObj ? creatorObj.phone : "";
-            
-            const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${item.id}&rate=${encodeURIComponent(item.title)}&participants=${encodeURIComponent(item.joinedBy)}&creator=${encodeURIComponent(item.creator)}`;
-            
-            const msg = `Hey ${item.creator}! Can you please add more details (where/when) for "${item.title}"? \n\nYou can set them here:\n${logisticsUrl}`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function saveAndNotify() {
             const item = activities.find(a => a.id === editingId);
+            const langData = i18n[currentLang];
             item.details = document.getElementById('edit-desc').value;
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
-            
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
             
-            let phone = "";
-            const participantNames = item.joinedBy.split(' & ');
-            if (item.joinedBy === "Everyone") {
-                phone = ""; 
-            } else if (participantNames.length === 1) {
-                const pObj = family.find(f => f.name === participantNames[0]);
-                if (pObj) phone = pObj.phone;
-            }
-
-            const appUrl = `${window.location.origin}${window.location.pathname}`;
-            const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}\n\nSee your future activities:\n${appUrl}`;
-            
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+            const message = `✅ *${langData.waUpdate}* ${item.title}\n📅 ${item.dateRaw} ${langData.waAt} ${item.time}\n📍 ${item.details}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
             closeEdit();
             renderFinalList();
         }
 
-        function closeEdit() { 
-            document.getElementById('edit-modal').classList.add('hidden'); 
-            const cleanUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-        }
-
+        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+        
         function deleteIdea(id) { 
-            const item = activities.find(a => a.id === id);
-            const isAdmin = currentUser && currentUser.name === "Amir";
-            const isCreator = currentUser && item.creator === currentUser.name;
-            
-            if (!isCreator && !isAdmin) {
-                alert("Only the creator or Admin can remove this activity.");
-                return;
-            }
-            if(confirm("Remove this activity?")) { 
+            if(confirm(i18n[currentLang].deleteConfirm)) { 
                 activities = activities.filter(a => a.id !== id); 
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
                 renderFinalList(); 
             } 
         }
+        
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
 </body>
