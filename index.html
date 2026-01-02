@@ -378,9 +378,10 @@
                 const clockOrCheck = isPast ? ' ✅' : ' 🕒';
                 const statusIcons = (a.details && a.dateRaw && a.time) ? ` ❤️${clockOrCheck}` : '';
                 
-                // Permission Check: Only show trash icon to creator
+                // Permission Check: Show trash icon if user is Creator OR Amir (Admin)
+                const isAdmin = currentUser && currentUser.name === "Amir";
                 const isCreator = currentUser && a.creator === currentUser.name;
-                const deleteHtml = isCreator ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : '';
+                const deleteHtml = (isCreator || isAdmin) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : '';
 
                 return `
                     <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
@@ -482,9 +483,11 @@
 
         function deleteIdea(id) { 
             const item = activities.find(a => a.id === id);
-            // Redundant security check
-            if (currentUser && item.creator !== currentUser.name) {
-                alert("Only the creator can remove this activity.");
+            const isAdmin = currentUser && currentUser.name === "Amir";
+            const isCreator = currentUser && item.creator === currentUser.name;
+            
+            if (!isCreator && !isAdmin) {
+                alert("Only the creator or Admin can remove this activity.");
                 return;
             }
             if(confirm("Remove this activity?")) { 
