@@ -28,6 +28,16 @@
             box-sizing: border-box; 
         }
 
+        /* Centering container for the Welcome Screen */
+        #setup-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1; /* Takes up remaining height to center vertically */
+            width: 100%;
+        }
+
         .app-header {
             text-align: center;
             padding: 15px 0;
@@ -135,10 +145,12 @@
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
-    <div id="setup-card" class="card hidden">
-        <h2>Who are you?</h2>
-        <div class="avatar-options" id="avatar-selector"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
+    <div id="setup-wrapper" class="hidden">
+        <div id="setup-card" class="card">
+            <h2>Who are you?</h2>
+            <div class="avatar-options" id="avatar-selector"></div>
+            <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
+        </div>
     </div>
 
     <div id="main-app" class="hidden">
@@ -202,7 +214,7 @@
                 return;
             }
             if (!currentUser) {
-                document.getElementById('setup-card').classList.remove('hidden');
+                document.getElementById('setup-wrapper').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
                     <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
                         <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
