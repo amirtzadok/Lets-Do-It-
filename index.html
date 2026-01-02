@@ -60,13 +60,7 @@
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        #setup-card { 
-            height: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            animation: fadeIn 0.5s ease;
-        }
+        #setup-card { height: auto; display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.5s ease; }
 
         .avatar-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
@@ -83,7 +77,7 @@
 
         h2 { font-size: 18px; font-weight: 800; margin: 5px 0; text-align: center; }
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -112,6 +106,7 @@
             cursor: pointer; user-select: none;
         }
         .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
+        .item-admin-add { position: absolute; right: 40px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; }
 
         .stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
@@ -137,7 +132,7 @@
         <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;" data-i18n="submitVote">Let's do it!</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Logistics</h3>
         <div id="edit-fields">
             <textarea id="edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
@@ -163,6 +158,12 @@
         <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
     </div>
 
+    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 101; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+        <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
+        <div id="suggestions-list-content"></div>
+        <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
+    </div>
+
     <div id="setup-card" class="card hidden">
         <h2 data-i18n="whoAreYou">Who are you?</h2>
         <div class="avatar-options" id="avatar-selector"></div>
@@ -172,7 +173,7 @@
     <div id="main-app" class="hidden">
         <div class="card">
             <div class="user-header">
-                <div id="user-info" class="user-info"></div>
+                <div id="user-info" class="user-info" onclick="openSuggestions()"></div>
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
             </div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
@@ -224,11 +225,12 @@
                 requestNote: "Request for more details will be sent to", viewLogistics: "View Logistics",
                 invitePrefix: "Invite", everyoneInvite: "Everyone", selectionInvite: "Selection", waSuggested: "suggested:", 
                 waRateHere: "Rate it here:", waUpdate: "UPDATE:", waAt: "at", noActivities: "No confirmed activities yet.", 
-                deleteConfirm: "Remove this activity?", deleteDenied: "Only the creator or Admin can remove this activity.",
+                deleteConfirm: "Remove this item?", deleteDenied: "Only the creator or Admin can remove this.",
                 waRatingMsg: "liked your idea", addDetailsNow: "+ Add details now (optional)", hideDetails: "- Hide details",
                 chooseDuration: "Choose duration", dur1: "1-3 hours", dur2: "half a day", dur3: "full day", waDur: "Duration:",
-                cancel: "Cancel", groupName: "Tzadok family", waConfirmed: "Activity confirmed and added to your list!",
-                waNegativeRating: "No one liked your idea.. Try another one!"
+                cancel: "Cancel", save: "Save", groupName: "Tzadok family", waConfirmed: "Activity confirmed and added to your list!",
+                waNegativeRating: "No one liked your idea.. Try another one!", mySuggestionsTitle: "My Suggestions",
+                noSuggestions: "You haven't suggested anything yet.", resendBtn: "Update & Send Again", directAddTooltip: "Add directly to list"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -240,17 +242,13 @@
                 requestNote: "בקשה לפרטים נוספים תישלח אל", viewLogistics: "פרטי הפעילות",
                 invitePrefix: "הזמן את", everyoneInvite: "כולם", selectionInvite: "הנבחרים", waSuggested: "הציע/ה:", 
                 waRateHere: "דרגו כאן:", waUpdate: "עדכון:", waAt: "ב-", noActivities: "אין עדיין פעילויות מאושרות.", 
-                deleteConfirm: "להסיר את הפעילות הזו?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פעילות.",
+                deleteConfirm: "להסיר את הפריט הזה?", deleteDenied: "רק היוצר או מנהל יכולים למחוק פריט.",
                 waRatingMsg: "אהב/ה את הרעיון שלך", addDetailsNow: "+ הוסיפו פרטים עכשיו (אופציונלי)", hideDetails: "- הסתר פרטים",
                 chooseDuration: "בחרו משך זמן", dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", waDur: "משך זמן:",
-                cancel: "ביטול", groupName: "משפחת צדוק", waConfirmed: "הפעילות אושרה ונוספה לרשימה שלך!",
-                waNegativeRating: "אף אחד לא אהב את הרעיון שלך.. נסה משהו אחר!"
+                cancel: "ביטול", save: "שמור", groupName: "משפחת צדוק", waConfirmed: "הפעילות אושרה ונוספה לרשימה שלך!",
+                waNegativeRating: "אף אחד לא אהב את הרעיון שלך.. נסה משהו אחר!", mySuggestionsTitle: "ההצעות שלי",
+                noSuggestions: "עדיין לא הצעת רעיונות.", resendBtn: "עדכן ושלח שוב", directAddTooltip: "הוסף ישירות לרשימה"
             }
-        };
-
-        const starLabels = {
-            eng: { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "What a great idea!" },
-            heb: { 1: "לא תודה", 2: "כנראה שלא", 3: "אולי", 4: "אוהב את זה!", 5: "רעיון מעולה!" }
         };
 
         const family = [
@@ -260,12 +258,15 @@
             { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
         ];
 
+        const starLabels = { eng: { 1: "No", 2: "Nope", 3: "Maybe", 4: "Liked!", 5: "Loved!" }, heb: { 1: "לא", 2: "לא ממש", 3: "אולי", 4: "אהבתי!", 5: "מדהים!" } };
+
         let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
         let editingId = null;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
+        let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
 
         function toggleLanguage() {
             currentLang = currentLang === 'eng' ? 'heb' : 'eng';
@@ -276,12 +277,11 @@
 
         function updateUILanguage() {
             const langData = i18n[currentLang];
-            const isHeb = currentLang === 'heb';
-            document.body.dir = isHeb ? 'rtl' : 'ltr';
+            document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
             const langBtn = document.getElementById('lang-toggle');
             langBtn.innerText = langData.langBtn;
-            if (isHeb) { langBtn.style.right = 'auto'; langBtn.style.left = '0px'; }
-            else { langBtn.style.left = 'auto'; langBtn.style.right = '0px'; }
+            langBtn.style.left = currentLang === 'heb' ? '0px' : 'auto';
+            langBtn.style.right = currentLang === 'eng' ? '0px' : 'auto';
             document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = langData[el.getAttribute('data-i18n')]);
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = langData[el.getAttribute('data-i18n-placeholder')]);
             if (currentUser) {
@@ -293,20 +293,16 @@
         function init() {
             updateUILanguage();
             const params = new URLSearchParams(window.location.search);
-            const editIdParam = params.get('editLogistics');
-            
-            if (editIdParam) {
+            if (params.get('editLogistics')) {
                 if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-                else { showMainApp(); openEdit(parseInt(editIdParam)); }
+                else { showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
                 return;
             }
-
             if (params.get('rate')) {
                 document.getElementById('rating-screen').classList.remove('hidden');
                 document.getElementById('rating-header').innerText = `${params.get('creator')} ${i18n[currentLang].waSuggested} ${params.get('rate')}`;
                 return;
             }
-
             if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
             else { showMainApp(); }
         }
@@ -321,14 +317,14 @@
         }
 
         function selectSelf(id) {
-            tempId = id;
             document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
             document.getElementById(`choice-${id}`).classList.add('active');
             document.getElementById('start-btn').disabled = false;
+            window.tempId = id;
         }
 
         function finishSetup() {
-            currentUser = family.find(f => f.id === tempId);
+            currentUser = family.find(f => f.id === window.tempId);
             localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser));
             location.reload();
         }
@@ -362,17 +358,12 @@
         }
 
         function toggleSuggestLogistics() {
-            const fields = document.getElementById('suggest-logistics-fields');
-            const btn = document.getElementById('toggle-suggest-details');
-            const isHidden = fields.classList.toggle('hidden');
-            btn.innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
+            const isHidden = document.getElementById('suggest-logistics-fields').classList.toggle('hidden');
+            document.getElementById('toggle-suggest-details').innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
         }
 
         function cancelSuggestLogistics() {
-            document.getElementById('suggest-desc').value = "";
-            document.getElementById('suggest-date').value = "";
-            document.getElementById('suggest-time').value = "";
-            document.getElementById('suggest-duration').value = "";
+            ['suggest-desc', 'suggest-date', 'suggest-time', 'suggest-duration'].forEach(id => document.getElementById(id).value = "");
             document.getElementById('suggest-logistics-fields').classList.add('hidden');
             document.getElementById('toggle-suggest-details').innerText = i18n[currentLang].addDetailsNow;
         }
@@ -384,83 +375,130 @@
                 if (el) el.classList.toggle('selected', selected.includes(f.id));
             });
             const btn = document.getElementById('action-btn');
-            const langData = i18n[currentLang];
             btn.disabled = !(selected.length > 0 && val);
             if (selected.length > 0) {
-                const target = selected.length === family.length ? langData.everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `${langData.invitePrefix} ${target}`;
-            } else { btn.innerText = langData.selectParticipants; }
+                const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
+            } else { btn.innerText = i18n[currentLang].selectParticipants; }
         }
 
         function sendWA() {
-            const activity = document.getElementById('main-input').value;
-            const sDesc = document.getElementById('suggest-desc').value;
-            const sDate = document.getElementById('suggest-date').value;
-            const sTime = document.getElementById('suggest-time').value;
-            const sDuration = document.getElementById('suggest-duration').value;
-            const langData = i18n[currentLang];
-            const pText = selected.length === family.length ? langData.everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            
-            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pText)}`;
-            if(sDesc) url += `&details=${encodeURIComponent(sDesc)}`;
-            if(sDate) url += `&date=${encodeURIComponent(sDate)}`;
-            if(sTime) url += `&time=${encodeURIComponent(sTime)}`;
-            if(sDuration) url += `&duration=${encodeURIComponent(sDuration)}`;
+            const title = document.getElementById('main-input').value;
+            const desc = document.getElementById('suggest-desc').value;
+            const date = document.getElementById('suggest-date').value;
+            const time = document.getElementById('suggest-time').value;
+            const dur = document.getElementById('suggest-duration').value;
+            const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
-            let phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
-            
-            let extraInfo = "";
-            if(sDesc || sDate || sDuration) {
-                extraInfo = `\n📍 ${sDesc || ''} ${sDate ? '\n📅 ' + sDate : ''} ${sTime ? 'at ' + sTime : ''} ${sDuration ? '\n⏳ ' + langData['dur' + (sDuration === '1-3' ? '1' : sDuration === 'half' ? '2' : '3')] : ''}`;
-            }
+            const suggObj = { id: Date.now(), title, desc, date, time, dur, creator: currentUser.name, participants, modified: new Date().toISOString() };
+            myHistory = myHistory.filter(s => s.title !== title);
+            myHistory.push(suggObj);
+            localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
 
-            const prefix = selected.length === family.length ? `🏠 *${langData.groupName}* \n` : "";
-            const waMsg = `${prefix}🚀 *Let's Do It!* \n${currentUser.name} ${langData.waSuggested} ${activity}${extraInfo}\n\n${langData.waRateHere}\n${url}`;
+            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(participants)}`;
+            if(desc) url += `&details=${encodeURIComponent(desc)}`;
+            if(date) url += `&date=${encodeURIComponent(date)}`;
+            if(time) url += `&time=${encodeURIComponent(time)}`;
+            if(dur) url += `&duration=${encodeURIComponent(dur)}`;
+
+            const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
+            const prefix = selected.length === family.length ? `🏠 *${i18n[currentLang].groupName}* \n` : "";
+            const durText = dur ? `\n⏳ ${i18n[currentLang]['dur' + (dur === '1-3' ? '1' : dur === 'half' ? '2' : '3')]}` : "";
+            const waMsg = `${prefix}🚀 *Let's Do It!* \n${currentUser.name} ${i18n[currentLang].waSuggested} ${title}\n📍 ${desc || ''}${date ? '\n📅 ' + date : ''}${time ? ' at ' + time : ''}${durText}\n\n${i18n[currentLang].waRateHere}\n${url}`;
+            
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
+            clearInput();
         }
 
-        function setStars(n) {
-            currentRating = n;
-            document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n));
-            document.getElementById('star-desc').innerText = starLabels[currentLang][n];
-            document.getElementById('submit-vote-btn').disabled = false;
+        function openSuggestions() {
+            const panel = document.getElementById('suggestions-panel');
+            const list = document.getElementById('suggestions-list-content');
+            const isAdmin = currentUser.name === "Amir";
+            const sorted = myHistory.sort((a, b) => a.title.localeCompare(b.title) || new Date(b.modified) - new Date(a.modified));
+
+            list.innerHTML = sorted.length ? sorted.map(s => `
+                <div class="list-item" style="border-left: 5px solid var(--primary);">
+                    <div class="item-delete" onclick="deleteSuggestion(${s.id})">🗑️</div>
+                    ${isAdmin ? `<div class="item-admin-add" title="${i18n[currentLang].directAddTooltip}" onclick="adminDirectAdd(${s.id})">🚀</div>` : ''}
+                    <b>${s.title}</b><br>
+                    <small>${s.participants}</small><br>
+                    <input type="text" value="${s.desc || ''}" id="hist-desc-${s.id}" placeholder="${i18n[currentLang].descPlaceholder}" style="margin-top:5px; font-size:12px; padding:8px;">
+                    <div style="display:flex; gap:5px;">
+                        <input type="date" value="${s.date || ''}" id="hist-date-${s.id}" style="font-size:11px; padding:5px;">
+                        <input type="time" value="${s.time || ''}" id="hist-time-${s.id}" style="font-size:11px; padding:5px;">
+                    </div>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <button class="primary-btn" style="flex:1; padding:8px; font-size:12px;" onclick="saveSuggestionEdit(${s.id})">${i18n[currentLang].save}</button>
+                        <button class="secondary-btn" style="flex:1; padding:8px; font-size:12px; margin-top:0;" onclick="closeSuggestions()">${i18n[currentLang].cancel}</button>
+                    </div>
+                    <button class="secondary-btn" style="background:var(--whatsapp); margin-top:5px; font-size:12px; padding:8px; width:100%;" onclick="resendSuggestion(${s.id})">${i18n[currentLang].resendBtn}</button>
+                </div>
+            `).join('') : `<p style="text-align:center;">${i18n[currentLang].noSuggestions}</p>`;
+            panel.classList.remove('hidden');
+        }
+
+        function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
+
+        function saveSuggestionEdit(id) {
+            const s = myHistory.find(item => item.id === id);
+            s.desc = document.getElementById(`hist-desc-${id}`).value;
+            s.date = document.getElementById(`hist-date-${id}`).value;
+            s.time = document.getElementById(`hist-time-${id}`).value;
+            s.modified = new Date().toISOString();
+            localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
+            openSuggestions();
+        }
+
+        function deleteSuggestion(id) {
+            if(confirm(i18n[currentLang].deleteConfirm)) {
+                myHistory = myHistory.filter(s => s.id !== id);
+                localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
+                openSuggestions();
+            }
+        }
+
+        function resendSuggestion(id) {
+            saveSuggestionEdit(id);
+            const s = myHistory.find(item => item.id === id);
+            document.getElementById('main-input').value = s.title;
+            document.getElementById('suggest-desc').value = s.desc;
+            document.getElementById('suggest-date').value = s.date;
+            document.getElementById('suggest-time').value = s.time;
+            closeSuggestions();
+        }
+
+        function adminDirectAdd(id) {
+            const s = myHistory.find(item => item.id === id);
+            activities.push({ 
+                id: Date.now(), title: s.title, joinedBy: s.participants, creator: s.creator, 
+                details: s.desc, dateRaw: s.date, time: s.time, duration: s.dur 
+            });
+            localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+            renderFinalList();
+            closeSuggestions();
         }
 
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
-            const creatorName = params.get('creator');
-            const activityTitle = params.get('rate');
-            const pText = params.get('participants');
             const aId = Date.now();
-            
-            const existingDetails = params.get('details');
-            const existingDate = params.get('date');
-            const existingTime = params.get('time');
-            const existingDuration = params.get('duration');
-            const hasLogistics = !!(existingDetails || existingDate || existingTime || existingDuration);
-
-            const cObj = family.find(f => f.name === creatorName);
-            let waMsg = "";
+            const creator = params.get('creator');
+            const title = params.get('rate');
+            const details = params.get('details') || '';
+            const date = params.get('date') || '';
+            const time = params.get('time') || '';
 
             if (currentRating >= 4) {
                 activities.push({ 
-                    id: aId, title: activityTitle, joinedBy: pText, creator: creatorName,
-                    details: existingDetails || '', dateRaw: existingDate || '', time: existingTime || '', duration: existingDuration || ''
+                    id: aId, title, joinedBy: params.get('participants'), creator,
+                    details, dateRaw: date, time, duration: params.get('duration') || ''
                 });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                
-                if (hasLogistics) {
-                    waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].waConfirmed}`;
-                } else {
-                    const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${aId}&rate=${encodeURIComponent(activityTitle)}&participants=${encodeURIComponent(pText)}&creator=${encodeURIComponent(creatorName)}`;
-                    waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} ${i18n[currentLang].waRatingMsg} "${activityTitle}"!\n\n${i18n[currentLang].editLogistics}:\n${logisticsUrl}`;
-                }
+                const cObj = family.find(f => f.name === creator);
+                let waMsg = `🎉 *Let's Do It!* \n${currentUser.name} ${i18n[currentLang].waRatingMsg} "${title}"!\n\n${(details || date) ? i18n[currentLang].waConfirmed : i18n[currentLang].editLogistics + ':\n' + window.location.origin + window.location.pathname + '?editLogistics=' + aId}`;
+                window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
             } else {
-                const appUrl = `${window.location.origin}${window.location.pathname}`;
-                waMsg = `📉 *Let's Do It!* \n${i18n[currentLang].waNegativeRating}\n\n${appUrl}`;
+                window.open(`https://wa.me/${family.find(f=>f.name===creator).phone}?text=${encodeURIComponent(i18n[currentLang].waNegativeRating)}`, '_blank');
             }
-
-            window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
             window.location.href = window.location.origin + window.location.pathname;
         }
 
@@ -468,13 +506,13 @@
             const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => {
-                const status = (a.details && a.dateRaw && a.time && a.duration) ? ` ❤️${a.dateRaw < todayStr ? ' ✅' : ' 🕒'}` : '';
+                const status = (a.details && a.dateRaw && a.time) ? ` ❤️${a.dateRaw < todayStr ? ' ✅' : ' 🕒'}` : '';
                 const canDel = currentUser && (a.creator === currentUser.name || currentUser.name === "Amir");
                 return `
-                    <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()" onclick="openEdit(${a.id})">
+                    <div class="list-item" onclick="openEdit(${a.id})">
                         ${canDel ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
                         <b>${a.title}${status}</b><br>
-                        <small>${i18n[currentLang].hiUser} ${a.creator} | עם: ${a.joinedBy}</small>
+                        <small>${a.creator} | ${a.joinedBy}</small>
                         ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
                     </div>
                 `;
@@ -483,17 +521,12 @@
 
         function validateLogistics() {
             const btn = document.getElementById('save-notify-btn');
-            btn.disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value && document.getElementById('edit-duration').value);
+            btn.disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value);
         }
 
         function openEdit(id) {
             editingId = id;
             let item = activities.find(a => a.id === id);
-            if (!item) {
-                const p = new URLSearchParams(window.location.search);
-                item = { id: id, title: p.get('rate') || "Plan", joinedBy: p.get('participants') || "Family", creator: p.get('creator') || "Amir" };
-                activities.push(item);
-            }
             const isCreator = currentUser && item.creator === currentUser.name;
             document.getElementById('modal-title').innerText = isCreator ? i18n[currentLang].editLogistics : i18n[currentLang].viewLogistics;
             document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
@@ -509,7 +542,7 @@
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "...";
                 const durText = item.duration ? i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')] : "...";
                 document.getElementById('view-duration').innerText = `${i18n[currentLang].waDur} ${durText}`;
-                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw && item.duration));
+                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw));
                 document.getElementById('request-note').innerText = `${i18n[currentLang].requestNote} ${item.creator}`;
             }
             document.getElementById('edit-modal').classList.remove('hidden');
@@ -518,8 +551,7 @@
         function requestDetails() {
             const item = activities.find(a => a.id === editingId);
             const cObj = family.find(f => f.name === item.creator);
-            const lUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${item.id}&rate=${encodeURIComponent(item.title)}&participants=${encodeURIComponent(item.joinedBy)}&creator=${encodeURIComponent(item.creator)}`;
-            const msg = `Hey ${item.creator}! Can you add details for "${item.title}"? \n\nLink:\n${lUrl}`;
+            const msg = `Hey ${item.creator}! Can you add details for "${item.title}"? \n\nLink:\n${window.location.origin}${window.location.pathname}?editLogistics=${item.id}`;
             window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -530,33 +562,22 @@
             item.time = document.getElementById('edit-time').value;
             item.duration = document.getElementById('edit-duration').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            let phone = (item.joinedBy !== "Everyone" && !item.joinedBy.includes("&")) ? (family.find(f => f.name === item.joinedBy.trim()) || {}).phone : "";
-            const durText = i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')];
-            const waMsg = `✅ *${i18n[currentLang].waUpdate}* ${item.title}\n📅 ${item.dateRaw} ${i18n[currentLang].waAt} ${item.time}\n⏳ ${durText}\n📍 ${item.details}\n\nSee activities:\n${window.location.origin}${window.location.pathname}`;
+            let phone = (item.joinedBy === "Everyone") ? "" : (family.find(f => f.name === item.joinedBy) || {}).phone;
+            const waMsg = `✅ *${i18n[currentLang].waUpdate}* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
             window.open(`https://wa.me/${phone || ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit(); renderFinalList();
         }
 
-        function closeEdit() { 
-            document.getElementById('edit-modal').classList.add('hidden'); 
-            window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
-        }
-
+        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) {
-            const item = activities.find(a => a.id === id);
-            if (currentUser && (item.creator === currentUser.name || currentUser.name === "Amir")) {
-                if(confirm(i18n[currentLang].deleteConfirm)) { 
-                    activities = activities.filter(a => a.id !== id); 
-                    localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
-                    renderFinalList(); 
-                }
-            } else { alert(i18n[currentLang].deleteDenied); }
+            if(confirm(i18n[currentLang].deleteConfirm)) { 
+                activities = activities.filter(a => a.id !== id); 
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
+                renderFinalList(); 
+            }
         }
-
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        let pressTimer;
-        function startPress(id) { pressTimer = setTimeout(() => openEdit(id), 600); }
-        function endPress() { clearTimeout(pressTimer); }
+        function setStars(n) { currentRating = n; document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n)); document.getElementById('submit-vote-btn').disabled = false; }
     </script>
 </body>
 </html>
