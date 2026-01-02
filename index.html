@@ -79,7 +79,6 @@
         .face-wrapper.selected .face-img { border-color: var(--primary); }
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-        /* Image Gallery with Green Checkmarks */
         .image-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; }
         .thumb-wrapper { position: relative; flex-shrink: 0; }
         .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover; cursor: pointer; }
@@ -110,6 +109,7 @@
         <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
         <div id="unified-edit-fields">
             <input type="text" id="modal-edit-title" placeholder="Activity Name">
+            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
             
             <div class="logistics-row">
                 <span class="logistics-label" data-i18n="labelDate">Date</span>
@@ -225,7 +225,7 @@
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
                 waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!",
-                innerLongPressTip: "(Long press to edit details)", addImages: "Images:"
+                innerLongPressTip: "(Long press to edit details)"
             },
             heb: {
                 langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
@@ -236,7 +236,7 @@
                 labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!", addImages: "תמונות:"
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
             }
         };
 
@@ -392,20 +392,15 @@
             const newDur = document.getElementById('modal-edit-duration').value;
             const newUrl = document.getElementById('modal-edit-url').value;
 
-            // Update History Entry
+            // Global Synchronization Loop
             const histIdx = myHistory.findIndex(h => h.id === editingId);
             if (histIdx > -1) {
-                const h = myHistory[histIdx];
-                h.title = newTitle; h.desc = newDesc; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
-                h.images = currentImages; h.modified = new Date().toISOString();
+                myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, images: currentImages, modified: new Date().toISOString() };
             }
 
-            // Sync confirmed list entry with the same creator and title
             const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
             if (publicIdx > -1) {
-                const a = activities[publicIdx];
-                a.title = newTitle; a.details = newDesc; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
-                a.images = currentImages;
+                activities[publicIdx] = { ...activities[publicIdx], title: newTitle, details: newDesc, dateRaw: newDate, time: newTime, duration: newDur, url: newUrl, images: currentImages };
             }
 
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
@@ -456,11 +451,7 @@
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
                 document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
                 document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
-                document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `
-                    <div class="thumb-wrapper">
-                        <img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">
-                    </div>
-                `).join('');
+                document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
             document.getElementById('edit-modal').style.zIndex = "1000";
