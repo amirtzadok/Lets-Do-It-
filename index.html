@@ -37,29 +37,15 @@
             padding: 15px 0;
             position: relative;
         }
-        .app-header h1 {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--primary);
-            margin: 0;
-        }
+        .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
 
         .lang-btn {
-            background: white;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px;
+            border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
+            top: 50%; transform: translateY(-50%);
         }
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        
         #setup-card { height: auto; display: flex; flex-direction: column; gap: 15px; animation: fadeIn 0.5s ease; }
 
         .avatar-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 5px; }
@@ -71,8 +57,7 @@
         @media (min-width: 768px) {
             body { padding-top: 20px; }
             .avatar-options { grid-template-columns: repeat(4, 1fr); }
-            .card { max-width: 600px; }
-            .app-header { max-width: 600px; }
+            .card, .app-header { max-width: 600px; }
         }
 
         h2 { font-size: 18px; font-weight: 800; margin: 5px 0; text-align: center; }
@@ -82,6 +67,7 @@
         
         .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
+        input[type="file"] { font-size: 12px; margin-bottom: 10px; }
         
         .clear-btn { background: transparent; border: none; padding: 8px; cursor: pointer; font-size: 20px; color: #94a3b8; transition: 0.2s; height: 46px; display: flex; align-items: center; }
 
@@ -100,20 +86,18 @@
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
 
-        .list-item { 
-            background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; 
-            border-left: 5px solid var(--whatsapp); position: relative; 
-            cursor: pointer; user-select: none;
-        }
-        
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; user-select: none; }
         .item-delete { position: absolute; right: 12px; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
+
+        .image-gallery { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
+        .image-gallery img { height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd; }
+        .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
         .stars { display: flex; justify-content: center; gap: 8px; margin: 10px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
         .star-label { text-align: center; font-weight: bold; color: var(--primary); min-height: 20px; margin-bottom: 5px; }
         .hidden { display: none !important; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -151,6 +135,8 @@
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
             <p id="view-duration" style="font-style:italic;"></p>
+            <div id="view-link-container"></div>
+            <div id="view-images-container" class="image-gallery"></div>
             <div id="request-details-ui" class="hidden">
                 <button class="primary-btn" id="request-btn" onclick="requestDetails()" data-i18n="getDetails">Get details</button>
                 <p id="request-note" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px;"></p>
@@ -195,6 +181,9 @@
                     <option value="half" data-i18n="dur2">half a day</option>
                     <option value="full" data-i18n="dur3">full day</option>
                 </select>
+                <input type="text" id="suggest-url" placeholder="Paste link here (URL)">
+                <label style="font-size:12px; display:block; margin-bottom:4px;" data-i18n="addImages">Add images:</label>
+                <input type="file" id="suggest-images" multiple accept="image/*">
                 <button class="cancel-logistics-btn" onclick="cancelSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
 
@@ -233,7 +222,7 @@
                 cancel: "Cancel", update: "Update", groupName: "Tzadok family", waConfirmed: "Activity confirmed and added to your list!",
                 waNegativeRating: "No one liked your idea.. Try another one!", mySuggestionsTitle: "My Suggestions",
                 noSuggestions: "You haven't suggested anything yet.", resendBtn: "Update & Send Again",
-                innerLongPressTip: "(Long press to edit item details)"
+                innerLongPressTip: "(Long press to edit item details)", addImages: "Add images:", viewLink: "🔗 View Link"
             },
             heb: {
                 langBtn: "ENG", chooseRating: "דרגו את הרעיון!", submitVote: "בואו נעשה את זה!", editLogistics: "ערוך פרטים", 
@@ -251,7 +240,7 @@
                 cancel: "ביטול", update: "עדכן", groupName: "משפחת צדוק", waConfirmed: "הפעילות אושרה ונוספה לרשימה שלך!",
                 waNegativeRating: "אף אחד לא אהב את הרעיון שלך.. נסה משהו אחר!", mySuggestionsTitle: "ההצעות שלי",
                 noSuggestions: "עדיין לא הצעת רעיונות.", resendBtn: "עדכן ושלח שוב",
-                innerLongPressTip: "(לחיצה ארוכה לעריכת פרטי הפריט)"
+                innerLongPressTip: "(לחיצה ארוכה לעריכת פרטי הפריט)", addImages: "הוספת תמונות:", viewLink: "🔗 צפייה בקישור"
             }
         };
 
@@ -268,7 +257,6 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
         let currentRating = 0;
-        let editingId = null;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
         let pressTimer;
@@ -345,57 +333,34 @@
             renderFinalList();
         }
 
-        function toggleFace(id) {
-            const idx = selected.indexOf(id);
-            idx > -1 ? selected.splice(idx, 1) : selected.push(id);
-            updateUIState();
-        }
-
-        function selectAll() {
-            selected = (selected.length === family.length) ? [] : family.map(f => f.id);
-            updateUIState();
-        }
-
-        function clearInput() { 
-            document.getElementById('main-input').value = ""; 
-            cancelSuggestLogistics();
-            updateUIState(); 
-        }
-
-        function toggleSuggestLogistics() {
-            const isHidden = document.getElementById('suggest-logistics-fields').classList.toggle('hidden');
-            document.getElementById('toggle-suggest-details').innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails;
-        }
-
-        function cancelSuggestLogistics() {
-            ['suggest-desc', 'suggest-date', 'suggest-time', 'suggest-duration'].forEach(id => document.getElementById(id).value = "");
-            document.getElementById('suggest-logistics-fields').classList.add('hidden');
-            document.getElementById('toggle-suggest-details').innerText = i18n[currentLang].addDetailsNow;
-        }
+        function toggleFace(id) { const idx = selected.indexOf(id); idx > -1 ? selected.splice(idx, 1) : selected.push(id); updateUIState(); }
+        function selectAll() { selected = (selected.length === family.length) ? [] : family.map(f => f.id); updateUIState(); }
+        function clearInput() { document.getElementById('main-input').value = ""; cancelSuggestLogistics(); updateUIState(); }
+        function toggleSuggestLogistics() { const isHidden = document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); document.getElementById('toggle-suggest-details').innerText = isHidden ? i18n[currentLang].addDetailsNow : i18n[currentLang].hideDetails; }
+        function cancelSuggestLogistics() { ['suggest-desc', 'suggest-date', 'suggest-time', 'suggest-duration', 'suggest-url', 'suggest-images'].forEach(id => document.getElementById(id).value = ""); document.getElementById('suggest-logistics-fields').classList.add('hidden'); document.getElementById('toggle-suggest-details').innerText = i18n[currentLang].addDetailsNow; }
 
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => {
-                const el = document.getElementById(`f-${f.id}`);
-                if (el) el.classList.toggle('selected', selected.includes(f.id));
-            });
+            family.forEach(f => { const el = document.getElementById(`f-${f.id}`); if (el) el.classList.toggle('selected', selected.includes(f.id)); });
             const btn = document.getElementById('action-btn');
             btn.disabled = !(selected.length > 0 && val);
-            if (selected.length > 0) {
-                const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
-            } else { btn.innerText = i18n[currentLang].selectParticipants; }
+            if (selected.length > 0) { const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & '); btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`; } else { btn.innerText = i18n[currentLang].selectParticipants; }
         }
 
-        function sendWA() {
+        async function sendWA() {
             const title = document.getElementById('main-input').value;
             const desc = document.getElementById('suggest-desc').value;
             const date = document.getElementById('suggest-date').value;
             const time = document.getElementById('suggest-time').value;
             const dur = document.getElementById('suggest-duration').value;
+            const urlInp = document.getElementById('suggest-url').value;
+            const imagesInp = document.getElementById('suggest-images').files;
             const participants = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
-            const suggObj = { id: Date.now(), title, desc, date, time, dur, creator: currentUser.name, participants, modified: new Date().toISOString() };
+            let base64Images = [];
+            for (let file of imagesInp) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
+
+            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants, modified: new Date().toISOString() };
             myHistory = myHistory.filter(s => s.title !== title);
             myHistory.push(suggObj);
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
@@ -405,6 +370,7 @@
             if(date) url += `&date=${encodeURIComponent(date)}`;
             if(time) url += `&time=${encodeURIComponent(time)}`;
             if(dur) url += `&duration=${encodeURIComponent(dur)}`;
+            if(urlInp) url += `&exturl=${encodeURIComponent(urlInp)}`;
 
             const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
             const prefix = selected.length === family.length ? `🏠 *${i18n[currentLang].groupName}* \n` : "";
@@ -427,26 +393,18 @@
                      ontouchstart="startInnerPress(${s.id})" 
                      ontouchend="endInnerPress()"
                      style="border-left: 5px solid var(--primary);">
-                    
                     <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
-                    
                     <div id="inner-view-${s.id}">
-                        <b>${s.title}</b><br>
-                        <small>${s.participants}</small>
+                        <b>${s.title}</b><br><small>${s.participants}</small>
+                        ${s.images ? `<div class="image-gallery">${s.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
                     </div>
-
                     <div id="inner-edit-${s.id}" class="hidden" style="margin-top:10px;">
-                        <input type="text" value="${s.desc || ''}" id="hist-desc-${s.id}" placeholder="${i18n[currentLang].descPlaceholder}" style="font-size:12px; padding:8px;">
-                        <div style="display:flex; gap:5px;">
-                            <input type="date" value="${s.date || ''}" id="hist-date-${s.id}" style="font-size:11px; padding:5px; flex:1;">
-                            <input type="time" value="${s.time || ''}" id="hist-time-${s.id}" style="font-size:11px; padding:5px; flex:1;">
-                        </div>
-                        <select id="hist-dur-${s.id}" style="font-size:12px; padding:8px; margin-top:5px;">
-                            <option value="" ${!s.dur ? 'selected' : ''} disabled>${i18n[currentLang].chooseDuration}</option>
-                            <option value="1-3" ${s.dur === '1-3' ? 'selected' : ''}>${i18n[currentLang].dur1}</option>
-                            <option value="half" ${s.dur === 'half' ? 'selected' : ''}>${i18n[currentLang].dur2}</option>
-                            <option value="full" ${s.dur === 'full' ? 'selected' : ''}>${i18n[currentLang].dur3}</option>
-                        </select>
+                        <input type="text" value="${s.desc || ''}" id="hist-desc-${s.id}" placeholder="${i18n[currentLang].descPlaceholder}">
+                        <div style="display:flex; gap:5px;"><input type="date" value="${s.date || ''}" id="hist-date-${s.id}" style="flex:1;"><input type="time" value="${s.time || ''}" id="hist-time-${s.id}" style="flex:1;"></div>
+                        <select id="hist-dur-${s.id}"><option value="1-3" ${s.dur === '1-3' ? 'selected' : ''}>${i18n[currentLang].dur1}</option><option value="half" ${s.dur === 'half' ? 'selected' : ''}>${i18n[currentLang].dur2}</option><option value="full" ${s.dur === 'full' ? 'selected' : ''}>${i18n[currentLang].dur3}</option></select>
+                        <input type="text" value="${s.url || ''}" id="hist-url-${s.id}" placeholder="Link (URL)">
+                        <label style="font-size:11px; display:block;" data-i18n="addImages">Update images:</label>
+                        <input type="file" id="hist-images-${s.id}" multiple accept="image/*">
                         <button class="primary-btn" style="padding:10px; font-size:13px; margin-top:10px; background:var(--whatsapp);" onclick="updateAndSaveSuggestion(${s.id})">${i18n[currentLang].update}</button>
                     </div>
                 </div>
@@ -454,22 +412,22 @@
             panel.classList.remove('hidden');
         }
 
-        function startInnerPress(id) { 
-            pressTimer = setTimeout(() => {
-                document.getElementById(`inner-view-${id}`).classList.add('hidden');
-                document.getElementById(`inner-edit-${id}`).classList.remove('hidden');
-            }, 600); 
-        }
-        function endInnerPress() { clearTimeout(pressTimer); }
-
-        function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
-
-        function updateAndSaveSuggestion(id) {
+        async function updateAndSaveSuggestion(id) {
             const s = myHistory.find(item => item.id === id);
             s.desc = document.getElementById(`hist-desc-${id}`).value;
             s.date = document.getElementById(`hist-date-${id}`).value;
             s.time = document.getElementById(`hist-time-${id}`).value;
             s.dur = document.getElementById(`hist-dur-${id}`).value;
+            s.url = document.getElementById(`hist-url-${id}`).value;
+            
+            // Process new images if any
+            const newImgFiles = document.getElementById(`hist-images-${id}`).files;
+            if (newImgFiles.length > 0) {
+                let base64Images = [];
+                for (let file of newImgFiles) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
+                s.images = base64Images;
+            }
+
             s.modified = new Date().toISOString();
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
             
@@ -478,41 +436,26 @@
             document.getElementById('suggest-date').value = s.date;
             document.getElementById('suggest-time').value = s.time;
             document.getElementById('suggest-duration').value = s.dur;
+            document.getElementById('suggest-url').value = s.url || "";
             
-            closeSuggestions();
-            updateUIState();
+            closeSuggestions(); updateUIState();
         }
 
-        function deleteSuggestion(id) {
-            if(confirm(i18n[currentLang].deleteConfirm)) {
-                myHistory = myHistory.filter(s => s.id !== id);
-                localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
-                openSuggestions();
-            }
-        }
+        function startInnerPress(id) { pressTimer = setTimeout(() => { document.getElementById(`inner-view-${id}`).classList.add('hidden'); document.getElementById(`inner-edit-${id}`).classList.remove('hidden'); }, 600); }
+        function endInnerPress() { clearTimeout(pressTimer); }
+        function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
+        function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
 
         function submitRating() {
             const params = new URLSearchParams(window.location.search);
             const aId = Date.now();
             const creator = params.get('creator');
             const title = params.get('rate');
-            const details = params.get('details') || '';
-            const date = params.get('date') || '';
-            const time = params.get('time') || '';
-            const dur = params.get('duration') || '';
-
             if (currentRating >= 4) {
-                activities.push({ 
-                    id: aId, title, joinedBy: params.get('participants'), creator,
-                    details, dateRaw: date, time, duration: dur
-                });
+                activities.push({ id: aId, title, joinedBy: params.get('participants'), creator, details: params.get('details') || '', dateRaw: params.get('date') || '', time: params.get('time') || '', duration: params.get('duration') || '', url: params.get('exturl') || '', images: (myHistory.find(s => s.title === title) || {}).images || [] });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-                const cObj = family.find(f => f.name === creator);
-                let waMsg = `🎉 *Let's Do It!* \n${currentUser.name} ${i18n[currentLang].waRatingMsg} "${title}"!\n\n${(details || date) ? i18n[currentLang].waConfirmed : i18n[currentLang].editLogistics + ':\n' + window.location.origin + window.location.pathname + '?editLogistics=' + aId}`;
-                window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
-            } else {
-                window.open(`https://wa.me/${family.find(f=>f.name===creator).phone}?text=${encodeURIComponent(i18n[currentLang].waNegativeRating)}`, '_blank');
-            }
+                window.open(`https://wa.me/${(family.find(f => f.name === creator) || {}).phone}?text=${encodeURIComponent('🎉 *Let\'s Do It!* \n' + currentUser.name + ' ' + i18n[currentLang].waRatingMsg + ' "' + title + '"!\n\n' + i18n[currentLang].waConfirmed)}`, '_blank');
+            } else { window.open(`https://wa.me/${(family.find(f=>f.name===creator) || {}).phone}?text=${encodeURIComponent(i18n[currentLang].waNegativeRating)}`, '_blank'); }
             window.location.href = window.location.origin + window.location.pathname;
         }
 
@@ -520,86 +463,49 @@
             const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => {
-                const status = (a.details && a.dateRaw && a.time && a.duration) ? ` ❤️${a.dateRaw < todayStr ? ' ✅' : ' 🕒'}` : '';
-                const isAdmin = currentUser && currentUser.name === "Amir";
-                const isCreator = currentUser && a.creator === currentUser.name;
-                const canDel = isAdmin || isCreator;
-
+                const canDel = currentUser && (a.creator === currentUser.name || currentUser.name === "Amir");
                 return `
                     <div class="list-item" onclick="openEdit(${a.id})">
                         ${canDel ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
-                        <b>${a.title}${status}</b><br>
+                        <b>${a.title}${ (a.details && a.dateRaw && a.time && a.duration) ? ' ❤️' + (a.dateRaw < todayStr ? ' ✅' : ' 🕒') : '' }</b><br>
                         <small>${a.creator} | ${a.joinedBy}</small>
+                        ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
+                        ${a.images && a.images.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
                         ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
                     </div>
                 `;
             }).join('') || `<p style="text-align:center; color:gray;">${i18n[currentLang].noActivities}</p>`;
         }
 
-        function validateLogistics() {
-            const btn = document.getElementById('save-notify-btn');
-            btn.disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value);
-        }
+        function validateLogistics() { document.getElementById('save-notify-btn').disabled = !(document.getElementById('edit-desc').value.trim() && document.getElementById('edit-date').value && document.getElementById('edit-time').value); }
 
         function openEdit(id) {
-            editingId = id;
-            let item = activities.find(a => a.id === id);
-            const isCreator = currentUser && item.creator === currentUser.name;
+            editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
             document.getElementById('modal-title').innerText = isCreator ? i18n[currentLang].editLogistics : i18n[currentLang].viewLogistics;
             document.getElementById('edit-fields').classList.toggle('hidden', !isCreator);
             document.getElementById('view-fields').classList.toggle('hidden', isCreator);
-            if (isCreator) {
-                document.getElementById('edit-desc').value = item.details || '';
-                document.getElementById('edit-date').value = item.dateRaw || '';
-                document.getElementById('edit-time').value = item.time || '';
-                document.getElementById('edit-duration').value = item.duration || '';
-                validateLogistics();
-            } else {
-                document.getElementById('view-desc').innerText = item.details || "...";
-                document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "...";
-                const durText = item.duration ? i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')] : "...";
-                document.getElementById('view-duration').innerText = `${i18n[currentLang].waDur} ${durText}`;
-                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw));
-                document.getElementById('request-note').innerText = `${i18n[currentLang].requestNote} ${item.creator}`;
+            if (isCreator) { document.getElementById('edit-desc').value = item.details || ''; document.getElementById('edit-date').value = item.dateRaw || ''; document.getElementById('edit-time').value = item.time || ''; document.getElementById('edit-duration').value = item.duration || ''; validateLogistics(); }
+            else { 
+                document.getElementById('view-desc').innerText = item.details || "..."; document.getElementById('view-datetime').innerText = item.dateRaw ? `📅 ${item.dateRaw} @ ${item.time}` : "...";
+                document.getElementById('view-duration').innerText = `${i18n[currentLang].waDur} ${item.duration ? i18n[currentLang]['dur' + (item.duration === '1-3' ? '1' : item.duration === 'half' ? '2' : '3')] : '...'}`;
+                document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
+                document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
+                document.getElementById('request-details-ui').classList.toggle('hidden', !!(item.details && item.dateRaw)); document.getElementById('request-note').innerText = `${i18n[currentLang].requestNote} ${item.creator}`;
             }
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
-        function requestDetails() {
-            const item = activities.find(a => a.id === editingId);
-            const cObj = family.find(f => f.name === item.creator);
-            const msg = `Hey ${item.creator}! Can you add details for "${item.title}"? \n\nLink:\n${window.location.origin}${window.location.pathname}?editLogistics=${item.id}`;
-            window.open(`https://wa.me/${cObj ? cObj.phone : ''}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
+        function requestDetails() { const item = activities.find(a => a.id === editingId); window.open(`https://wa.me/${(family.find(f => f.name === item.creator) || {}).phone}?text=${encodeURIComponent('Hey ' + item.creator + '! Can you add details for "' + item.title + '"? \n\nLink:\n' + window.location.origin + window.location.pathname + '?editLogistics=' + item.id)}`, '_blank'); }
 
         function saveAndNotify() {
-            const item = activities.find(a => a.id === editingId);
-            item.details = document.getElementById('edit-desc').value;
-            item.dateRaw = document.getElementById('edit-date').value;
-            item.time = document.getElementById('edit-time').value;
-            item.duration = document.getElementById('edit-duration').value;
+            const item = activities.find(a => a.id === editingId); item.details = document.getElementById('edit-desc').value; item.dateRaw = document.getElementById('edit-date').value; item.time = document.getElementById('edit-time').value; item.duration = document.getElementById('edit-duration').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            let phone = (item.joinedBy === "Everyone") ? "" : (family.find(f => f.name === item.joinedBy) || {}).phone;
-            const waMsg = `✅ *${i18n[currentLang].waUpdate}* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
-            window.open(`https://wa.me/${phone || ''}?text=${encodeURIComponent(waMsg)}`, '_blank');
+            window.open(`https://wa.me/${(item.joinedBy === "Everyone" ? "" : (family.find(f => f.name === item.joinedBy) || {}).phone)}?text=${encodeURIComponent('✅ *' + i18n[currentLang].waUpdate + '* ' + item.title + '\n📅 ' + item.dateRaw + ' at ' + item.time + '\n📍 ' + item.details)}`, '_blank');
             closeEdit(); renderFinalList();
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-        
-        function deleteIdea(id) {
-            const item = activities.find(a => a.id === id);
-            const isAdmin = currentUser && currentUser.name === "Amir";
-            const isCreator = currentUser && item.creator === currentUser.name;
-            if (isAdmin || isCreator) {
-                if(confirm(i18n[currentLang].deleteConfirm)) { 
-                    activities = activities.filter(a => a.id !== id); 
-                    localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
-                    renderFinalList(); 
-                }
-            } else { alert(i18n[currentLang].deleteDenied); }
-        }
-        
+        function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
         function setStars(n) { currentRating = n; document.querySelectorAll('#star-row span').forEach((s, i) => s.classList.toggle('active', i < n)); document.getElementById('submit-vote-btn').disabled = false; }
     </script>
