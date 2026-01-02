@@ -33,7 +33,6 @@
             border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
             top: 50%; transform: translateY(-50%);
         }
-        #help-btn { font-size: 16px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
@@ -41,27 +40,35 @@
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
         .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
+        .avatar-choice span { font-size: 11px; margin-top: 4px; font-weight: bold; }
 
-        @media (min-width: 768px) {
-            body { padding-top: 20px; }
-            .card, .app-header { max-width: 600px; }
-        }
+        @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 768px) { .card, .app-header { max-width: 600px; } }
 
         .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
         input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        
+        input[type="file"] { font-size: 12px; margin-bottom: 10px; }
+
         .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .logistics-label { font-size: 12px; color: #64748b; min-width: 80px; font-weight: bold; }
+        .logistics-label { font-size: 12px; color: #64748b; min-width: 90px; font-weight: bold; }
         body[dir="rtl"] .logistics-label { text-align: right; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
-        .item-delete { position: absolute; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
+        
+        /* High Contrast Delete Icon [cite: 41, 42, 43] */
+        .item-delete { 
+            position: absolute; right: 12px; top: 12px; cursor: pointer; 
+            font-size: 18px; z-index: 5; color: #ef4444; /* High contrast red */
+            background: white; border-radius: 50%; width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
 
         .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
@@ -78,8 +85,7 @@
         .gallery-thumb:hover { transform: scale(1.05); }
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
-        /* Fullscreen Image Overlay */
-        #img-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
+        #img-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
         #img-overlay img { max-width: 95%; max-height: 95%; border-radius: 10px; }
 
         .hidden { display: none !important; }
@@ -88,7 +94,6 @@
 <body onload="init()">
 
     <header class="app-header">
-        <button id="help-btn" class="header-btn" onclick="openGuide()">?</button>
         <h1 id="app-name-display">🚀 Let's Do It!</h1>
         <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
     </header>
@@ -142,7 +147,7 @@
         </div>
     </div>
 
-    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 99; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
         <div id="suggestions-list-content"></div>
         <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
@@ -212,7 +217,8 @@
                 labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!"
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!",
+                innerLongPressTip: "(Long press to edit details)", addImages: "Images:"
             },
             heb: {
                 langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
@@ -223,7 +229,7 @@
                 labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!", addImages: "תמונות:"
             }
         };
 
@@ -238,7 +244,7 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
         let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let editingId = null; let pressTimer;
+        let selected = []; let editingId = null;
 
         function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
         
@@ -248,8 +254,6 @@
             document.getElementById('lang-toggle').innerText = d.langBtn;
             document.getElementById('lang-toggle').style.left = isHeb ? '0px' : 'auto';
             document.getElementById('lang-toggle').style.right = isHeb ? 'auto' : '0px';
-            document.getElementById('help-btn').style.left = isHeb ? 'auto' : '0px';
-            document.getElementById('help-btn').style.right = isHeb ? '0px' : 'auto';
             document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
             if (currentUser) document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${d.hiUser}, ${currentUser.name}</b>`;
@@ -304,8 +308,15 @@
             const imagesInp = document.getElementById('suggest-images').files;
             const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
 
+            // Robust Base64 Image Processing 
             let base64Images = [];
-            for (let file of imagesInp) { base64Images.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
+            for (let file of imagesInp) { 
+                base64Images.push(await new Promise(r => { 
+                    let reader = new FileReader(); 
+                    reader.onload = e => r(e.target.result); 
+                    reader.readAsDataURL(file); 
+                })); 
+            }
 
             const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, images: base64Images, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
             myHistory.push(suggObj);
@@ -320,7 +331,7 @@
         function openSuggestions() {
             const sorted = myHistory.sort((a, b) => a.title.localeCompare(b.title) || new Date(b.modified) - new Date(a.modified));
             document.getElementById('suggestions-list-content').innerHTML = sorted.map(s => `
-                <div class="list-item" onmousedown="startInnerPress(${s.id})" onmouseup="endInnerPress()" ontouchstart="startInnerPress(${s.id})" ontouchend="endInnerPress()">
+                <div class="list-item" onclick="openInnerEdit(${s.id})">
                     <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
                     <div><b>${s.title}</b><br><small>${s.participants}</small></div>
                 </div>
@@ -328,8 +339,14 @@
             document.getElementById('suggestions-panel').classList.remove('hidden');
         }
 
-        function startInnerPress(id) { pressTimer = setTimeout(() => { editingId = id; const s = myHistory.find(i => i.id === id); populateModal(s); document.getElementById('edit-modal').classList.remove('hidden'); }, 600); }
-        function endInnerPress() { clearTimeout(pressTimer); }
+        function openInnerEdit(id) { 
+            editingId = id; 
+            const s = myHistory.find(i => i.id === id);
+            populateModal(s);
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').style.zIndex = "1000";
+        }
+
         function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
 
         function populateModal(item) {
@@ -350,17 +367,23 @@
             const newUrl = document.getElementById('modal-edit-url').value;
             
             const imgFiles = document.getElementById('modal-edit-images').files;
-            let newImages = null;
+            let newImages = [];
             if (imgFiles.length > 0) {
-                newImages = [];
-                for (let file of imgFiles) { newImages.push(await new Promise(r => { let reader = new FileReader(); reader.onload = e => r(e.target.result); reader.readAsDataURL(file); })); }
+                for (let file of imgFiles) { 
+                    newImages.push(await new Promise(r => { 
+                        let reader = new FileReader(); 
+                        reader.onload = e => r(e.target.result); 
+                        reader.readAsDataURL(file); 
+                    })); 
+                }
             }
 
+            // Sync Globally [cite: 123, 124, 125]
             const histIdx = myHistory.findIndex(h => h.id === editingId || (h.title === newTitle && h.creator === currentUser.name));
             if (histIdx > -1) {
                 const h = myHistory[histIdx];
                 h.title = newTitle; h.date = newDate; h.time = newTime; h.dur = newDur; h.url = newUrl;
-                if(newImages) h.images = newImages;
+                if(newImages.length > 0) h.images = newImages;
                 h.modified = new Date().toISOString();
             }
 
@@ -368,7 +391,7 @@
             if (publicIdx > -1) {
                 const a = activities[publicIdx];
                 a.title = newTitle; a.dateRaw = newDate; a.time = newTime; a.duration = newDur; a.url = newUrl;
-                if(newImages) a.images = newImages;
+                if(newImages.length > 0) a.images = newImages;
             }
 
             localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
@@ -414,6 +437,7 @@
             if (isCreator) { editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); }
             else { 
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
+                document.getElementById('modal-close-btn').classList.remove('hidden');
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
                 document.getElementById('view-duration').innerText = item.duration ? `Duration: ${item.duration}` : "";
@@ -421,6 +445,7 @@
                 document.getElementById('view-gallery').innerHTML = (item.images || []).map(img => `<img src="${img}" class="gallery-thumb" onclick="enlarge('${img}')">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').style.zIndex = "1000";
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
