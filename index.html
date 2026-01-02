@@ -131,16 +131,16 @@
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 10%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 400px;">
         <h3>Edit Logistics</h3>
-        <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
+        <textarea id="edit-desc" placeholder="Where / What we do?" oninput="validateLogistics()"></textarea>
         <div class="input-group">
             <span class="input-label">📅 Date</span>
-            <input type="date" id="edit-date">
+            <input type="date" id="edit-date" oninput="validateLogistics()">
         </div>
         <div class="input-group">
             <span class="input-label">🕒 Time</span>
-            <input type="time" id="edit-time">
+            <input type="time" id="edit-time" oninput="validateLogistics()">
         </div>
-        <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
+        <button class="primary-btn" id="save-notify-btn" onclick="saveAndNotify()" disabled>Save & Notify Participants</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
@@ -203,8 +203,6 @@
 
         function init() {
             const params = new URLSearchParams(window.location.search);
-            
-            // Check if we are opening a specific activity for editing (Logistics Panel)
             const editIdParam = params.get('editLogistics');
             
             if (params.get('rate')) {
@@ -222,10 +220,7 @@
                 renderSetup();
             } else {
                 showMainApp();
-                // If the URL contains a request to edit logistics, open the modal
-                if (editIdParam) {
-                    openEdit(parseInt(editIdParam));
-                }
+                if (editIdParam) openEdit(parseInt(editIdParam));
             }
         }
 
@@ -310,18 +305,15 @@
             const params = new URLSearchParams(window.location.search);
             const creatorName = params.get('creator');
             const activityTitle = params.get('rate');
+            const participantsText = params.get('participants');
             const activityId = Date.now();
 
             if (currentRating >= 4) {
-                // Save to local storage for the rater
-                activities.push({ id: activityId, title: activityTitle, joinedBy: params.get('participants'), creator: creatorName });
+                activities.push({ id: activityId, title: activityTitle, joinedBy: participantsText, creator: creatorName });
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
 
-                // Find creator's phone number
                 const creatorObj = family.find(f => f.name === creatorName);
                 const creatorPhone = creatorObj ? creatorObj.phone : "";
-
-                // Create link for the creator to open the logistics panel
                 const logisticsUrl = `${window.location.origin}${window.location.pathname}?editLogistics=${activityId}`;
                 const waMsg = `🎉 *Let's Do It!* \n${currentUser ? currentUser.name : 'Someone'} rated your idea "${activityTitle}" with ${currentRating} stars!\n\nSet the logistics here:\n${logisticsUrl}`;
                 
@@ -331,14 +323,26 @@
         }
 
         function renderFinalList() {
-            document.getElementById('final-list').innerHTML = activities.map(a => `
-                <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
-                    <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
-                    <b>${a.title}</b><br>
-                    <small>With: ${a.joinedBy}</small>
-                    ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
-                </div>
-            `).join('') || '<p style="text-align:center; color:gray;">No confirmed activities yet.</p>';
+            document.getElementById('final-list').innerHTML = activities.map(a => {
+                // Icons appear if logistics are fully set
+                const statusIcons = (a.details && a.dateRaw && a.time) ? ' ❤️🕒' : '';
+                return `
+                    <div class="list-item" onmousedown="startPress(${a.id})" onmouseup="endPress()" ontouchstart="startPress(${a.id})" ontouchend="endPress()">
+                        <div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>
+                        <b>${a.title}${statusIcons}</b><br>
+                        <small>With: ${a.joinedBy}</small>
+                        ${a.dateRaw ? `<br><small>📅 ${a.dateRaw} @ ${a.time}</small>` : ''}
+                    </div>
+                `;
+            }).join('') || '<p style="text-align:center; color:gray;">No confirmed activities yet.</p>';
+        }
+
+        function validateLogistics() {
+            const desc = document.getElementById('edit-desc').value.trim();
+            const date = document.getElementById('edit-date').value;
+            const time = document.getElementById('edit-time').value;
+            const btn = document.getElementById('save-notify-btn');
+            btn.disabled = !(desc && date && time);
         }
 
         function openEdit(id) {
@@ -349,6 +353,7 @@
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
             document.getElementById('save-notify-btn').innerText = `Save & Notify ${item.joinedBy}`;
+            validateLogistics();
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -358,8 +363,16 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+            
+            let phone = "";
+            const participantNames = item.joinedBy.split(' & ');
+            if (participantNames.length === 1 && item.joinedBy !== "Everyone") {
+                const pObj = family.find(f => f.name === participantNames[0]);
+                if (pObj) phone = pObj.phone;
+            }
+
             const waMsg = `✅ *UPDATE:* ${item.title}\n📅 ${item.dateRaw} at ${item.time}\n📍 ${item.details}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(waMsg)}`, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waMsg)}`, '_blank');
             closeEdit();
             renderFinalList();
         }
