@@ -37,7 +37,6 @@
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Small Circular Avatars */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -60,6 +59,9 @@
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         .item-delete { position: absolute; top: 12px; cursor: pointer; font-size: 16px; z-index: 5; opacity: 0.6; }
         body[dir="rtl"] .item-delete { right: auto; left: 12px; }
+
+        /* Small creator avatar inside list items */
+        .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
 
         .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
         .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
@@ -89,11 +91,11 @@
         <button class="primary-btn" onclick="closeGuide()" data-i18n="close">Got it!</button>
     </div>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
         <div id="unified-edit-fields">
             <input type="text" id="modal-edit-title" placeholder="Activity Name">
-            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
+            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Notes/Description"></textarea>
             <div style="display:flex; gap:5px;">
                 <input type="date" id="modal-edit-date" style="flex:1;">
                 <input type="time" id="modal-edit-time" style="flex:1;">
@@ -105,9 +107,7 @@
                 <option value="full" data-i18n="dur3">full day</option>
             </select>
             <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
-            <label style="font-size:11px; display:block;" data-i18n="addImages">Images:</label>
             <input type="file" id="modal-edit-images" multiple accept="image/*">
-            
             <div style="display:flex; gap:8px; margin-top:10px;">
                 <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
                 <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
@@ -168,11 +168,9 @@
                 <input type="file" id="suggest-images" multiple accept="image/*">
                 <button class="secondary-btn" onclick="toggleSuggestLogistics()" data-i18n="cancel">Cancel</button>
             </div>
-            <div class="faces-container">
-                <div class="face-grid">
-                    <div id="faces-render" style="display:contents;"></div>
-                    <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
-                </div>
+            <div class="face-grid">
+                <div id="faces-render" style="display:contents;"></div>
+                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
             </div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
         </div>
@@ -185,25 +183,24 @@
     <script>
         const i18n = {
             eng: {
-                langBtn: "HEB", guideTitle: "User Guide", close: "Close", update: "Update", cancel: "Cancel",
+                langBtn: "HEB", close: "Close", update: "Update", cancel: "Cancel",
                 editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?", 
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
                 everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
                 dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!",
-                innerLongPressTip: "(Long press to edit details)", addImages: "Images:"
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!"
             },
             heb: {
-                langBtn: "ENG", guideTitle: "מדריך למשתמש", close: "סגור", update: "עדכן", cancel: "ביטול",
+                langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
                 editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
                 dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", innerLongPressTip: "(לחיצה ארוכה לעריכת פרטים)", addImages: "תמונות:"
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
             }
         };
 
@@ -314,8 +311,6 @@
                 const s = myHistory.find(i => i.id === id);
                 populateModal(s);
                 document.getElementById('edit-modal').classList.remove('hidden');
-                // Ensure z-index is higher than suggestions panel [cite: 55]
-                document.getElementById('edit-modal').style.zIndex = "1000";
             }, 600); 
         }
         function endInnerPress() { clearTimeout(pressTimer); }
@@ -387,15 +382,20 @@
         }
 
         function renderFinalList() {
+            const todayStr = new Date().toISOString().split('T')[0];
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
-            document.getElementById('final-list').innerHTML = sorted.map(a => `
+            document.getElementById('final-list').innerHTML = sorted.map(a => {
+                const creatorObj = family.find(f => f.name === a.creator);
+                return `
                 <div class="list-item" onclick="openEdit(${a.id})">
                     ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
+                    <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/25'">
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
                     ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
                     ${a.images?.length ? `<div class="image-gallery">${a.images.map(img => `<img src="${img}">`).join('')}</div>` : ''}
                 </div>
-            `).join('') || `<p>No confirmed activities yet</p>`;
+            `;
+            }).join('') || `<p>No confirmed activities yet</p>`;
         }
 
         function openEdit(id) {
@@ -413,18 +413,12 @@
                 document.getElementById('view-images-container').innerHTML = (item.images || []).map(img => `<img src="${img}">`).join('');
             }
             document.getElementById('edit-modal').classList.remove('hidden');
-            document.getElementById('edit-modal').style.zIndex = "1000";
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
         function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        function openGuide() {
-            const d = i18n[currentLang];
-            document.getElementById('guide-content').innerHTML = `<div style="text-align:left;"><b>Planning</b><p>${d.g1Title}</p><b>Global Sync</b><p>${d.g2Body}</p></div>`;
-            document.getElementById('guide-panel').classList.remove('hidden');
-        }
-        function closeGuide() { document.getElementById('guide-panel').classList.add('hidden'); }
+        function openGuide() { alert('Planning: Create ideas & build excitement!\nGlobal Sync: History updates sync with public list.\nFinalizing: Confirm items in Future Activities.'); }
     </script>
 </body>
 </html>
