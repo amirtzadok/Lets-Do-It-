@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Let's Do It!</title>
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Let's Do It!">
+    
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" sizes="192x192" href="logo.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     
     <style>
@@ -13,67 +21,94 @@
             --heart: #f43f5e;
             --bg: #f8fafc;
             --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --completed: #fee2e2;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
-        .card { background: white; padding: 25px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; }
+        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Desktop specific adjustments */
+        .welcome-logo-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            flex: 0 0 auto; 
+            margin-top: 5px; 
+        }
+        .welcome-logo-container img { max-width: 160px; height: auto; } 
+
+        #setup-card { 
+            height: 88vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            padding: 15px; 
+            overflow: hidden;
+            text-align: center;
+        }
+
+        h2.setup-title { 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin: 5px 0 15px 0; 
+        } 
+
+        .avatar-options { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            justify-items: center; 
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
+        .avatar-btn { width: 90px; height: 90px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
+        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
+        .avatar-choice span { font-weight: bold; margin-top: 4px; font-size: 14px; opacity: 0.6; }
+        .avatar-choice.active span { opacity: 1; color: var(--primary); }
+
         @media (min-width: 768px) {
             body { padding: 40px; }
             .card { max-width: 800px; padding: 40px; }
-            .avatar-options { grid-template-columns: repeat(4, 1fr) !important; } 
-            .faces-container { gap: 25px !important; }
-            .welcome-logo-container img { width: 220px !important; }
+            #setup-card { height: auto; min-height: 500px; gap: 20px; justify-content: center; }
+            .avatar-options { grid-template-columns: repeat(4, 1fr); gap: 30px; } 
+            .welcome-logo-container img { max-width: 220px; }
             #setup-card .primary-btn { width: 33.33%; }
         }
 
-        h2 { font-size: 22px; font-weight: 800; margin-top: 0; margin-bottom: 15px; text-align: center; }
-
-        /* Welcome Screen UI with Logo */
-        .welcome-logo-container { display: flex; align-items: center; justify-content: center; margin-bottom: 30px; padding-top: 20px; }
-        .welcome-logo-container img { width: 160px; height: auto; }
-
-        /* Setup Screen - Vertical on Mobile */
-        .avatar-options { display: grid; grid-template-columns: 1fr; gap: 15px; justify-items: center; margin: 20px 0; }
-        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 80px; height: 80px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; transition: 0.3s; object-fit: cover; }
-        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-weight: bold; margin-top: 5px; font-size: 14px; opacity: 0.6; }
-        .avatar-choice.active span { opacity: 1; color: var(--primary); }
-
-        /* Main App UI */
-        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         
-        .input-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        input[type="text"], input[type="date"], textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 10px; }
-        .clear-x { position: absolute; right: 12px; top: 22px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
+        .input-wrapper { position: relative; width: 100%; margin-bottom: 12px; }
+        input[type="text"], input[type="date"], input[type="time"], textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; outline: none; margin-bottom: 8px; }
+        .clear-x { position: absolute; right: 12px; top: 20px; transform: translateY(-50%); background: #cbd5e1; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: none; align-items: center; justify-content: center; font-weight: bold; z-index: 5; }
 
-        .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .faces-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
         .face-wrapper { cursor: pointer; text-align: center; transition: 0.3s; opacity: 0.4; }
         .face-wrapper.selected { opacity: 1; transform: translateY(-5px); }
-        .face { width: 55px; height: 55px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face { width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face { border-color: var(--primary); }
-        .heart-box { width: 55px; height: 55px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 3px solid transparent; }
+        .heart-box { width: 50px; height: 50px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 3px solid transparent; }
         .face-wrapper.selected .heart-box { border-color: var(--heart); }
 
-        /* Buttons & List */
-        .primary-btn { width: 100%; padding: 18px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 18px; display: block; margin: 0 auto; }
-        #setup-card .primary-btn { width: 66%; }
+        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 17px; display: block; margin: 0 auto; transition: 0.2s; }
+        #setup-card .primary-btn { width: 85%; margin-top: auto; }
+        .primary-btn:active { transform: scale(0.98); }
         .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
         .secondary-btn { width: 100%; padding: 12px; background: #cbd5e1; color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .cal-btn { background: #4285F4; margin-top: 10px; }
 
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
-        .item-actions { position: absolute; right: 15px; top: 15px; display: flex; gap: 12px; cursor: pointer; font-size: 18px; }
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; transition: transform 0.1s; user-select: none; }
+        .list-item:active { transform: scale(0.98); }
+        .item-actions { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 18px; }
         .status-icons { font-size: 14px; margin-left: 8px; }
 
-        /* Rating UI */
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 35px; color: #ddd; cursor: pointer; }
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0; font-size: 32px; color: #ddd; cursor: pointer; }
         .stars span.active { color: #facc15; }
-        .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 20px; min-height: 20px; }
+        .star-label { text-align: center; font-weight: bold; color: var(--primary); margin-bottom: 15px; min-height: 20px; }
+
+        .field-label { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
 
         .hidden { display: none !important; }
         .reset-link { font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; }
@@ -82,22 +117,31 @@
 <body onload="init()">
 
     <div id="rating-screen" class="card hidden">
-        <h2 style="text-align:center">Rate the Idea!</h2>
-        <p id="rate-idea-name" style="text-align:center; font-size:18px; font-weight:bold; color:#334155;"></p>
+        <div class="welcome-logo-container">
+            <img src="logo.png" alt="Let's Do It Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
+        </div>
+        <h2 id="rating-header" style="text-align:center; font-size:17px;"></h2>
+        <p id="rating-prompt" style="text-align:center; font-weight:bold; color:var(--primary); margin-bottom:15px;">Rate their idea!</p>
+        
         <div class="stars" id="star-row">
             <span onclick="setStars(1)">★</span><span onclick="setStars(2)">★</span><span onclick="setStars(3)">★</span><span onclick="setStars(4)">★</span><span onclick="setStars(5)">★</span>
         </div>
         <div id="star-desc" class="star-label">Choose your rating</div>
-        <button class="primary-btn" onclick="submitRating()">Submit Vote</button>
+        
+        <button class="primary-btn" id="submit-vote-btn" onclick="submitRating()" disabled style="margin-top: 15px;">Let's do it!</button>
     </div>
 
     <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 100; max-height: 90vh; overflow-y: auto; border: 2px solid var(--primary); width: 90%; max-width: 450px;">
         <h3>Edit Logistics</h3>
         <textarea id="edit-desc" placeholder="Where / What we do?"></textarea>
+        
+        <div class="field-label">📅 Date</div>
         <input type="date" id="edit-date">
-        <input type="text" id="edit-time" placeholder="Time (e.g. 10:00 or Afternoon)">
+        
+        <div class="field-label">🕒 Time</div>
+        <input type="time" id="edit-time">
+        
         <button class="primary-btn" id="edit-notify-btn" onclick="saveAndNotify()">Save & Notify Participants</button>
-        <button class="primary-btn cal-btn" id="gcal-btn">Add to Google Calendar</button>
         <button class="secondary-btn" onclick="closeEdit()">Cancel</button>
     </div>
 
@@ -105,7 +149,7 @@
         <div class="welcome-logo-container">
             <img src="logo.png" alt="Let's Do It Logo" onerror="this.src='https://raw.githubusercontent.com/amirtzadok/Lets-Do-It-/main/logo.png'">
         </div>
-        <h2>Choose your avatar</h2>
+        <h2 class="setup-title">Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled>Let's do it!</button>
     </div>
@@ -151,17 +195,20 @@
         let selected = [];
         let currentRating = 0;
         let editingId = null;
+        let longPressTimer;
         let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
 
         function init() {
             const urlParams = new URLSearchParams(window.location.search);
             const rateName = urlParams.get('rate');
+            const creator = urlParams.get('creator');
+            const editId = urlParams.get('editId');
 
             if (rateName) {
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('setup-card').classList.add('hidden');
                 document.getElementById('rating-screen').classList.remove('hidden');
-                document.getElementById('rate-idea-name').innerText = `"${rateName}"`;
+                document.getElementById('rating-header').innerText = `${creator} created an activity for "${rateName}"`;
                 return;
             }
 
@@ -169,54 +216,71 @@
                 document.getElementById('setup-card').classList.remove('hidden');
                 document.getElementById('avatar-selector').innerHTML = family.map(f => `
                     <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
-                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                        <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/90'">
                         <span>${f.name}</span>
                     </div>
                 `).join('');
             } else {
                 showMainApp();
+                if (editId) openEdit(parseInt(editId));
             }
         }
 
-        // --- RATING LOGIC ---
-        const starLabels = { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "LET'S DO IT!" };
+        // Updated Label for 5-star rating
+        const starLabels = { 1: "No thanks", 2: "Probably not", 3: "Maybe", 4: "I like it!", 5: "what a great idea!" };
+
         function setStars(n) {
             currentRating = n;
             const stars = document.querySelectorAll('#star-row span');
             stars.forEach((s, i) => s.classList.toggle('active', i < n));
             document.getElementById('star-desc').innerText = starLabels[n];
+            document.getElementById('submit-vote-btn').disabled = false;
         }
 
         function submitRating() {
-            if (currentRating === 0) return alert("Pick stars!");
-            const idea = new URLSearchParams(window.location.search).get('rate');
+            const params = new URLSearchParams(window.location.search);
+            const idea = params.get('rate');
+            const creatorName = params.get('creator');
+            const participants = params.get('participants') || 'Someone';
+
             if (currentRating >= 4) {
-                // Modified activity object to track if logistics are set
-                activities.push({ 
+                const newActivity = { 
                     id: Date.now(), 
                     title: idea, 
                     dateAdded: new Date().toLocaleDateString(),
-                    hasLogistics: false 
-                });
+                    creator: creatorName,
+                    joinedBy: participants,
+                    hasLogistics: false
+                };
+                activities.push(newActivity);
                 localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
+                
+                const creatorObj = family.find(f => f.name === creatorName);
+                if (creatorObj) {
+                    const baseUrl = window.location.origin + window.location.pathname;
+                    const directEditUrl = `${baseUrl}?editId=${newActivity.id}`;
+                    const msg = `${participants} joined your suggestion to ${idea}\n🚀 Time to edit your activity details.\n\nEdit here: ${directEditUrl}`;
+                    window.open(`https://wa.me/${creatorObj.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                }
             }
             window.location.href = window.location.pathname;
         }
 
-        // --- LOGISTICS & CALENDAR ---
+        function handlePressStart(id) {
+            longPressTimer = setTimeout(() => openEdit(id), 600);
+        }
+        function handlePressEnd() {
+            clearTimeout(longPressTimer);
+        }
+
         function openEdit(id) {
             editingId = id;
             const item = activities.find(a => a.id === id);
+            if (!item) return;
             document.getElementById('edit-desc').value = item.details || '';
             document.getElementById('edit-date').value = item.dateRaw || '';
             document.getElementById('edit-time').value = item.time || '';
-            
-            document.getElementById('gcal-btn').onclick = () => {
-                const date = (item.dateRaw || "").replace(/-/g, '');
-                const time = (item.time || "1000").replace(/:/g, '');
-                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.title)}&dates=${date}T${time}00/${date}T${parseInt(time)+1}00&details=${encodeURIComponent(item.details || '')}&location=Israel&sf=true&output=xml`;
-                window.open(url, '_blank');
-            };
+            document.getElementById('edit-notify-btn').innerText = `Save & Notify ${item.joinedBy || 'Participants'}`;
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -227,19 +291,25 @@
             item.dateRaw = document.getElementById('edit-date').value;
             item.time = document.getElementById('edit-time').value;
             
-            // Mark as having logistics to trigger icon display
-            if (item.dateRaw || item.time || item.details) {
-                item.hasLogistics = true;
-            }
+            if (item.dateRaw || item.time) item.hasLogistics = true;
 
             localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            const msg = `UPDATE: *${item.title}*\n📅 When: ${item.dateRaw} @ ${item.time}\n📍 Where: ${item.details}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+
+            const dateStr = (item.dateRaw || "").replace(/-/g, '');
+            const timeStr = (item.time || "1000").replace(/:/g, '');
+            const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.title)}&dates=${dateStr}T${timeStr}00/${dateStr}T${parseInt(timeStr)+1}00&details=${encodeURIComponent(item.details || '')}&location=Israel&sf=true&output=xml`;
+            
+            const msg = `UPDATE: *${item.title}*\n📅 When: ${item.dateRaw} @ ${item.time}\n📍 Where: ${item.details}\n\nAdd to calendar: ${calUrl}`;
+            
+            const joinedObj = family.find(f => f.name === item.joinedBy);
+            let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            if (joinedObj) waUrl = `https://wa.me/${joinedObj.phone}?text=${encodeURIComponent(msg)}`;
+            
+            window.open(waUrl, '_blank');
             closeEdit();
             renderFinalList();
         }
 
-        // --- UI UTILS ---
         function selectSelf(id) {
             tempSelectedId = id;
             document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
@@ -248,9 +318,8 @@
         }
 
         function finishSetup() {
-            const user = family.find(f => f.id === tempSelectedId);
-            localStorage.setItem('letsdoit_user_identity', JSON.stringify(user));
-            creatorIdentity = user;
+            creatorIdentity = family.find(f => f.id === tempSelectedId);
+            localStorage.setItem('letsdoit_user_identity', JSON.stringify(creatorIdentity));
             document.getElementById('setup-card').classList.add('hidden');
             showMainApp();
         }
@@ -265,12 +334,12 @@
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-info').innerHTML = `
-                <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/40'">
+                <img src="${creatorIdentity.img}" onerror="this.src='https://via.placeholder.com/35'">
                 <span style="font-weight:bold; font-size:14px;">Hi, ${creatorIdentity.name}</span>
             `;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
-                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/55'">
+                    <img src="${f.img}" class="face" onerror="this.src='https://via.placeholder.com/50'">
                     <p style="font-size:10px; margin-top:5px; font-weight:bold;">${f.name}</p>
                 </div>
             `).join('');
@@ -288,41 +357,50 @@
             const btn = document.getElementById('action-btn');
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
             document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
-            if (selected.length === 0) {
-                btn.innerText = "Select Participants";
-                btn.disabled = true;
-            } else {
+            if (selected.length === 0) { btn.innerText = "Select Participants"; btn.disabled = true; }
+            else { 
                 const names = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `Invite ${names}`;
-                btn.disabled = !val;
+                btn.innerText = `Invite ${names}`; btn.disabled = !val; 
             }
         }
 
         function sendWA() {
             const activity = document.getElementById('main-input').value;
             const chosen = family.filter(f => selected.includes(f.id));
+            const participants = selected.length === family.length ? "Everyone" : chosen.map(f => f.name).join(' & ');
             const baseUrl = window.location.origin + window.location.pathname;
-            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}`;
+            const ratingUrl = `${baseUrl}?rate=${encodeURIComponent(activity)}&creator=${encodeURIComponent(creatorIdentity.name)}&participants=${encodeURIComponent(participants)}`;
+            
             const msg = `🚀 Let's Do It!\n${creatorIdentity.name} suggested "${activity}".\n\nRate it here:\n${ratingUrl}`;
             let waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
             if (chosen.length === 1) waUrl = `https://wa.me/${chosen[0].phone}?text=${encodeURIComponent(msg)}`;
             window.open(waUrl, '_blank');
         }
 
-        // Updated list rendering to show heart and clock icons when logistics exist
         function renderFinalList() {
             document.getElementById('final-list').innerHTML = activities.map(a => `
-                <div class="list-item">
-                    <div class="item-actions"><span onclick="openEdit(${a.id})">📝</span> <span onclick="deleteIdea(${a.id})">🗑️</span></div>
+                <div class="list-item" 
+                     onmousedown="handlePressStart(${a.id})" 
+                     onmouseup="handlePressEnd()" 
+                     ontouchstart="handlePressStart(${a.id})" 
+                     ontouchend="handlePressEnd()">
+                    <div class="item-actions"><span onclick="deleteIdea(${a.id})">🗑️</span></div>
                     <div style="font-weight:bold;">
                         ${a.title}
                         ${a.hasLogistics ? '<span class="status-icons">❤️🕒</span>' : ''}
                     </div>
+                    <div style="font-size:11px; color:#64748b;">Joined by: ${a.joinedBy}</div>
                 </div>
             `).join('') || '<p style="color:#94a3b8; font-size:12px; text-align:center;">No activities yet.</p>';
         }
 
-        function deleteIdea(id) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); }
+        function deleteIdea(id) { 
+            if (confirm("Are you sure you want to delete this activity?")) {
+                activities = activities.filter(a => a.id !== id); 
+                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); 
+                renderFinalList(); 
+            }
+        }
     </script>
 </body>
 </html>
