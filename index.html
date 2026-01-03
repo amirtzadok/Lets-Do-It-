@@ -31,7 +31,6 @@
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Avatar & Face Grid */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .avatar-btn { width: 50px; height: 50px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -43,25 +42,21 @@
         .face-img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face-img { border-color: var(--primary); }
 
-        /* Star Rating */
         .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; direction: ltr; }
         .star { font-size: 40px; cursor: pointer; color: #d1d5db; transition: 0.2s; }
         .star.active { color: var(--star-gold); }
-        .rating-label { font-weight: bold; font-size: 18px; color: var(--primary); height: 24px; }
 
-        /* General UI */
-        input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
+        input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .primary-btn:disabled { background: #cbd5e1; }
-        .secondary-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 15px; margin-top: 8px; font-weight: bold; }
+        .secondary-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 15px; margin-top: 8px; font-weight: bold; cursor: pointer; }
 
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         body[dir="rtl"] .list-item { border-left: none; border-right: 5px solid var(--whatsapp); }
         
-        .action-icon { background: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; font-size: 14px; }
-        .hidden { display: none !important; }
         .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; box-sizing: border-box; }
-        .rating-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; text-align: center; }
+        .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; text-align: center; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body onload="init()">
@@ -78,41 +73,55 @@
     </div>
 
     <div id="rating-modal" class="modal-bg hidden">
-        <div class="rating-card">
+        <div class="modal-card">
             <h3 id="rate-title-main"></h3>
             <h1 id="rate-activity-name" style="margin: 10px 0; color: var(--primary);"></h1>
-            <p id="rate-details" style="font-size: 14px; color: #64748b; margin-bottom: 15px;"></p>
-            <div class="rating-label" id="rating-text"></div>
-            <div class="stars" id="star-container">
+            <div class="stars">
                 <span class="star" onclick="setRating(1)">★</span>
                 <span class="star" onclick="setRating(2)">★</span>
                 <span class="star" onclick="setRating(3)">★</span>
                 <span class="star" onclick="setRating(4)">★</span>
                 <span class="star" onclick="setRating(5)">★</span>
             </div>
-            <button class="primary-btn" id="confirm-rate-btn" onclick="submitRating()" disabled data-i18n="submit">Send Rating</button>
-            <button class="secondary-btn" onclick="closeRating()" data-i18n="close">Not now</button>
+            <p id="rating-text" style="font-weight:bold;"></p>
+            <button class="primary-btn" id="confirm-rate-btn" onclick="submitRating()" disabled data-i18n="submit">Send Feedback</button>
+        </div>
+    </div>
+
+    <div id="details-modal" class="modal-bg hidden">
+        <div class="modal-card">
+            <h2 id="modal-activity-title">Activity Details</h2>
+            <div id="edit-area" class="hidden">
+                <input type="text" id="edit-name" placeholder="Activity Name">
+                <input type="time" id="edit-time" placeholder="Start Hour">
+                <select id="edit-dur">
+                    <option value="1-3 hours">1-3 hours</option>
+                    <option value="half a day">Half a day</option>
+                    <option value="full day">Full day</option>
+                </select>
+                <input type="text" id="edit-url" placeholder="Paste URL link here">
+                <button class="primary-btn" onclick="saveDetails()">Save Changes</button>
+            </div>
+            <div id="view-area" class="hidden">
+                <p id="view-time-info"></p>
+                <p id="view-dur-info"></p>
+                <div id="view-url-area"></div>
+                <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()">Nudge creator for details</button>
+            </div>
+            <button class="secondary-btn" onclick="closeModals()">Close</button>
         </div>
     </div>
 
     <div id="main-app" class="hidden">
         <div class="card">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <div id="user-info" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold;" onclick="openHistory()"></div>
+                <div id="user-info" style="display:flex; align-items:center; gap:8px; font-weight:bold;"></div>
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8; font-weight:bold;" onclick="resetIdentity()" data-i18n="notMe">Not you?</span>
             </div>
-            
-            <h2 data-i18n="doSomething">Let's do something together!</h2>
             <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
-
-            <div class="face-grid">
-                <div id="faces-render" style="display:contents;"></div>
-                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div style="width:42px;height:42px;background:#fff1f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
-            </div>
-
+            <div class="face-grid" id="faces-render"></div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants">Select Participants</button>
         </div>
-
         <div class="card">
             <h2 data-i18n="futureActivities">🚀 Let's Do It!</h2>
             <div id="final-list"></div>
@@ -123,21 +132,19 @@
         const i18n = {
             eng: {
                 langBtn: "HEB", whoAreYou: "Who are you?", enterApp: "Let's do it!", welcomeUser: "Welcome {name}",
-                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
-                everyone: "Everyone", everyoneInvite: "Everyone", futureActivities: "🚀 Let's Do It!", 
-                notMe: "Not you?", groupName: "Tzadok family", selectParticipants: "Select Participants",
-                invitePrefix: "Invite", deleteConfirm: "Delete this?", close: "Close",
-                rateIdea: "Rate {name}'s idea", submit: "Send Rating", needDetails: "Tap to add details!",
-                ratings: ["", "Don't want to", "Probably no", "Maybe", "I like it", "Let's do it!"]
+                planPlaceholder: "What's the plan?", everyone: "Everyone", everyoneInvite: "Everyone", 
+                futureActivities: "🚀 Let's Do It!", notMe: "Not you?", groupName: "Tzadok family",
+                invitePrefix: "Invite", selectParticipants: "Select Participants", submit: "Send Feedback",
+                rateIdea: "Rate {name}'s idea", tryAgain: "Try another idea, {name}.", 
+                addMore: "Add more details on this activity!", ratings: ["", "Don't want to", "Probably no", "Maybe", "I like it", "Let's do it!"]
             },
             heb: {
                 langBtn: "ENG", whoAreYou: "מי את/ה?", enterApp: "קדימה!", welcomeUser: "ברוך הבא {name}",
-                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
-                everyone: "כולם", everyoneInvite: "כולם", futureActivities: "🚀 בואו נעשה את זה!", 
-                notMe: "זה לא את/ה?", groupName: "משפחת צדוק", selectParticipants: "בחרו משתתפים",
-                invitePrefix: "הזמן את", deleteConfirm: "למחוק?", close: "סגור",
-                rateIdea: "דרגו את הרעיון של {name}", submit: "שלח דירוג", needDetails: "לחץ להוספת פרטים!",
-                ratings: ["", "לא רוצה", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה את זה!"]
+                planPlaceholder: "מה התכנון?", everyone: "כולם", everyoneInvite: "כולם", 
+                futureActivities: "🚀 בואו נעשה את זה!", notMe: "זה לא את/ה?", groupName: "משפחת צדוק",
+                invitePrefix: "הזמן את", selectParticipants: "בחרו משתתפים", submit: "שלח משוב",
+                rateIdea: "דרגו את הרעיון של {name}", tryAgain: "נסה רעיון אחר, {name}.", 
+                addMore: "תוסיף עוד פרטים על הפעילות!", ratings: ["", "לא רוצה", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה את זה!"]
             }
         };
 
@@ -151,9 +158,7 @@
         let currentLang = localStorage.getItem('ldit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('ldit_user'));
         let activities = JSON.parse(localStorage.getItem('ldit_list')) || [];
-        let selected = [];
-        let tempRating = 0;
-        let incomingIdea = null;
+        let tempRating = 0, incomingIdea = null, activeActivityId = null;
 
         function toggleLanguage() {
             currentLang = currentLang === 'eng' ? 'heb' : 'eng';
@@ -162,69 +167,56 @@
         }
 
         function init() {
-            const d = i18n[currentLang];
             document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
-            document.getElementById('lang-toggle').innerText = d.langBtn;
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
-
+            document.getElementById('lang-toggle').innerText = i18n[currentLang].langBtn;
+            
             const params = new URLSearchParams(window.location.search);
             if (params.get('import')) {
-                incomingIdea = {
-                    id: params.get('id') || Date.now(), title: params.get('t'), details: params.get('d'),
-                    creator: params.get('c'), p: params.get('p')
-                };
-                showRatingModal();
-                window.history.replaceState({}, document.title, window.location.pathname);
+                incomingIdea = { id: params.get('id'), t: params.get('t'), c: params.get('c'), p: params.get('p') };
+                document.getElementById('rate-title-main').innerText = i18n[currentLang].rateIdea.replace("{name}", incomingIdea.c);
+                document.getElementById('rate-activity-name').innerText = incomingIdea.t;
+                document.getElementById('rating-modal').classList.remove('hidden');
             }
 
-            if (!currentUser) {
-                document.getElementById('setup-card').classList.remove('hidden');
-                renderSetup();
-            } else showMainApp();
+            if (!currentUser) { renderSetup(); document.getElementById('setup-card').classList.remove('hidden'); }
+            else showMainApp();
         }
 
-        function showRatingModal() {
-            document.getElementById('rate-title-main').innerText = i18n[currentLang].rateIdea.replace("{name}", incomingIdea.creator);
-            document.getElementById('rate-activity-name').innerText = incomingIdea.title;
-            document.getElementById('rate-details').innerText = incomingIdea.details || "";
-            document.getElementById('rating-modal').classList.remove('hidden');
-        }
-
-        function setRating(num) {
-            tempRating = num;
-            const stars = document.querySelectorAll('.star');
-            stars.forEach((s, i) => s.classList.toggle('active', i < num));
-            document.getElementById('rating-text').innerText = i18n[currentLang].ratings[num];
+        function setRating(n) {
+            tempRating = n;
+            document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < n));
+            document.getElementById('rating-text').innerText = i18n[currentLang].ratings[n];
             document.getElementById('confirm-rate-btn').disabled = false;
         }
 
         function submitRating() {
-            if (tempRating >= 4) {
-                if (!activities.find(a => a.id == incomingIdea.id)) {
-                    activities.push({...incomingIdea, dateRaw: '', time: ''});
-                    localStorage.setItem('ldit_list', JSON.stringify(activities));
-                }
+            const isHigh = tempRating >= 4;
+            const msg = isHigh ? i18n[currentLang].addMore : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
+            
+            if (isHigh && !activities.find(a => a.id == incomingIdea.id)) {
+                activities.push({ ...incomingIdea, title: incomingIdea.t, time: '', dur: '', url: '' });
+                localStorage.setItem('ldit_list', JSON.stringify(activities));
             }
-            closeRating();
+
+            const phone = family.find(f => f.name === incomingIdea.c)?.phone || "";
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            closeModals();
             if (currentUser) renderFinalList();
         }
 
-        function closeRating() { document.getElementById('rating-modal').classList.add('hidden'); }
-
         function renderSetup() {
             document.getElementById('avatar-selector').innerHTML = family.map(f => `
-                <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id}, '${f.name}')">
-                    <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'">
+                <div class="avatar-choice" onclick="selectSelf(${f.id}, '${f.name}')">
+                    <img src="${f.img}" class="avatar-btn" id="self-${f.id}">
                     <span style="font-size:11px;font-weight:bold;">${f.name}</span>
                 </div>`).join('');
         }
 
         function selectSelf(id, name) {
-            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
-            document.getElementById(`choice-${id}`).classList.add('active');
-            const btn = document.getElementById('start-btn');
-            btn.disabled = false;
-            btn.innerText = i18n[currentLang].welcomeUser.replace("{name}", name);
+            document.querySelectorAll('.avatar-btn').forEach(b => b.parentElement.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            const b = document.getElementById('start-btn');
+            b.disabled = false; b.innerText = i18n[currentLang].welcomeUser.replace("{name}", name);
             window.tempId = id;
         }
 
@@ -236,12 +228,12 @@
 
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"> ${i18n[currentLang].hiUser}, ${currentUser.name}`;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"> ${currentUser.name}`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
-                    <img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/50'">
+                    <img src="${f.img}" class="face-img">
                     <p style="font-size:10px; font-weight:bold;">${f.name}</p>
-                </div>`).join('');
+                </div>`).join('') + `<div class="face-wrapper" id="f-all" onclick="selectAll()"><div style="width:42px;height:42px;background:#fff1f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">❤️</div><p style="font-size:10px; font-weight:bold;">${i18n[currentLang].everyone}</p></div>`;
             renderFinalList();
         }
 
@@ -258,57 +250,72 @@
 
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
+            family.forEach(f => { if(document.getElementById(`f-${f.id}`)) document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)) });
             const btn = document.getElementById('action-btn');
             btn.disabled = !(selected.length > 0 && val);
-            if (selected.length > 0) {
-                const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
-            }
+            if (selected.length > 0) btn.innerText = `${i18n[currentLang].invitePrefix} ${selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ')}`;
         }
 
         function sendWA() {
             const title = document.getElementById('main-input').value;
-            const isEveryone = selected.length === family.length;
-            const pNames = isEveryone ? i18n[currentLang].groupName : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const id = Date.now();
-
-            const params = new URLSearchParams({ import: 'true', id, t: title, c: currentUser.name, p: pNames });
-            const magicLink = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-            const waText = `🚀 *${currentUser.name}* has a new idea: *${title}*\n\nRate it here to confirm:\n${magicLink}`;
-
-            const phone = (!isEveryone && selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(waText)}`, '_blank');
+            const pNames = selected.length === family.length ? i18n[currentLang].groupName : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: pNames });
+            const waText = `🚀 *${currentUser.name}* idea: *${title}*\nRate it:\n${window.location.origin}${window.location.pathname}?${params.toString()}`;
+            window.open(`https://wa.me/${(!params.get('p').includes('&') && selected.length === 1) ? family.find(f => f.id === selected[0]).phone : ""}?text=${encodeURIComponent(waText)}`, '_blank');
             location.reload();
         }
 
         function renderFinalList() {
-            document.getElementById('final-list').innerHTML = activities.map(a => {
-                const isCreator = currentUser && a.creator === currentUser.name;
-                const needsDetails = isCreator && (!a.dateRaw || !a.time);
-                return `
-                <div class="list-item" style="${needsDetails ? 'border-left-color: var(--heart);' : ''}">
-                    <div style="position:absolute; right:12px; top:12px;" class="action-icon" onclick="deleteItem(${a.id})">🗑️</div>
-                    <b>${a.title}</b><br>
-                    <small>${a.creator} | ${a.joinedBy}</small>
-                    ${a.dateRaw ? `<br><span style="font-size:12px; font-weight:bold;">📅 ${a.dateRaw} @ ${a.time}</span>` : ''}
-                    ${needsDetails ? `<div style="color:var(--heart); font-size:11px; font-weight:bold; cursor:pointer;" onclick="editActivity(${a.id})">⚠️ ${i18n[currentLang].needDetails}</div>` : ''}
-                </div>`;
-            }).join('') || `<p>No confirmed activities yet.</p>`;
+            document.getElementById('final-list').innerHTML = activities.map(a => `
+                <div class="list-item" onclick="openDetails(${a.id})">
+                    <div style="position:absolute; right:12px; top:12px; z-index:10;" onclick="event.stopPropagation(); deleteItem(${a.id})">🗑️</div>
+                    <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
+                    ${a.time ? `<br><span style="font-size:12px;">🕒 ${a.time} (${a.dur})</span>` : `<br><span style="color:var(--heart);font-size:11px;">Details missing</span>`}
+                </div>`).join('') || `<p>No confirmed activities.</p>`;
         }
 
-        function editActivity(id) {
+        function openDetails(id) {
+            activeActivityId = id;
             const a = activities.find(x => x.id == id);
-            const date = prompt("Date (YYYY-MM-DD):", a.dateRaw);
-            const time = prompt("Time (HH:MM):", a.time);
-            if (date && time) {
-                a.dateRaw = date; a.time = time;
-                localStorage.setItem('ldit_list', JSON.stringify(activities));
-                renderFinalList();
+            const isCreator = currentUser && a.creator === currentUser.name;
+            
+            document.getElementById('modal-activity-title').innerText = a.title;
+            document.getElementById('edit-area').classList.toggle('hidden', !isCreator);
+            document.getElementById('view-area').classList.toggle('hidden', isCreator);
+            
+            if(isCreator) {
+                document.getElementById('edit-name').value = a.title;
+                document.getElementById('edit-time').value = a.time;
+                document.getElementById('edit-dur').value = a.dur || "1-3 hours";
+                document.getElementById('edit-url').value = a.url;
+            } else {
+                document.getElementById('view-time-info').innerText = a.time ? "Start: " + a.time : "Time: TBD";
+                document.getElementById('view-dur-info').innerText = a.dur ? "Duration: " + a.dur : "";
+                document.getElementById('view-url-area').innerHTML = a.url ? `<a href="${a.url}" target="_blank" class="link-btn">Open Link</a>` : "";
+                document.getElementById('nudge-btn').classList.toggle('hidden', !!a.time);
             }
+            document.getElementById('details-modal').classList.remove('hidden');
         }
 
-        function deleteItem(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id != id); localStorage.setItem('ldit_list', JSON.stringify(activities)); renderFinalList(); } }
+        function saveDetails() {
+            const a = activities.find(x => x.id == activeActivityId);
+            a.title = document.getElementById('edit-name').value;
+            a.time = document.getElementById('edit-time').value;
+            a.dur = document.getElementById('edit-dur').value;
+            a.url = document.getElementById('edit-url').value;
+            localStorage.setItem('ldit_list', JSON.stringify(activities));
+            renderFinalList();
+            closeModals();
+        }
+
+        function nudgeCreator() {
+            const a = activities.find(x => x.id == activeActivityId);
+            const phone = family.find(f => f.name === a.creator)?.phone || "";
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent("Hey " + a.creator + ", please add more details to: " + a.title)}`, '_blank');
+        }
+
+        function deleteItem(id) { if(confirm("Delete?")) { activities = activities.filter(a => a.id != id); localStorage.setItem('ldit_list', JSON.stringify(activities)); renderFinalList(); } }
+        function closeModals() { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); }
         function resetIdentity() { localStorage.removeItem('ldit_user'); location.reload(); }
     </script>
 </body>
