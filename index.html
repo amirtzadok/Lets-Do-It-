@@ -36,7 +36,6 @@
 
         .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
         
-        /* Circular Avatars */
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
         .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
@@ -61,9 +60,9 @@
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         
-        /* Contrast Delete Icon */
+        /* Delete Icon moved down as requested */
         .item-delete { 
-            position: absolute; right: 12px; top: 12px; cursor: pointer; 
+            position: absolute; right: 12px; bottom: 12px; cursor: pointer; 
             font-size: 18px; z-index: 5; color: #ef4444;
             background: white; border-radius: 50%; width: 24px; height: 24px;
             display: flex; align-items: center; justify-content: center;
@@ -81,6 +80,8 @@
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
+
+        .time-rough { color: var(--heart); font-weight: bold; font-size: 13px; margin-inline-end: 5px; }
 
         .hidden { display: none !important; }
     </style>
@@ -205,18 +206,20 @@
                 labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", waNegativeRating: "Try another one!"
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", 
+                timeEstimate: { tomorrow: "Tomorrow", inXDays: "In {x} days", nextWeek: "Next week", nextMonth: "Next month", inXMonths: "In {x} months", soon: "Soon" }
             },
             heb: {
                 langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
                 editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
-                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
+                dur1: "1-3 שעות", dur2: "חצי ייום", dur3: "יום שלם", chooseDuration: "בחירה",
                 labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!", waNegativeRating: "נסו משהו אחר!"
+                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!",
+                timeEstimate: { tomorrow: "מחר", inXDays: "בעוד {x} ימים", nextWeek: "שבוע הבא", nextMonth: "חודש הבא", inXMonths: "בעוד {x} חודשים", soon: "בקרוב" }
             }
         };
 
@@ -357,27 +360,36 @@
 
         function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
 
-        function setStars(n) { currentRating = n; document.querySelectorAll('#star-row span').forEach((s, i) => s.style.color = i < n ? '#facc15' : '#ddd'); document.getElementById('submit-vote-btn').disabled = false; }
-        
-        function submitRating() {
-            const p = new URLSearchParams(window.location.search);
-            const title = p.get('rate'); const creator = p.get('creator');
-            if (currentRating >= 4) {
-                const hist = myHistory.find(s => s.title === title && s.creator === creator) || {};
-                activities.push({ id: Date.now(), title, creator, joinedBy: p.get('participants'), details: p.get('details') || hist.desc || '', dateRaw: p.get('date') || hist.date || '', time: p.get('time') || hist.time || '', duration: p.get('duration') || hist.dur || '', url: p.get('exturl') || hist.url || '' });
-                localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            }
-            window.location.href = window.location.origin + window.location.pathname;
+        function getRoughTimeLabel(dateStr) {
+            if (!dateStr) return "";
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const target = new Date(dateStr);
+            target.setHours(0,0,0,0);
+            
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const t = i18n[currentLang].timeEstimate;
+
+            if (diffDays === 0) return ""; 
+            if (diffDays === 1) return t.tomorrow;
+            if (diffDays > 1 && diffDays < 7) return t.inXDays.replace("{x}", diffDays);
+            if (diffDays >= 7 && diffDays < 30) return t.nextWeek;
+            if (diffDays >= 30 && diffDays < 60) return t.nextMonth;
+            if (diffDays >= 60) return t.inXMonths.replace("{x}", Math.floor(diffDays/30));
+            return t.soon;
         }
 
         function renderFinalList() {
             const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
             document.getElementById('final-list').innerHTML = sorted.map(a => {
                 const creatorObj = family.find(f => f.name === a.creator);
+                const roughTime = getRoughTimeLabel(a.dateRaw);
                 return `
                 <div class="list-item" onclick="openEdit(${a.id})">
                     ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
-                    <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/25'">
+                    <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/40'">
+                    ${roughTime ? `<span class="time-rough">${roughTime}</span>` : ''}
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
                     ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
                 </div>
@@ -393,7 +405,6 @@
             else { 
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
                 document.getElementById('modal-close-btn').classList.remove('hidden');
-                // FIXED: Set title once here
                 document.getElementById('view-title').innerText = item.title;
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
