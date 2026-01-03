@@ -26,12 +26,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Prevents screen movement/bounce on mobile */
             overflow: hidden; 
             position: fixed;
         }
 
-        /* Language Toggle Button */
         .lang-btn {
             position: absolute;
             top: 15px;
@@ -45,21 +43,21 @@
             z-index: 1001;
         }
 
-        /* Setup Screen - Vertically Centered Group */
+        /* Setup Screen */
         #setup-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Vertically Aligned to Screen */
+            justify-content: center;
             height: 100vh;
             width: 100%;
             padding: 20px;
             text-align: center;
-            touch-action: none; /* Disables pull-to-refresh */
+            touch-action: none;
         }
 
         .logo-img {
-            width: 160px; /* Doubled size */
+            width: 160px;
             height: auto;
             margin-bottom: 15px; 
         }
@@ -71,7 +69,6 @@
             color: #000;
         }
 
-        /* Avatar Selection - Centered Mobile Vertical */
         .avatar-options {
             display: flex;
             flex-direction: column;
@@ -83,7 +80,7 @@
 
         .avatar-choice {
             display: flex;
-            flex-direction: column; /* Centering names under pics */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -112,18 +109,17 @@
             color: #333;
         }
 
-        /* Desktop Layout Adjustments */
         @media (min-width: 768px) {
             body { overflow: auto; position: static; }
-            .logo-img { width: 180px; margin-bottom: 60px; } /* Increased Space */
-            .setup-title { font-size: 36px; margin-bottom: 50px; } /* Increased Space */
+            .logo-img { width: 180px; margin-bottom: 60px; }
+            .setup-title { font-size: 36px; margin-bottom: 50px; }
             .avatar-options {
                 flex-direction: row;
                 max-width: 900px;
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 60px; /* Increased Space between avatars */
-                margin-bottom: 70px; /* Increased Space to button */
+                gap: 60px;
+                margin-bottom: 70px;
             }
             .avatar-btn { width: 130px; height: 130px; }
             .avatar-choice span { font-size: 22px; }
@@ -147,7 +143,7 @@
             opacity: 0.6;
         }
 
-        /* Main App Content */
+        /* Main Screen */
         #main-content { 
             width: 100%; 
             display: flex; 
@@ -172,7 +168,7 @@
         
         .face-grid { 
             display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
+            grid-template-columns: repeat(5, 1fr); 
             gap: 10px; 
             width: 100%; 
             margin: 15px 0; 
@@ -198,6 +194,8 @@
         }
 
         .face-wrapper.selected .face-img { border-color: var(--primary); }
+        .heart-box { width: 45px; height: 45px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 3px solid transparent; }
+        .face-wrapper.selected .heart-box { border-color: var(--primary); }
     </style>
 </head>
 <body onload="init()">
@@ -218,6 +216,10 @@
             <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
             <div class="face-grid">
                 <div id="faces-render" style="display:contents;"></div>
+                <div class="face-wrapper" id="f-all" onclick="selectAll()">
+                    <div class="heart-box">❤️</div>
+                    <p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p>
+                </div>
             </div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants" style="max-width:100%"></button>
         </div>
@@ -228,20 +230,22 @@
             eng: {
                 whoAreYou: "Choose your avatar", enterApp: "Let's do it!",
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
-                selectParticipants: "Select Participants", invitePrefix: "Invite", langBtn: "HEB"
+                selectParticipants: "Select Participants", invitePrefix: "Invite", langBtn: "HEB",
+                waMsg: "suggested: ", everyone: "Everyone"
             },
             heb: {
                 whoAreYou: "בחר מי את/ה", enterApp: "בואו נתחיל!",
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
-                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", langBtn: "ENG"
+                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", langBtn: "ENG",
+                waMsg: "הציע/ה: ", everyone: "כולם"
             }
         };
 
         const family = [
-            { id: 1, name: "Amir", img: "amir.png" },
-            { id: 2, name: "Rani", img: "rani.png" },
-            { id: 3, name: "Lia", img: "lia.png" },
-            { id: 4, name: "Gal", img: "gal.png" }
+            { id: 1, name: "Amir", img: "amir.png", phone: "972547880404" },
+            { id: 2, name: "Rani", img: "rani.png", phone: "972542428664" },
+            { id: 3, name: "Lia", img: "lia.png", phone: "972526765297" },
+            { id: 4, name: "Gal", img: "gal.png", phone: "972553054450" }
         ];
 
         let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
@@ -266,7 +270,6 @@
                 document.getElementById('setup-card').classList.remove('hidden');
                 renderSetup();
             } else {
-                // Allow scrolling for main content
                 document.body.style.overflow = "auto";
                 document.body.style.position = "static";
                 showMainApp();
@@ -313,17 +316,24 @@
             updateUIState();
         }
 
+        function selectAll() {
+            selected = (selected.length === family.length) ? [] : family.map(f => f.id);
+            updateUIState();
+        }
+
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             family.forEach(f => {
                 const el = document.getElementById(`f-${f.id}`);
                 if (el) el.classList.toggle('selected', selected.includes(f.id));
             });
+            document.getElementById('f-all').classList.toggle('selected', selected.length === family.length);
+            
             const btn = document.getElementById('action-btn');
             if (btn) {
                 btn.disabled = !(selected.length > 0 && val);
                 if (selected.length > 0) {
-                    const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                    const names = selected.length === family.length ? i18n[currentLang].everyone : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
                     btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
                 } else {
                     btn.innerText = i18n[currentLang].selectParticipants;
@@ -331,7 +341,20 @@
             }
         }
 
-        function sendWA() { alert("Invite Sent!"); }
+        function sendWA() {
+            const plan = document.getElementById('main-input').value;
+            const message = `🚀 ${currentUser.name} ${i18n[currentLang].waMsg}${plan}`;
+            
+            if (selected.length === family.length) {
+                // Targeted group logic
+                window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+            } else if (selected.length === 1) {
+                const target = family.find(f => f.id === selected[0]);
+                window.open(`https://wa.me/${target.phone}?text=${encodeURIComponent(message)}`, '_blank');
+            } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+            }
+        }
     </script>
 </body>
 </html>
