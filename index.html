@@ -43,41 +43,41 @@
             z-index: 1001;
         }
 
-        /* Setup Screen - Vertically Aligned & Compressed for Mobile */
+        /* Setup Screen - Vertical Centering for Mobile */
         #setup-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Centers all content vertically */
+            justify-content: center; /* Centers everything vertically as a group */
             height: 100vh;
             width: 100%;
             padding: 10px;
             text-align: center;
             touch-action: none;
-            overflow: hidden;
         }
 
         .logo-img {
-            width: 130px; /* Reduced slightly to ensure button fits */
+            width: 130px;
             height: auto;
-            margin-bottom: 5px; 
+            margin-bottom: 8px; 
         }
 
         .setup-title {
             font-size: 22px;
             font-weight: 800;
-            margin: 0 0 15px 0;
+            margin: 0 0 12px 0;
             color: #000;
         }
 
-        /* Avatar Selection - Centered Mobile Vertical */
+        /* Avatar Selection - Horizontal Centering */
         .avatar-options {
             display: flex;
             flex-direction: column;
-            gap: 5px; /* Minimized gap */
+            gap: 8px; 
             width: 100%;
             max-width: 280px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            align-items: center; /* Ensures names are centered under pics */
         }
 
         .avatar-choice {
@@ -86,7 +86,8 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 2px;
+            padding: 4px;
+            border-radius: 15px;
             transition: 0.2s;
         }
 
@@ -113,19 +114,17 @@
         /* Desktop Layout Adjustments */
         @media (min-width: 768px) {
             body { overflow: auto; position: static; }
-            .logo-img { width: 160px; margin-bottom: 30px; }
-            .setup-title { font-size: 32px; margin-bottom: 40px; }
+            .logo-img { width: 160px; margin-bottom: 20px; }
+            .setup-title { font-size: 32px; margin-bottom: 25px; }
             .avatar-options {
                 flex-direction: row;
                 max-width: 900px;
                 flex-wrap: wrap;
-                justify-content: center;
-                gap: 50px;
-                margin-bottom: 50px;
+                justify-content: center; /* Centers the avatar group horizontally */
+                gap: 40px;
             }
-            .avatar-btn { width: 120px; height: 120px; }
+            .avatar-btn { width: 110px; height: 110px; }
             .avatar-choice span { font-size: 20px; }
-            .primary-btn { max-width: 300px; padding: 18px; }
         }
 
         .primary-btn {
@@ -145,7 +144,7 @@
             opacity: 0.6;
         }
 
-        /* Main App Content Styles */
+        /* Main App Content */
         #main-content { 
             width: 100%; 
             display: flex; 
@@ -293,7 +292,8 @@
 
         function showMainApp() {
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${i18n[currentLang].hiUser}, ${currentUser.name}</b>`;
+            const welcomeMsg = currentLang === 'heb' ? `היי, ${currentUser.name}` : `Hi, ${currentUser.name}`;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${welcomeMsg}</b>`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/50'">
