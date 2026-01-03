@@ -1,103 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Let's Do It!</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+
     <style>
         :root {
             --primary: #2563eb;
             --whatsapp: #58d368;
             --heart: #f43f5e;
             --bg: #f8fafc;
-            --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); padding: 10px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; min-height: 100vh; box-sizing: border-box; 
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .app-header {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 480px; padding: 15px 0; position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 480px;
+            padding: 15px 0;
+            position: relative;
         }
-        .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
+
+        .app-header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 0;
+        }
 
         .header-btn {
-            background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px;
-            border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
-            top: 50%; transform: translateY(-50%);
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        
-        .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
-        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 1; object-fit: cover; }
-        .avatar-choice.active .avatar-btn { border-color: var(--primary); transform: scale(1.05); }
-        .avatar-choice span { font-size: 11px; margin-top: 4px; font-weight: bold; }
-
-        @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 768px) { .card, .app-header { max-width: 600px; } }
-
-        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        
-        input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        
-        .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .logistics-label { font-size: 12px; color: #64748b; min-width: 90px; font-weight: bold; }
-        body[dir="rtl"] .logistics-label { text-align: right; }
-
-        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
-        .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
-
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
-        
-        .item-delete { 
-            position: absolute; right: 12px; top: 12px; cursor: pointer; 
-            font-size: 18px; z-index: 5; color: #ef4444;
-            background: white; border-radius: 50%; width: 24px; height: 24px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 480px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
-        body[dir="rtl"] .item-delete { right: auto; left: 12px; }
 
-        .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
+        .avatar-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 5px;
+            width: 100%;
+        }
 
-        .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        
+        .avatar-choice {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .avatar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            opacity: 1;
+            object-fit: cover;
+        }
+
+        .avatar-choice.active .avatar-btn {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .avatar-choice span {
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 400px) {
+            .avatar-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+
+            .card,
+            .app-header {
+                max-width: 600px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+
+            .card,
+            .app-header {
+                max-width: 800px;
+            }
+
+            .avatar-btn {
+                width: 120px;
+                height: 120px;
+                border-width: 6px;
+            }
+
+            .avatar-choice span {
+                font-size: 18px;
+                margin-top: 10px;
+            }
+
+            #start-btn {
+                margin-top: 40px;
+            }
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .user-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+        }
+
+        .logistics-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logistics-label {
+            font-size: 12px;
+            color: #64748b;
+            min-width: 90px;
+            font-weight: bold;
+        }
+
+        body[dir="rtl"] .logistics-label {
+            text-align: right;
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--whatsapp);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 10px;
+            background: #cbd5e1;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            margin-top: 8px;
+        }
+
+        .list-item {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border-left: 5px solid var(--whatsapp);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .item-delete {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 5;
+            color: #ef4444;
+            background: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        body[dir="rtl"] .item-delete {
+            right: auto;
+            left: 12px;
+        }
+
+        .creator-badge {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-inline-end: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .face-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin: 15px 0;
+        }
+
         /* Updated Face Selection Styles */
-        .face-wrapper { 
-            cursor: pointer; 
-            text-align: center; 
-            opacity: 1; /* regular color before choosing */
-            transition: 0.3s; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+        .face-wrapper {
+            cursor: pointer;
+            text-align: center;
+            opacity: 1;
+            /* regular color before choosing */
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .face-img { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
-        
+
+        .face-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            object-fit: cover;
+        }
+
         /* Red line added to the circle for choosing */
-        .face-wrapper.selected .face-img { border-color: #ef4444; }
-        
-        .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-        .face-wrapper.selected .heart-box { border: 3px solid #ef4444; }
+        .face-wrapper.selected .face-img {
+            border-color: #ef4444;
+        }
 
-        .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
+        .heart-box {
+            width: 40px;
+            height: 40px;
+            background: #fff1f2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
 
-        .time-rough { color: var(--heart); font-weight: bold; font-size: 13px; margin-inline-end: 5px; }
+        .face-wrapper.selected .heart-box {
+            border: 3px solid #ef4444;
+        }
 
-        .hidden { display: none !important; }
+        .link-btn {
+            display: inline-block;
+            background: #e2e8f0;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 5px;
+        }
+
+        .time-rough {
+            color: var(--heart);
+            font-weight: bold;
+            font-size: 13px;
+            margin-inline-end: 5px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body onload="init()">
 
     <header class="app-header">
@@ -105,17 +345,19 @@
         <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
     </header>
 
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="edit-modal" class="card hidden"
+        style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
         <div id="unified-edit-fields">
             <input type="text" id="modal-edit-title" placeholder="Activity Name">
-            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
-            
+            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder"
+                placeholder="Description/Notes"></textarea>
+
             <div class="logistics-row">
                 <span class="logistics-label" data-i18n="labelDate">Date</span>
                 <input type="date" id="modal-edit-date" style="flex:1; margin-bottom:0;">
             </div>
-            
+
             <div class="logistics-row">
                 <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
                 <input type="time" id="modal-edit-time" style="flex:1; margin-bottom:0;">
@@ -132,10 +374,12 @@
             </div>
 
             <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
-            
+
             <div style="display:flex; gap:8px; margin-top:10px;">
-                <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
-                <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
+                <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;"
+                    data-i18n="update">Update</button>
+                <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;"
+                    data-i18n="cancel">Cancel</button>
             </div>
         </div>
 
@@ -149,7 +393,8 @@
         </div>
     </div>
 
-    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
+    <div id="suggestions-panel" class="card hidden"
+        style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
         <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
         <div id="suggestions-list-content"></div>
         <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
@@ -158,21 +403,27 @@
     <div id="setup-card" class="card hidden">
         <h2 data-i18n="whoAreYou">Who are you?</h2>
         <div class="avatar-options" id="avatar-selector"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp">Let's do it!</button>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp"
+            style="direction: ltr;">Let's do
+            it!</button>
     </div>
 
     <div id="main-app" class="hidden">
         <div class="card">
             <div class="user-header">
                 <div id="user-info" class="user-info" onclick="openSuggestions()"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
+                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()"
+                    data-i18n="notMe">Not me?</span>
             </div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
             <div class="input-row" style="display:flex; gap:8px;">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="flex:1;">
-                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;" onclick="clearInput()">✕</button>
+                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()"
+                    style="flex:1;">
+                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;"
+                    onclick="clearInput()">✕</button>
             </div>
-            <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
+            <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add
+                details now (optional)</button>
             <div id="suggest-logistics-fields" class="hidden optional-logistics">
                 <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
                 <div class="logistics-row">
@@ -197,9 +448,13 @@
             </div>
             <div class="face-grid">
                 <div id="faces-render" style="display:contents;"></div>
-                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
+                <div class="face-wrapper" id="f-all" onclick="selectAll()">
+                    <div class="heart-box">❤️</div>
+                    <p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p>
+                </div>
             </div>
-            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled
+                data-i18n="selectParticipants"></button>
         </div>
         <div class="card">
             <h2 data-i18n="futureActivities">🚀 Future Activities!</h2>
@@ -211,21 +466,21 @@
         const i18n = {
             eng: {
                 langBtn: "HEB", close: "Close", update: "Update", cancel: "Cancel",
-                editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?", 
-                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
-                everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
+                editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?",
+                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
+                everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now", enterApp: "Let's do it!",
                 dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Select",
                 labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
                 mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
                 selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", 
+                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!",
                 timeEstimate: { tomorrow: "Tomorrow", inXDays: "In {x} days", nextWeek: "Next week", nextMonth: "Next month", inXMonths: "In {x} months", soon: "Soon" }
             },
             heb: {
                 langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
-                editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
-                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
-                everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
+                editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?",
+                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
+                everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו", enterApp: "Let's do it!",
                 dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
                 labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
@@ -249,7 +504,7 @@
         let selected = []; let editingId = null;
 
         function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
-        
+
         function updateUILanguage() {
             const d = i18n[currentLang]; const isHeb = currentLang === 'heb';
             document.body.dir = isHeb ? 'rtl' : 'ltr';
@@ -287,7 +542,7 @@
         function selectAll() { selected = (selected.length === family.length) ? [] : family.map(f => f.id); updateUIState(); }
         function clearInput() { document.getElementById('main-input').value = ""; updateUIState(); }
         function toggleSuggestLogistics() { document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); }
-        
+
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
@@ -328,8 +583,8 @@
             document.getElementById('suggestions-panel').classList.remove('hidden');
         }
 
-        function openInnerEdit(id) { 
-            editingId = id; 
+        function openInnerEdit(id) {
+            editingId = id;
             const s = myHistory.find(i => i.id === id);
             populateModal(s);
             document.getElementById('edit-modal').classList.remove('hidden');
@@ -370,25 +625,25 @@
             location.reload();
         }
 
-        function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
+        function deleteSuggestion(id) { if (confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
 
         function getRoughTimeLabel(dateStr) {
             if (!dateStr) return "";
             const today = new Date();
-            today.setHours(0,0,0,0);
+            today.setHours(0, 0, 0, 0);
             const target = new Date(dateStr);
-            target.setHours(0,0,0,0);
-            
+            target.setHours(0, 0, 0, 0);
+
             const diffTime = target - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             const t = i18n[currentLang].timeEstimate;
 
-            if (diffDays === 0) return ""; 
+            if (diffDays === 0) return "";
             if (diffDays === 1) return t.tomorrow;
             if (diffDays > 1 && diffDays < 7) return t.inXDays.replace("{x}", diffDays);
             if (diffDays >= 7 && diffDays < 30) return t.nextWeek;
             if (diffDays >= 30 && diffDays < 60) return t.nextMonth;
-            if (diffDays >= 60) return t.inXMonths.replace("{x}", Math.floor(diffDays/30));
+            if (diffDays >= 60) return t.inXMonths.replace("{x}", Math.floor(diffDays / 30));
             return t.soon;
         }
 
@@ -413,9 +668,9 @@
             editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
             const editF = document.getElementById('unified-edit-fields');
             const viewF = document.getElementById('view-fields');
-            if (isCreator) { 
-                editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); 
-            } else { 
+            if (isCreator) {
+                editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item);
+            } else {
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
                 document.getElementById('modal-close-btn').classList.remove('hidden');
                 // FIXED: Activity title is set here, ensuring no double display
@@ -430,8 +685,9 @@
         }
 
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-        function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
+        function deleteIdea(id) { if (confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
         function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
 </body>
+
 </html>
