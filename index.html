@@ -46,7 +46,9 @@
         .star { font-size: 40px; cursor: pointer; color: #d1d5db; transition: 0.2s; }
         .star.active { color: var(--star-gold); }
 
-        input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
+        input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
+        .logistics-label { font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px; text-align: start; }
+
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
         .primary-btn:disabled { background: #cbd5e1; }
         .secondary-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 15px; margin-top: 8px; font-weight: bold; cursor: pointer; }
@@ -55,8 +57,11 @@
         body[dir="rtl"] .list-item { border-left: none; border-right: 5px solid var(--whatsapp); }
         
         .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; box-sizing: border-box; }
-        .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; text-align: center; max-height: 90vh; overflow-y: auto; }
+        .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; max-height: 90vh; overflow-y: auto; }
         .hidden { display: none !important; }
+        
+        .view-data-point { text-align: start; background: #f8fafc; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
+        .view-data-point b { color: var(--primary); }
     </style>
 </head>
 <body onload="init()">
@@ -90,24 +95,44 @@
 
     <div id="details-modal" class="modal-bg hidden">
         <div class="modal-card">
-            <h2 id="modal-activity-title">Activity Details</h2>
+            <h2 id="modal-activity-title" style="margin-bottom:20px;">Activity Details</h2>
+            
             <div id="edit-area" class="hidden">
-                <input type="text" id="edit-name" placeholder="Activity Name">
-                <input type="time" id="edit-time" placeholder="Start Hour">
+                <label class="logistics-label">Name of activity</label>
+                <input type="text" id="edit-name">
+                
+                <label class="logistics-label">Date</label>
+                <input type="date" id="edit-date">
+                
+                <label class="logistics-label">Start hour</label>
+                <input type="time" id="edit-time">
+                
+                <label class="logistics-label">Duration</label>
                 <select id="edit-dur">
                     <option value="1-3 hours">1-3 hours</option>
                     <option value="half a day">Half a day</option>
                     <option value="full day">Full day</option>
                 </select>
-                <input type="text" id="edit-url" placeholder="Paste URL link here">
+                
+                <label class="logistics-label">Extra details</label>
+                <textarea id="edit-details" rows="3"></textarea>
+                
+                <label class="logistics-label">URL link</label>
+                <input type="text" id="edit-url" placeholder="https://...">
+                
                 <button class="primary-btn" onclick="saveDetails()">Save Changes</button>
             </div>
+
             <div id="view-area" class="hidden">
-                <p id="view-time-info"></p>
-                <p id="view-dur-info"></p>
-                <div id="view-url-area"></div>
-                <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()">Nudge creator for details</button>
+                <div class="view-data-point"><b>Date:</b> <span id="v-date">TBD</span></div>
+                <div class="view-data-point"><b>Start Hour:</b> <span id="v-time">TBD</span></div>
+                <div class="view-data-point"><b>Duration:</b> <span id="v-dur">TBD</span></div>
+                <div class="view-data-point"><b>Extra Details:</b> <span id="v-details">No extra info</span></div>
+                <div id="v-url-container"></div>
+                
+                <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()" style="margin-top:10px;">Add more details</button>
             </div>
+            
             <button class="secondary-btn" onclick="closeModals()">Close</button>
         </div>
     </div>
@@ -194,7 +219,7 @@
             const msg = isHigh ? i18n[currentLang].addMore : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
             
             if (isHigh && !activities.find(a => a.id == incomingIdea.id)) {
-                activities.push({ ...incomingIdea, title: incomingIdea.t, time: '', dur: '', url: '' });
+                activities.push({ ...incomingIdea, title: incomingIdea.t, dateRaw: '', time: '', dur: '', details: '', url: '' });
                 localStorage.setItem('ldit_list', JSON.stringify(activities));
             }
 
@@ -270,7 +295,7 @@
                 <div class="list-item" onclick="openDetails(${a.id})">
                     <div style="position:absolute; right:12px; top:12px; z-index:10;" onclick="event.stopPropagation(); deleteItem(${a.id})">🗑️</div>
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
-                    ${a.time ? `<br><span style="font-size:12px;">🕒 ${a.time} (${a.dur})</span>` : `<br><span style="color:var(--heart);font-size:11px;">Details missing</span>`}
+                    ${a.dateRaw ? `<br><span style="font-size:12px; font-weight:bold;">📅 ${a.dateRaw} @ ${a.time}</span>` : `<br><span style="color:var(--heart);font-size:11px;">Details missing - Tap to fill</span>`}
                 </div>`).join('') || `<p>No confirmed activities.</p>`;
         }
 
@@ -279,20 +304,24 @@
             const a = activities.find(x => x.id == id);
             const isCreator = currentUser && a.creator === currentUser.name;
             
-            document.getElementById('modal-activity-title').innerText = a.title;
+            document.getElementById('modal-activity-title').innerText = isCreator ? "Edit Logistics" : a.title;
             document.getElementById('edit-area').classList.toggle('hidden', !isCreator);
             document.getElementById('view-area').classList.toggle('hidden', isCreator);
             
             if(isCreator) {
                 document.getElementById('edit-name').value = a.title;
+                document.getElementById('edit-date').value = a.dateRaw;
                 document.getElementById('edit-time').value = a.time;
                 document.getElementById('edit-dur').value = a.dur || "1-3 hours";
+                document.getElementById('edit-details').value = a.details || "";
                 document.getElementById('edit-url').value = a.url;
             } else {
-                document.getElementById('view-time-info').innerText = a.time ? "Start: " + a.time : "Time: TBD";
-                document.getElementById('view-dur-info').innerText = a.dur ? "Duration: " + a.dur : "";
-                document.getElementById('view-url-area').innerHTML = a.url ? `<a href="${a.url}" target="_blank" class="link-btn">Open Link</a>` : "";
-                document.getElementById('nudge-btn').classList.toggle('hidden', !!a.time);
+                document.getElementById('v-date').innerText = a.dateRaw || "TBD";
+                document.getElementById('v-time').innerText = a.time || "TBD";
+                document.getElementById('v-dur').innerText = a.dur || "TBD";
+                document.getElementById('v-details').innerText = a.details || "No extra info";
+                document.getElementById('v-url-container').innerHTML = a.url ? `<a href="${a.url}" target="_blank" class="link-btn" style="display:block; text-align:center; margin-top:10px;">Open URL Link</a>` : "";
+                document.getElementById('nudge-btn').classList.toggle('hidden', !!a.time && !!a.dateRaw);
             }
             document.getElementById('details-modal').classList.remove('hidden');
         }
@@ -300,8 +329,10 @@
         function saveDetails() {
             const a = activities.find(x => x.id == activeActivityId);
             a.title = document.getElementById('edit-name').value;
+            a.dateRaw = document.getElementById('edit-date').value;
             a.time = document.getElementById('edit-time').value;
             a.dur = document.getElementById('edit-dur').value;
+            a.details = document.getElementById('edit-details').value;
             a.url = document.getElementById('edit-url').value;
             localStorage.setItem('ldit_list', JSON.stringify(activities));
             renderFinalList();
@@ -311,7 +342,7 @@
         function nudgeCreator() {
             const a = activities.find(x => x.id == activeActivityId);
             const phone = family.find(f => f.name === a.creator)?.phone || "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent("Hey " + a.creator + ", please add more details to: " + a.title)}`, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(i18n[currentLang].addMore + " (" + a.title + ")")}`, '_blank');
         }
 
         function deleteItem(id) { if(confirm("Delete?")) { activities = activities.filter(a => a.id != id); localStorage.setItem('ldit_list', JSON.stringify(activities)); renderFinalList(); } }
