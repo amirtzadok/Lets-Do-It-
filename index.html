@@ -11,20 +11,20 @@
     <style>
         :root {
             --primary: #2563eb;
-            --whatsapp: #58d368;
+            --whatsapp: #76ce71; /* Matched to green in image */
             --heart: #f43f5e;
             --bg: #f8fafc;
             --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --card-max-width: 480px; /* Unified width constraint */
+            --card-max-width: 480px;
         }
 
         * {
-            box-sizing: border-box; /* Ensures padding doesn't affect panel size */
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
+            background: #ffffff; /* Matching white background from image */
             padding: 10px;
             display: flex;
             flex-direction: column;
@@ -71,14 +71,75 @@
             background: white;
             padding: 20px;
             border-radius: 30px;
-            box-shadow: var(--card-shadow);
             width: 100%;
             max-width: var(--card-max-width);
             margin-bottom: 20px;
         }
 
-        /* Avatar grids unified */
-        .avatar-options, .face-grid {
+        /* Setup Screen / Avatar Selector specific to image reference */
+        .setup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 20px;
+        }
+
+        .setup-rocket {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .setup-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            color: #000;
+        }
+
+        .avatar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .avatar-row {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .avatar-row:active {
+            background: #f0f0f0;
+        }
+
+        .avatar-row.active .avatar-img {
+            border: 4px solid var(--whatsapp);
+        }
+
+        .avatar-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid transparent;
+        }
+
+        .avatar-label {
+            font-size: 26px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* Main App Grid (Post-Setup) */
+        .face-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
@@ -86,105 +147,49 @@
             justify-items: center;
         }
 
-        .avatar-choice {
+        .face-wrapper {
+            cursor: pointer;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            cursor: pointer;
-            transition: 0.3s;
         }
 
-        .avatar-btn {
-            width: 50px;
-            height: 50px;
+        .face-img-small {
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            border: 4px solid transparent;
+            border: 3px solid transparent;
             object-fit: cover;
         }
 
-        .avatar-choice.active .avatar-btn {
-            border-color: var(--primary);
-            transform: scale(1.05);
+        .face-wrapper.selected .face-img-small {
+            border-color: #ef4444;
         }
 
-        .avatar-choice span {
-            font-size: 11px;
-            margin-top: 4px;
-            font-weight: bold;
-        }
-
-        .user-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .user-header img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        input[type="text"],
-        input[type="date"],
-        input[type="time"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        /* Fixed label widths to prevent panel jumping */
-        .logistics-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .logistics-label {
-            font-size: 13px;
-            color: #64748b;
-            width: 100px; /* Fixed width for consistency */
-            flex-shrink: 0;
-            font-weight: bold;
-        }
-
+        /* Buttons */
         .primary-btn {
             width: 100%;
             min-height: 55px;
-            padding: 12px;
             background: var(--whatsapp);
             color: white;
             border: none;
-            border-radius: 18px;
-            font-weight: 800;
+            border-radius: 30px; /* Rounder as per image */
+            font-weight: 700;
             cursor: pointer;
-            font-size: 17px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .primary-btn:disabled {
+            opacity: 0.6;
+        }
+
         .secondary-btn {
             width: 100%;
             min-height: 45px;
-            padding: 10px;
             background: #cbd5e1;
             color: white;
             border: none;
@@ -195,212 +200,42 @@
             justify-content: center;
         }
 
-        .list-item {
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-            border-left: 5px solid var(--whatsapp);
-            position: relative;
-            cursor: pointer;
-        }
+        /* Logistics and List items */
+        .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .logistics-label { font-size: 13px; color: #64748b; width: 100px; flex-shrink: 0; font-weight: bold; }
+        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; }
+        body[dir="rtl"] .list-item { border-left: none; border-right: 5px solid var(--whatsapp); }
 
-        body[dir="rtl"] .list-item {
-            border-left: none;
-            border-right: 5px solid var(--whatsapp);
-        }
-
-        .item-delete {
-            position: absolute;
-            right: 12px;
-            top: 12px;
-            cursor: pointer;
-            font-size: 18px;
-            z-index: 5;
-            color: #ef4444;
-            background: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        body[dir="rtl"] .item-delete {
-            right: auto;
-            left: 12px;
-        }
-
-        .face-wrapper {
-            cursor: pointer;
-            text-align: center;
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .face-img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: 3px solid transparent;
-            object-fit: cover;
-        }
-
-        .face-wrapper.selected .face-img {
-            border-color: #ef4444;
-        }
-
-        .heart-box {
-            width: 45px;
-            height: 45px;
-            background: #fff1f2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            border: 3px solid transparent;
-        }
-
-        .face-wrapper.selected .heart-box {
-            border: 3px solid #ef4444;
-        }
-
-        .link-btn {
-            display: inline-block;
-            background: #e2e8f0;
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: bold;
-            text-decoration: none;
-            margin-top: 5px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
         @media (min-width: 768px) {
-            :root { --card-max-width: 600px; }
-            .avatar-btn, .face-img, .heart-box { width: 70px; height: 70px; }
+            .avatar-row { justify-content: center; }
         }
     </style>
 </head>
 
 <body onload="init()">
 
-    <header class="app-header">
-        <h1 id="app-name-display">🚀 Let's Do It!</h1>
-        <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
-    </header>
-
-    <div id="edit-modal" class="card hidden"
-        style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-height: 85vh; overflow-y: auto;">
-        <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
-        <div id="unified-edit-fields">
-            <input type="text" id="modal-edit-title" placeholder="Activity Name">
-            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
-
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelDate">Date</span>
-                <input type="date" id="modal-edit-date" style="flex:1; margin-bottom:0;">
-            </div>
-
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
-                <input type="time" id="modal-edit-time" style="flex:1; margin-bottom:0;">
-            </div>
-
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelDur">Duration</span>
-                <select id="modal-edit-duration" style="flex:1; margin-bottom:0;">
-                    <option value="" disabled selected data-i18n="chooseDuration">Select</option>
-                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                    <option value="half" data-i18n="dur2">half a day</option>
-                    <option value="full" data-i18n="dur3">full day</option>
-                </select>
-            </div>
-
-            <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
-
-            <div style="display:flex; gap:8px; margin-top:10px;">
-                <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
-                <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
-            </div>
-        </div>
-
-        <div id="view-fields" class="hidden">
-            <h2 id="view-title" style="color: var(--primary); margin-top: 0; margin-bottom: 10px;"></h2>
-            <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
-            <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
-            <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
-            <div id="view-link-container"></div>
-            <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
-        </div>
+    <div id="setup-screen" class="setup-container hidden">
+        <div class="setup-rocket">🚀</div>
+        <h2 class="setup-title" data-i18n="whoAreYou">Choose your avatar</h2>
+        <div class="avatar-list" id="avatar-selector"></div>
+        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp">Let's do it!</button>
     </div>
 
-    <div id="suggestions-panel" class="card hidden"
-        style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-height: 85vh; overflow-y: auto;">
-        <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
-        <div id="suggestions-list-content"></div>
-        <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
-    </div>
+    <div id="main-app" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <header class="app-header">
+            <h1 id="app-name-display">🚀 Let's Do It!</h1>
+            <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
+        </header>
 
-    <div id="setup-card" class="card hidden">
-        <h2 data-i18n="whoAreYou">Who are you?</h2>
-        <div class="avatar-options" id="avatar-selector"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp" style="margin-top:20px;">Let's do it!</button>
-    </div>
-
-    <div id="main-app" class="hidden">
         <div class="card">
-            <div class="user-header">
-                <div id="user-info" class="user-info" onclick="openSuggestions()"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
-            </div>
+            <div id="user-info" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;"></div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
-            <div class="input-row" style="display:flex; gap:8px;">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="flex:1;">
-                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;" onclick="clearInput()">✕</button>
-            </div>
-            <button class="secondary-btn" onclick="toggleSuggestLogistics()" style="background:#e2e8f0; color:#475569; margin-bottom:10px;">
-                <span data-i18n="addDetailsNow">+ Add details now</span>
-            </button>
+            <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
             
-            <div id="suggest-logistics-fields" class="hidden">
-                <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelDate">Date</span>
-                    <input type="date" id="suggest-date" style="flex:1; margin-bottom:0;">
-                </div>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
-                    <input type="time" id="suggest-time" style="flex:1; margin-bottom:0;">
-                </div>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelDur">Duration</span>
-                    <select id="suggest-duration" style="flex:1; margin-bottom:0;">
-                        <option value="" disabled selected data-i18n="chooseDuration">Select</option>
-                        <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                        <option value="half" data-i18n="dur2">half a day</option>
-                        <option value="full" data-i18n="dur3">full day</option>
-                    </select>
-                </div>
-                <input type="text" id="suggest-url" placeholder="Paste link (URL)">
-            </div>
-
-            <div class="face-grid">
+            <div class="face-grid" style="margin: 20px 0;">
                 <div id="faces-render" style="display:contents;"></div>
-                <div class="face-wrapper" id="f-all" onclick="selectAll()">
-                    <div class="heart-box">❤️</div>
-                    <p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p>
-                </div>
             </div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
         </div>
@@ -413,27 +248,17 @@
 
     <script>
         const i18n = {
-            eng: {
-                langBtn: "HEB", close: "Close", update: "Update", cancel: "Cancel",
-                editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?",
-                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
-                everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now", enterApp: "Let's do it!",
-                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Select",
-                labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration", notMe: "Not me?",
-                mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
-                selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                timeEstimate: { tomorrow: "Tomorrow", inXDays: "In {x} days", nextWeek: "Next week", nextMonth: "Next month", inXMonths: "In {x} months", soon: "Soon" }
+            eng: { 
+                whoAreYou: "Choose your avatar", enterApp: "Let's do it!", 
+                hiUser: "Hi", doSomething: "Let's do something together!", 
+                planPlaceholder: "What's the plan?", selectParticipants: "Select Participants",
+                langBtn: "HEB", futureActivities: "🚀 Future Activities!", invitePrefix: "Invite"
             },
-            heb: {
-                langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
-                editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?",
-                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
-                everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים", enterApp: "בואו נתחיל!",
-                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
-                labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן", notMe: "לא את/ה?",
-                mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
-                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                timeEstimate: { tomorrow: "מחר", inXDays: "בעוד {x} ימים", nextWeek: "שבוע הבא", nextMonth: "חודש הבא", inXMonths: "בעוד {x} חודשים", soon: "בקרוב" }
+            heb: { 
+                whoAreYou: "בחרו את האוואטר שלכם", enterApp: "בואו נתחיל!", 
+                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", 
+                planPlaceholder: "מה התכנון?", selectParticipants: "בחרו משתתפים",
+                langBtn: "ENG", futureActivities: "🚀 פעילויות עתידיות!", invitePrefix: "הזמן את"
             }
         };
 
@@ -446,106 +271,92 @@
 
         let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
-        let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
-        let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let editingId = null;
-
-        function toggleLanguage() { 
-            currentLang = currentLang === 'eng' ? 'heb' : 'eng'; 
-            localStorage.setItem('letsdoit_lang', currentLang); 
-            location.reload(); 
-        }
-
-        function updateUILanguage() {
-            const d = i18n[currentLang]; const isHeb = currentLang === 'heb';
-            document.body.dir = isHeb ? 'rtl' : 'ltr';
-            document.getElementById('lang-toggle').innerText = d.langBtn;
-            document.getElementById('lang-toggle').style.left = isHeb ? '10px' : 'auto';
-            document.getElementById('lang-toggle').style.right = isHeb ? 'auto' : '10px';
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
-            if (currentUser) document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${d.hiUser}, ${currentUser.name}</b>`;
-        }
+        let selected = [];
 
         function init() {
             updateUILanguage();
-            if (!currentUser) { 
-                document.getElementById('setup-card').classList.remove('hidden'); 
-                renderSetup(); 
+            if (!currentUser) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                renderSetup();
             } else {
                 showMainApp();
             }
         }
 
-        function renderSetup() { 
-            document.getElementById('avatar-selector').innerHTML = family.map(f => `<div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})"><img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'"><span>${f.name}</span></div>`).join(''); 
+        function toggleLanguage() {
+            currentLang = currentLang === 'eng' ? 'heb' : 'eng';
+            localStorage.setItem('letsdoit_lang', currentLang);
+            location.reload();
         }
 
-        function selectSelf(id) { 
-            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active')); 
-            document.getElementById(`choice-${id}`).classList.add('active'); 
-            document.getElementById('start-btn').disabled = false; window.tempId = id; 
+        function updateUILanguage() {
+            const d = i18n[currentLang];
+            document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
+            const btn = document.getElementById('lang-toggle');
+            if (btn) btn.innerText = d.langBtn;
         }
 
-        function finishSetup() { 
-            currentUser = family.find(f => f.id === window.tempId); 
-            localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser)); 
-            location.reload(); 
+        function renderSetup() {
+            document.getElementById('avatar-selector').innerHTML = family.map(f => `
+                <div class="avatar-row" id="choice-${f.id}" onclick="selectSelf(${f.id})">
+                    <img src="${f.img}" class="avatar-img" onerror="this.src='https://via.placeholder.com/90'">
+                    <span class="avatar-label">${f.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectSelf(id) {
+            document.querySelectorAll('.avatar-row').forEach(el => el.classList.remove('active'));
+            document.getElementById(`choice-${id}`).classList.add('active');
+            document.getElementById('start-btn').disabled = false;
+            window.tempId = id;
+        }
+
+        function finishSetup() {
+            currentUser = family.find(f => f.id === window.tempId);
+            localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser));
+            location.reload();
         }
 
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('faces-render').innerHTML = family.map(f => `<div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})"><img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/55'"><p style="font-size:10px; font-weight:bold;">${f.name}</p></div>`).join('');
-            renderFinalList();
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${i18n[currentLang].hiUser}, ${currentUser.name}</b>`;
+            document.getElementById('faces-render').innerHTML = family.map(f => `
+                <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
+                    <img src="${f.img}" class="face-img-small" onerror="this.src='https://via.placeholder.com/45'">
+                    <p style="font-size:10px; font-weight:bold; margin-top:5px;">${f.name}</p>
+                </div>
+            `).join('');
         }
 
-        function toggleFace(id) { const idx = selected.indexOf(id); idx > -1 ? selected.splice(idx, 1) : selected.push(id); updateUIState(); }
-        function selectAll() { selected = (selected.length === family.length) ? [] : family.map(f => f.id); updateUIState(); }
-        function clearInput() { document.getElementById('main-input').value = ""; updateUIState(); }
-        function toggleSuggestLogistics() { document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); }
+        function toggleFace(id) {
+            const idx = selected.indexOf(id);
+            idx > -1 ? selected.splice(idx, 1) : selected.push(id);
+            updateUIState();
+        }
 
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
-            const btn = document.getElementById('action-btn'); btn.disabled = !(selected.length > 0 && val);
+            family.forEach(f => {
+                const el = document.getElementById(`f-${f.id}`);
+                if (el) el.classList.toggle('selected', selected.includes(f.id));
+            });
+            const btn = document.getElementById('action-btn');
+            btn.disabled = !(selected.length > 0 && val);
             if (selected.length > 0) {
-                const target = selected.length === family.length ? i18n[currentLang].everyone : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
-            } else btn.innerText = i18n[currentLang].selectParticipants;
+                const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
+            } else {
+                btn.innerText = i18n[currentLang].selectParticipants;
+            }
         }
 
         function sendWA() {
             const title = document.getElementById('main-input').value;
-            const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const suggObj = { id: Date.now(), title, participants: pNames, modified: new Date().toISOString() };
-            myHistory.push(suggObj);
-            localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
-            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\n\nCheck it out here: ' + url)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title)}`, '_blank');
         }
-
-        function openSuggestions() {
-            document.getElementById('suggestions-list-content').innerHTML = myHistory.map(s => `
-                <div class="list-item" onclick="openInnerEdit(${s.id})">
-                    <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
-                    <div><b>${s.title}</b><br><small>${s.participants}</small></div>
-                </div>
-            `).join('') || `<p>No history yet</p>`;
-            document.getElementById('suggestions-panel').classList.remove('hidden');
-        }
-
-        function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
-
-        function renderFinalList() {
-            document.getElementById('final-list').innerHTML = activities.map(a => `
-                <div class="list-item">
-                    <b>${a.title}</b><br><small>${a.creator}</small>
-                </div>
-            `).join('') || `<p>No activities yet</p>`;
-        }
-
-        function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
     </script>
 </body>
 
