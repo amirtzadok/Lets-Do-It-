@@ -38,8 +38,8 @@
         
         .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
         .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
-        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
+        .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 1; object-fit: cover; }
+        .avatar-choice.active .avatar-btn { border-color: var(--primary); transform: scale(1.05); }
         .avatar-choice span { font-size: 11px; margin-top: 4px; font-weight: bold; }
 
         @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(2, 1fr); } }
@@ -60,9 +60,8 @@
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
         
-        /* Delete Icon moved down as requested */
         .item-delete { 
-            position: absolute; right: 12px; bottom: 12px; cursor: pointer; 
+            position: absolute; right: 12px; top: 12px; cursor: pointer; 
             font-size: 18px; z-index: 5; color: #ef4444;
             background: white; border-radius: 50%; width: 24px; height: 24px;
             display: flex; align-items: center; justify-content: center;
@@ -73,11 +72,24 @@
         .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
 
         .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
-        .face-wrapper.selected { opacity: 1; }
+        
+        /* Updated Face Selection Styles */
+        .face-wrapper { 
+            cursor: pointer; 
+            text-align: center; 
+            opacity: 1; /* regular color before choosing */
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
         .face-img { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
-        .face-wrapper.selected .face-img { border-color: var(--primary); }
+        
+        /* Red line added to the circle for choosing */
+        .face-wrapper.selected .face-img { border-color: #ef4444; }
+        
         .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .face-wrapper.selected .heart-box { border: 3px solid #ef4444; }
 
         .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
 
@@ -128,7 +140,7 @@
         </div>
 
         <div id="view-fields" class="hidden">
-            <h2 id="view-title" style="color: var(--primary); margin-top: 0;"></h2>
+            <h2 id="view-title" style="color: var(--primary); margin-top: 0; margin-bottom: 10px;"></h2>
             <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
             <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
             <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
@@ -214,7 +226,7 @@
                 editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
                 everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
-                dur1: "1-3 שעות", dur2: "חצי ייום", dur3: "יום שלם", chooseDuration: "בחירה",
+                dur1: "1-3 שעות", dur2: "חצי יום", dur3: "יום שלם", chooseDuration: "בחירה",
                 labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
                 mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
                 selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
@@ -401,10 +413,12 @@
             editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
             const editF = document.getElementById('unified-edit-fields');
             const viewF = document.getElementById('view-fields');
-            if (isCreator) { editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); }
-            else { 
+            if (isCreator) { 
+                editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); 
+            } else { 
                 editF.classList.add('hidden'); viewF.classList.remove('hidden');
                 document.getElementById('modal-close-btn').classList.remove('hidden');
+                // FIXED: Activity title is set here, ensuring no double display
                 document.getElementById('view-title').innerText = item.title;
                 document.getElementById('view-desc').innerText = item.details || "...";
                 document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
