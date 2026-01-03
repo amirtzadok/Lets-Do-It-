@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Let's Do It!</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     
@@ -22,13 +22,29 @@
             background: #ffffff; 
             margin: 0; 
             height: 100vh; 
+            width: 100vw;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            overflow: hidden; 
+            position: fixed;
         }
 
-        /* Setup Screen - Optimized for No Scroll */
+        /* Language Toggle Button */
+        .lang-btn {
+            position: absolute;
+            top: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* Setup Screen - Locked for No Scroll */
         #setup-card {
             display: flex;
             flex-direction: column;
@@ -38,48 +54,50 @@
             width: 100%;
             padding: 10px;
             text-align: center;
+            touch-action: none;
         }
 
         .logo-img {
             width: 160px; /* Doubled size */
             height: auto;
-            margin-bottom: 10px; /* Minimized gap */
+            margin-bottom: 8px; 
         }
 
         .setup-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            margin-top: 0;
-            margin-bottom: 15px; /* Minimized gap */
+            margin: 0 0 12px 0;
             color: #000;
         }
 
-        /* Avatar Selection - Mobile Vertical */
+        /* Avatar Selection - Centered Mobile Vertical */
         .avatar-options {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Minimized gap between avatars */
+            gap: 8px; 
             width: 100%;
             max-width: 280px;
-            margin-bottom: 15px; /* Moved button closer */
+            margin-bottom: 12px;
         }
 
         .avatar-choice {
             display: flex;
+            flex-direction: column; /* Centering names under pics */
             align-items: center;
-            gap: 15px;
+            justify-content: center;
             cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 4px;
+            border-radius: 15px;
             transition: 0.2s;
         }
 
         .avatar-btn {
-            width: 70px; /* Slightly adjusted for mobile height constraints */
-            height: 70px;
+            width: 65px; 
+            height: 65px;
             border-radius: 50%;
             border: 4px solid transparent;
             object-fit: cover;
+            margin-bottom: 2px;
         }
 
         .avatar-choice.active .avatar-btn {
@@ -88,45 +106,29 @@
         }
 
         .avatar-choice span {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
         }
 
         /* Desktop Layout Adjustments */
         @media (min-width: 768px) {
-            .logo-img {
-                width: 160px; /* Maintained doubled size */
-                margin-bottom: 25px;
-            }
-            .setup-title {
-                font-size: 32px;
-                margin-bottom: 30px;
-            }
+            body { overflow: auto; position: static; }
+            .logo-img { width: 160px; margin-bottom: 20px; }
+            .setup-title { font-size: 32px; margin-bottom: 25px; }
             .avatar-options {
                 flex-direction: row;
                 max-width: 800px;
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 40px;
-                margin-bottom: 40px;
             }
-            .avatar-choice {
-                flex-direction: column;
-                text-align: center;
-            }
-            .avatar-btn {
-                width: 120px;
-                height: 120px;
-            }
-            .primary-btn {
-                margin-top: 30px;
-            }
+            .avatar-btn { width: 110px; height: 110px; }
         }
 
         .primary-btn {
             width: 100%;
-            max-width: 280px;
+            max-width: 260px;
             padding: 14px;
             background: var(--whatsapp);
             color: white;
@@ -139,22 +141,64 @@
 
         .primary-btn:disabled {
             opacity: 0.6;
-            cursor: not-allowed;
         }
 
-        /* Main App Content Hidden during setup */
-        #main-content { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .main-card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; }
+        /* Main App Content */
+        #main-content { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            overflow-y: auto; 
+            height: 100vh; 
+        }
+
+        .main-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 30px; 
+            box-shadow: var(--card-shadow); 
+            width: 100%; 
+            max-width: var(--card-max-width); 
+            margin-bottom: 20px; 
+        }
+
         .hidden { display: none !important; }
         
-        .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; display: flex; flex-direction: column; align-items: center; }
+        .face-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            width: 100%; 
+            margin: 15px 0; 
+        }
+
+        .face-wrapper { 
+            cursor: pointer; 
+            text-align: center; 
+            opacity: 0.4; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
         .face-wrapper.selected { opacity: 1; }
-        .face-img { width: 45px; height: 45px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+
+        .face-img { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            border: 3px solid transparent; 
+            object-fit: cover; 
+        }
+
         .face-wrapper.selected .face-img { border-color: var(--primary); }
     </style>
 </head>
 <body onload="init()">
+
+    <button id="lang-toggle" class="lang-btn" onclick="toggleLanguage()">HEB</button>
 
     <div id="setup-card" class="hidden">
         <img src="logo.png" alt="Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/160?text=Logo'">
@@ -180,12 +224,12 @@
             eng: {
                 whoAreYou: "Choose your avatar", enterApp: "Let's do it!",
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
-                selectParticipants: "Select Participants", invitePrefix: "Invite"
+                selectParticipants: "Select Participants", invitePrefix: "Invite", langBtn: "HEB"
             },
             heb: {
                 whoAreYou: "בחר מי את/ה", enterApp: "בואו נתחיל!",
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
-                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את"
+                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", langBtn: "ENG"
             }
         };
 
@@ -200,14 +244,27 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
 
+        function toggleLanguage() {
+            currentLang = currentLang === 'eng' ? 'heb' : 'eng';
+            localStorage.setItem('letsdoit_lang', currentLang);
+            location.reload();
+        }
+
         function init() {
             document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
             document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]);
+            
+            const lBtn = document.getElementById('lang-toggle');
+            lBtn.innerText = i18n[currentLang].langBtn;
+            lBtn.style[currentLang === 'heb' ? 'left' : 'right'] = '15px';
 
             if (!currentUser) {
                 document.getElementById('setup-card').classList.remove('hidden');
                 renderSetup();
             } else {
+                // Allow scrolling for main content
+                document.body.style.overflow = "auto";
+                document.body.style.position = "static";
                 showMainApp();
             }
         }
@@ -236,7 +293,8 @@
 
         function showMainApp() {
             document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${i18n[currentLang].hiUser}, ${currentUser.name}</b>`;
+            const welcomeMsg = currentLang === 'heb' ? `היי, ${currentUser.name}` : `Hi, ${currentUser.name}`;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${welcomeMsg}</b>`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/50'">
@@ -258,7 +316,15 @@
                 if (el) el.classList.toggle('selected', selected.includes(f.id));
             });
             const btn = document.getElementById('action-btn');
-            if (btn) btn.disabled = !(selected.length > 0 && val);
+            if (btn) {
+                btn.disabled = !(selected.length > 0 && val);
+                if (selected.length > 0) {
+                    const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                    btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
+                } else {
+                    btn.innerText = i18n[currentLang].selectParticipants;
+                }
+            }
         }
 
         function sendWA() { alert("Invite Sent!"); }
