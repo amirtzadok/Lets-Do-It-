@@ -9,17 +9,123 @@
     <style>
         :root {
             --primary: #2563eb;
-            --whatsapp: #58d368;
-            --heart: #f43f5e;
+            --whatsapp: #76ce71;
             --bg: #f8fafc;
             --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --card-max-width: 480px;
         }
+
+        * { box-sizing: border-box; }
 
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); padding: 10px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; min-height: 100vh; box-sizing: border-box; 
+            background: #ffffff; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Setup Screen Centering */
+        #setup-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .setup-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: #000;
+        }
+
+        /* Avatar Selection - Vertical Mobile */
+        .avatar-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 40px;
+        }
+
+        .avatar-choice {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 20px;
+            transition: 0.2s;
+        }
+
+        .avatar-btn {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            object-fit: cover;
+        }
+
+        .avatar-choice.active .avatar-btn {
+            border-color: var(--whatsapp);
+            transform: scale(1.05);
+        }
+
+        .avatar-choice span {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 768px) {
+            .avatar-options {
+                flex-direction: row;
+                max-width: 800px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 40px;
+            }
+            .avatar-choice {
+                flex-direction: column;
+                text-align: center;
+            }
+            .avatar-btn {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        .primary-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 16px;
+            background: var(--whatsapp);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .app-header {
@@ -27,169 +133,48 @@
             width: 100%; max-width: 480px; padding: 15px 0; position: relative;
         }
         .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
-
         .header-btn {
             background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px;
             border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
             top: 50%; transform: translateY(-50%);
         }
-
-        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        
-        .avatar-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px; width: 100%; }
-        .avatar-choice { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
-        .avatar-btn { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; opacity: 0.5; object-fit: cover; }
-        .avatar-choice.active .avatar-btn { border-color: var(--primary); opacity: 1; transform: scale(1.05); }
-        .avatar-choice span { font-size: 11px; margin-top: 4px; font-weight: bold; }
-
-        @media (max-width: 400px) { .avatar-options { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 768px) { .card, .app-header { max-width: 600px; } }
-
-        .user-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .user-header img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        
-        input[type="text"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 8px; }
-        
-        .logistics-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .logistics-label { font-size: 12px; color: #64748b; min-width: 90px; font-weight: bold; }
-        body[dir="rtl"] .logistics-label { text-align: right; }
-
-        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
-        .secondary-btn { width: 100%; padding: 10px; background: #cbd5e1; color: white; border: none; border-radius: 15px; margin-top: 8px; }
-
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
-        
-        /* Delete Icon moved down as requested */
-        .item-delete { 
-            position: absolute; right: 12px; bottom: 12px; cursor: pointer; 
-            font-size: 18px; z-index: 5; color: #ef4444;
-            background: white; border-radius: 50%; width: 24px; height: 24px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        body[dir="rtl"] .item-delete { right: auto; left: 12px; }
-
-        .creator-badge { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-inline-end: 8px; border: 1px solid #ddd; }
-
-        .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
-        .face-wrapper.selected { opacity: 1; }
-        .face-img { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
-        .face-wrapper.selected .face-img { border-color: var(--primary); }
-        .heart-box { width: 40px; height: 40px; background: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-
-        .link-btn { display: inline-block; background: #e2e8f0; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none; margin-top: 5px; }
-
-        .time-rough { color: var(--heart); font-weight: bold; font-size: 13px; margin-inline-end: 5px; }
-
+        .main-card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; }
         .hidden { display: none !important; }
+        
+        .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
+        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; display: flex; flex-direction: column; align-items: center; }
+        .face-wrapper.selected { opacity: 1; }
+        .face-img { width: 45px; height: 45px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face-wrapper.selected .face-img { border-color: var(--primary); }
     </style>
 </head>
 <body onload="init()">
 
-    <header class="app-header">
-        <h1 id="app-name-display">🚀 Let's Do It!</h1>
-        <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
-    </header>
-
-    <div id="edit-modal" class="card hidden" style="position: fixed; top: 5%; z-index: 1000; border: 2px solid var(--primary); width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
-        <h3 id="modal-title" data-i18n="editLogistics">Edit Details</h3>
-        <div id="unified-edit-fields">
-            <input type="text" id="modal-edit-title" placeholder="Activity Name">
-            <textarea id="modal-edit-desc" data-i18n-placeholder="descPlaceholder" placeholder="Description/Notes"></textarea>
-            
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelDate">Date</span>
-                <input type="date" id="modal-edit-date" style="flex:1; margin-bottom:0;">
-            </div>
-            
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
-                <input type="time" id="modal-edit-time" style="flex:1; margin-bottom:0;">
-            </div>
-
-            <div class="logistics-row">
-                <span class="logistics-label" data-i18n="labelDur">Duration</span>
-                <select id="modal-edit-duration" style="flex:1; margin-bottom:0;">
-                    <option value="" disabled selected data-i18n="chooseDuration">Select</option>
-                    <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                    <option value="half" data-i18n="dur2">half a day</option>
-                    <option value="full" data-i18n="dur3">full day</option>
-                </select>
-            </div>
-
-            <input type="text" id="modal-edit-url" placeholder="Paste link (URL)">
-            
-            <div style="display:flex; gap:8px; margin-top:10px;">
-                <button class="primary-btn" onclick="syncAndSaveGlobal()" style="flex:2;" data-i18n="update">Update</button>
-                <button class="secondary-btn" onclick="closeEdit()" style="flex:1; margin-top:0;" data-i18n="cancel">Cancel</button>
-            </div>
-        </div>
-
-        <div id="view-fields" class="hidden">
-            <h2 id="view-title" style="color: var(--primary); margin-top: 0;"></h2>
-            <p id="view-desc" style="background:#f1f5f9; padding:12px; border-radius:12px;"></p>
-            <p id="view-datetime" style="font-weight:bold; color:var(--primary);"></p>
-            <p id="view-duration" style="font-style:italic; font-size:13px;"></p>
-            <div id="view-link-container"></div>
-            <button class="secondary-btn" onclick="closeEdit()" data-i18n="close">Close</button>
-        </div>
-    </div>
-
-    <div id="suggestions-panel" class="card hidden" style="position: fixed; top: 5%; z-index: 500; border: 2px solid var(--whatsapp); width: 95%; max-width: 450px; max-height: 85vh; overflow-y: auto;">
-        <h2 data-i18n="mySuggestionsTitle">My Suggestions</h2>
-        <div id="suggestions-list-content"></div>
-        <button class="secondary-btn" onclick="closeSuggestions()" data-i18n="close">Close</button>
-    </div>
-
-    <div id="setup-card" class="card hidden">
-        <h2 data-i18n="whoAreYou">Who are you?</h2>
+    <div id="setup-card" class="hidden">
+        <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+        <h2 class="setup-title" data-i18n="whoAreYou">Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp">Let's do it!</button>
     </div>
 
-    <div id="main-app" class="hidden">
-        <div class="card">
-            <div class="user-header">
-                <div id="user-info" class="user-info" onclick="openSuggestions()"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()" data-i18n="notMe">Not me?</span>
-            </div>
+    <div id="main-content" class="hidden">
+        <header class="app-header">
+            <h1 id="app-name-display">🚀 Let's Do It!</h1>
+            <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
+        </header>
+
+        <div class="main-card">
+            <div id="user-info" style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"></div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
-            <div class="input-row" style="display:flex; gap:8px;">
-                <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="flex:1;">
-                <button style="background:none; border:none; color:#ccc; cursor:pointer; font-size:20px;" onclick="clearInput()">✕</button>
-            </div>
-            <button class="toggle-logistics-btn" onclick="toggleSuggestLogistics()" data-i18n="addDetailsNow">+ Add details now (optional)</button>
-            <div id="suggest-logistics-fields" class="hidden optional-logistics">
-                <textarea id="suggest-desc" data-i18n-placeholder="descPlaceholder"></textarea>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelDate">Date</span>
-                    <input type="date" id="suggest-date" style="flex:1; margin-bottom:0;">
-                </div>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelStart">Starting hour</span>
-                    <input type="time" id="suggest-time" style="flex:1; margin-bottom:0;">
-                </div>
-                <div class="logistics-row">
-                    <span class="logistics-label" data-i18n="labelDur">Duration</span>
-                    <select id="suggest-duration" style="flex:1; margin-bottom:0;">
-                        <option value="" disabled selected data-i18n="chooseDuration">Select</option>
-                        <option value="1-3" data-i18n="dur1">1-3 hours</option>
-                        <option value="half" data-i18n="dur2">half a day</option>
-                        <option value="full" data-i18n="dur3">full day</option>
-                    </select>
-                </div>
-                <input type="text" id="suggest-url" placeholder="Paste link (URL)">
-                <button class="secondary-btn" onclick="toggleSuggestLogistics()" data-i18n="cancel">Cancel</button>
-            </div>
+            <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
+            
             <div class="face-grid">
                 <div id="faces-render" style="display:contents;"></div>
-                <div class="face-wrapper" id="f-all" onclick="selectAll()"><div class="heart-box">❤️</div><p style="font-size:10px; font-weight:bold;" data-i18n="everyone">Everyone</p></div>
             </div>
-            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants"></button>
+            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants" style="max-width:100%"></button>
         </div>
-        <div class="card">
+        
+        <div class="main-card">
             <h2 data-i18n="futureActivities">🚀 Future Activities!</h2>
             <div id="final-list"></div>
         </div>
@@ -198,226 +183,113 @@
     <script>
         const i18n = {
             eng: {
-                langBtn: "HEB", close: "Close", update: "Update", cancel: "Cancel",
-                editLogistics: "Edit Details", descPlaceholder: "Notes/Description", whoAreYou: "Who are you?", 
-                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?", 
-                everyone: "Everyone", futureActivities: "🚀 Future Activities!", addDetailsNow: "+ Add details now",
-                dur1: "1-3 hours", dur2: "half a day", dur3: "full day", chooseDuration: "Select",
-                labelDate: "Date", labelStart: "Starting hour", labelDur: "Duration",
-                mySuggestionsTitle: "My Suggestions", deleteConfirm: "Delete this?", groupName: "Tzadok family",
-                selectParticipants: "Select Participants", invitePrefix: "Invite", viewLink: "🔗 View Link",
-                waRatingMsg: "liked your idea", waConfirmed: "Confirmed!", 
-                timeEstimate: { tomorrow: "Tomorrow", inXDays: "In {x} days", nextWeek: "Next week", nextMonth: "Next month", inXMonths: "In {x} months", soon: "Soon" }
+                langBtn: "HEB", whoAreYou: "Choose your avatar", enterApp: "Let's do it!",
+                hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
+                futureActivities: "🚀 Future Activities!", selectParticipants: "Select Participants", invitePrefix: "Invite"
             },
             heb: {
-                langBtn: "ENG", close: "סגור", update: "עדכן", cancel: "ביטול",
-                editLogistics: "ערוך פרטים", descPlaceholder: "תיאור/הערות", whoAreYou: "מי את/ה?", 
-                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?", 
-                everyone: "כולם", futureActivities: "🚀 פעילויות עתידיות!", addDetailsNow: "+ הוסיפו פרטים עכשיו",
-                dur1: "1-3 שעות", dur2: "חצי ייום", dur3: "יום שלם", chooseDuration: "בחירה",
-                labelDate: "תאריך", labelStart: "שעת התחלה", labelDur: "משך זמן",
-                mySuggestionsTitle: "ההצעות שלי", deleteConfirm: "למחוק?", groupName: "משפחת צדוק",
-                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את", viewLink: "🔗 צפייה בקישור",
-                waRatingMsg: "אהב/ה את הרעיון", waConfirmed: "אושר!",
-                timeEstimate: { tomorrow: "מחר", inXDays: "בעוד {x} ימים", nextWeek: "שבוע הבא", nextMonth: "חודש הבא", inXMonths: "בעוד {x} חודשים", soon: "בקרוב" }
+                langBtn: "ENG", whoAreYou: "בחר מי את/ה", enterApp: "בואו נתחיל!",
+                hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
+                futureActivities: "🚀 פעילויות עתידיות!", selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את"
             }
         };
 
         const family = [
-            { id: 1, name: "Amir", phone: "972547880404", img: "amir.png" },
-            { id: 2, name: "Rani", phone: "972542428664", img: "rani.png" },
-            { id: 3, name: "Lia", phone: "972526765297", img: "lia.png" },
-            { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
+            { id: 1, name: "Amir", img: "amir.png" },
+            { id: 2, name: "Rani", img: "rani.png" },
+            { id: 3, name: "Lia", img: "lia.png" },
+            { id: 4, name: "Gal", img: "gal.png" }
         ];
 
         let currentLang = localStorage.getItem('letsdoit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
-        let activities = JSON.parse(localStorage.getItem('letsdoit_final_list')) || [];
-        let myHistory = JSON.parse(localStorage.getItem('letsdoit_suggestions_history')) || [];
-        let selected = []; let editingId = null;
+        let selected = [];
 
-        function toggleLanguage() { currentLang = currentLang === 'eng' ? 'heb' : 'eng'; localStorage.setItem('letsdoit_lang', currentLang); location.reload(); }
-        
-        function updateUILanguage() {
-            const d = i18n[currentLang]; const isHeb = currentLang === 'heb';
-            document.body.dir = isHeb ? 'rtl' : 'ltr';
-            document.getElementById('lang-toggle').innerText = d.langBtn;
-            document.getElementById('lang-toggle').style.left = isHeb ? '0px' : 'auto';
-            document.getElementById('lang-toggle').style.right = isHeb ? 'auto' : '0px';
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = d[el.getAttribute('data-i18n')]);
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = d[el.getAttribute('data-i18n-placeholder')]);
-            if (currentUser) document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://via.placeholder.com/40'"> <b>${d.hiUser}, ${currentUser.name}</b>`;
+        function toggleLanguage() { 
+            currentLang = currentLang === 'eng' ? 'heb' : 'eng'; 
+            localStorage.setItem('letsdoit_lang', currentLang); 
+            location.reload(); 
         }
 
         function init() {
-            updateUILanguage();
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('editLogistics')) {
-                if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-                else { showMainApp(); openEdit(parseInt(params.get('editLogistics'))); }
-                return;
+            document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]);
+            
+            const langBtn = document.getElementById('lang-toggle');
+            if(langBtn) {
+                langBtn.innerText = i18n[currentLang].langBtn;
+                langBtn.style[currentLang === 'heb' ? 'left' : 'right'] = '10px';
             }
-            if (!currentUser) { document.getElementById('setup-card').classList.remove('hidden'); renderSetup(); }
-            else showMainApp();
+
+            if (!currentUser) {
+                document.getElementById('setup-card').classList.remove('hidden');
+                renderSetup();
+            } else {
+                showMainApp();
+            }
         }
 
-        function renderSetup() { document.getElementById('avatar-selector').innerHTML = family.map(f => `<div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})"><img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/80'"><span>${f.name}</span></div>`).join(''); }
-        function selectSelf(id) { document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active')); document.getElementById(`choice-${id}`).classList.add('active'); document.getElementById('start-btn').disabled = false; window.tempId = id; }
-        function finishSetup() { currentUser = family.find(f => f.id === window.tempId); localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser)); location.reload(); }
+        function renderSetup() {
+            document.getElementById('avatar-selector').innerHTML = family.map(f => `
+                <div class="avatar-choice" id="choice-${f.id}" onclick="selectSelf(${f.id})">
+                    <img src="${f.img}" class="avatar-btn" onerror="this.src='https://via.placeholder.com/120'">
+                    <span>${f.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectSelf(id) {
+            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
+            document.getElementById(`choice-${id}`).classList.add('active');
+            document.getElementById('start-btn').disabled = false;
+            window.tempId = id;
+        }
+
+        function finishSetup() {
+            currentUser = family.find(f => f.id === window.tempId);
+            localStorage.setItem('letsdoit_user_identity', JSON.stringify(currentUser));
+            location.reload();
+        }
 
         function showMainApp() {
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('faces-render').innerHTML = family.map(f => `<div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})"><img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/55'"><p style="font-size:10px; font-weight:bold;">${f.name}</p></div>`).join('');
-            renderFinalList();
+            document.getElementById('main-content').classList.remove('hidden');
+            const welcomeText = currentLang === 'heb' ? `היי, ${currentUser.name}` : `Hi, ${currentUser.name}`;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${welcomeText}</b>`;
+            document.getElementById('faces-render').innerHTML = family.map(f => `
+                <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
+                    <img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/50'">
+                    <p style="font-size:10px; font-weight:bold;">${f.name}</p>
+                </div>
+            `).join('');
         }
 
-        function toggleFace(id) { const idx = selected.indexOf(id); idx > -1 ? selected.splice(idx, 1) : selected.push(id); updateUIState(); }
-        function selectAll() { selected = (selected.length === family.length) ? [] : family.map(f => f.id); updateUIState(); }
-        function clearInput() { document.getElementById('main-input').value = ""; updateUIState(); }
-        function toggleSuggestLogistics() { document.getElementById('suggest-logistics-fields').classList.toggle('hidden'); }
-        
+        function toggleFace(id) {
+            const idx = selected.indexOf(id);
+            idx > -1 ? selected.splice(idx, 1) : selected.push(id);
+            updateUIState();
+        }
+
         function updateUIState() {
             const val = document.getElementById('main-input').value;
-            family.forEach(f => document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)));
-            const btn = document.getElementById('action-btn'); btn.disabled = !(selected.length > 0 && val);
-            if (selected.length > 0) {
-                const target = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                btn.innerText = `${i18n[currentLang].invitePrefix} ${target}`;
-            } else btn.innerText = i18n[currentLang].selectParticipants;
-        }
-
-        async function sendWA() {
-            const title = document.getElementById('main-input').value;
-            const desc = document.getElementById('suggest-desc').value;
-            const date = document.getElementById('suggest-date').value;
-            const time = document.getElementById('suggest-time').value;
-            const dur = document.getElementById('suggest-duration').value;
-            const urlInp = document.getElementById('suggest-url').value;
-            const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-
-            const suggObj = { id: Date.now(), title, desc, date, time, dur, url: urlInp, creator: currentUser.name, participants: pNames, modified: new Date().toISOString() };
-            myHistory.push(suggObj);
-            localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
-
-            let url = `${window.location.origin}${window.location.pathname}?rate=${encodeURIComponent(title)}&creator=${encodeURIComponent(currentUser.name)}&participants=${encodeURIComponent(pNames)}`;
-            const phone = (selected.length === 1 && selected.length !== family.length) ? family.find(f => f.id === selected[0]).phone : "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent('🚀 ' + currentUser.name + ' suggested: ' + title + '\n\nRate here: ' + url)}`, '_blank');
-            location.reload();
-        }
-
-        function openSuggestions() {
-            const sorted = myHistory.sort((a, b) => a.title.localeCompare(b.title) || new Date(b.modified) - new Date(a.modified));
-            document.getElementById('suggestions-list-content').innerHTML = sorted.map(s => `
-                <div class="list-item" onclick="openInnerEdit(${s.id})">
-                    <div class="item-delete" onclick="event.stopPropagation(); deleteSuggestion(${s.id})">🗑️</div>
-                    <div><b>${s.title}</b><br><small>${s.participants}</small></div>
-                </div>
-            `).join('') || `<p>No suggestions yet</p>`;
-            document.getElementById('suggestions-panel').classList.remove('hidden');
-        }
-
-        function openInnerEdit(id) { 
-            editingId = id; 
-            const s = myHistory.find(i => i.id === id);
-            populateModal(s);
-            document.getElementById('edit-modal').classList.remove('hidden');
-            document.getElementById('edit-modal').style.zIndex = "1000";
-        }
-
-        function closeSuggestions() { document.getElementById('suggestions-panel').classList.add('hidden'); }
-
-        function populateModal(item) {
-            document.getElementById('modal-edit-title').value = item.title || "";
-            document.getElementById('modal-edit-desc').value = item.details || item.desc || "";
-            document.getElementById('modal-edit-date').value = item.dateRaw || item.date || "";
-            document.getElementById('modal-edit-time').value = item.time || "";
-            document.getElementById('modal-edit-duration').value = item.duration || item.dur || "";
-            document.getElementById('modal-edit-url').value = item.url || "";
-        }
-
-        async function syncAndSaveGlobal() {
-            const newTitle = document.getElementById('modal-edit-title').value;
-            const newDesc = document.getElementById('modal-edit-desc').value;
-            const newDate = document.getElementById('modal-edit-date').value;
-            const newTime = document.getElementById('modal-edit-time').value;
-            const newDur = document.getElementById('modal-edit-duration').value;
-            const newUrl = document.getElementById('modal-edit-url').value;
-
-            const histIdx = myHistory.findIndex(h => h.id === editingId);
-            if (histIdx > -1) {
-                myHistory[histIdx] = { ...myHistory[histIdx], title: newTitle, desc: newDesc, date: newDate, time: newTime, dur: newDur, url: newUrl, modified: new Date().toISOString() };
+            family.forEach(f => {
+                const face = document.getElementById(`f-${f.id}`);
+                if (face) face.classList.toggle('selected', selected.includes(f.id));
+            });
+            const btn = document.getElementById('action-btn');
+            if (btn) {
+                btn.disabled = !(selected.length > 0 && val);
+                if (selected.length > 0) {
+                    const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                    btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
+                } else {
+                    btn.innerText = i18n[currentLang].selectParticipants;
+                }
             }
-
-            const publicIdx = activities.findIndex(a => a.id === editingId || (a.title === newTitle && a.creator === currentUser.name));
-            if (publicIdx > -1) {
-                activities[publicIdx] = { ...activities[publicIdx], title: newTitle, details: newDesc, dateRaw: newDate, time: newTime, duration: newDur, url: newUrl };
-            }
-
-            localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory));
-            localStorage.setItem('letsdoit_final_list', JSON.stringify(activities));
-            location.reload();
         }
 
-        function deleteSuggestion(id) { if(confirm(i18n[currentLang].deleteConfirm)) { myHistory = myHistory.filter(s => s.id !== id); localStorage.setItem('letsdoit_suggestions_history', JSON.stringify(myHistory)); openSuggestions(); } }
-
-        function getRoughTimeLabel(dateStr) {
-            if (!dateStr) return "";
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const target = new Date(dateStr);
-            target.setHours(0,0,0,0);
-            
-            const diffTime = target - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const t = i18n[currentLang].timeEstimate;
-
-            if (diffDays === 0) return ""; 
-            if (diffDays === 1) return t.tomorrow;
-            if (diffDays > 1 && diffDays < 7) return t.inXDays.replace("{x}", diffDays);
-            if (diffDays >= 7 && diffDays < 30) return t.nextWeek;
-            if (diffDays >= 30 && diffDays < 60) return t.nextMonth;
-            if (diffDays >= 60) return t.inXMonths.replace("{x}", Math.floor(diffDays/30));
-            return t.soon;
+        function sendWA() {
+            alert("Sending Invite...");
         }
-
-        function renderFinalList() {
-            const sorted = [...activities].sort((a, b) => (a.dateRaw || '9999').localeCompare(b.dateRaw || '9999'));
-            document.getElementById('final-list').innerHTML = sorted.map(a => {
-                const creatorObj = family.find(f => f.name === a.creator);
-                const roughTime = getRoughTimeLabel(a.dateRaw);
-                return `
-                <div class="list-item" onclick="openEdit(${a.id})">
-                    ${(currentUser && (a.creator === currentUser.name || currentUser.name === "Amir")) ? `<div class="item-delete" onclick="event.stopPropagation(); deleteIdea(${a.id})">🗑️</div>` : ''}
-                    <img src="${creatorObj ? creatorObj.img : ''}" class="creator-badge" onerror="this.src='https://via.placeholder.com/40'">
-                    ${roughTime ? `<span class="time-rough">${roughTime}</span>` : ''}
-                    <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
-                    ${a.url ? `<br><a href="${a.url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">${i18n[currentLang].viewLink}</a>` : ''}
-                </div>
-            `;
-            }).join('') || `<p>No confirmed activities yet</p>`;
-        }
-
-        function openEdit(id) {
-            editingId = id; let item = activities.find(a => a.id === id); const isCreator = currentUser && item.creator === currentUser.name;
-            const editF = document.getElementById('unified-edit-fields');
-            const viewF = document.getElementById('view-fields');
-            if (isCreator) { editF.classList.remove('hidden'); viewF.classList.add('hidden'); populateModal(item); }
-            else { 
-                editF.classList.add('hidden'); viewF.classList.remove('hidden');
-                document.getElementById('modal-close-btn').classList.remove('hidden');
-                document.getElementById('view-title').innerText = item.title;
-                document.getElementById('view-desc').innerText = item.details || "...";
-                document.getElementById('view-datetime').innerText = item.dateRaw ? `${item.dateRaw} @ ${item.time}` : "Time TBD";
-                document.getElementById('view-duration').innerText = item.duration ? `${i18n[currentLang].labelDur}: ${item.duration}` : "";
-                document.getElementById('view-link-container').innerHTML = item.url ? `<a href="${item.url}" target="_blank" class="link-btn">${i18n[currentLang].viewLink}</a>` : "";
-            }
-            document.getElementById('edit-modal').classList.remove('hidden');
-            document.getElementById('edit-modal').style.zIndex = "1000";
-        }
-
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-        function deleteIdea(id) { if(confirm(i18n[currentLang].deleteConfirm)) { activities = activities.filter(a => a.id !== id); localStorage.setItem('letsdoit_final_list', JSON.stringify(activities)); renderFinalList(); } }
-        function resetIdentity() { localStorage.removeItem('letsdoit_user_identity'); location.reload(); }
     </script>
 </body>
 </html>
