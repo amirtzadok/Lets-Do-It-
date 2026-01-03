@@ -21,59 +21,62 @@
             font-family: 'Segoe UI', sans-serif; 
             background: #ffffff; 
             margin: 0; 
-            min-height: 100vh; 
+            height: 100vh; 
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
-        /* Setup Screen Centering */
+        /* Setup Screen - Optimized for No Scroll */
         #setup-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
             width: 100%;
-            padding: 20px;
+            padding: 10px;
             text-align: center;
         }
 
         .logo-img {
-            width: 80px;
-            margin-bottom: 20px;
+            width: 160px; /* Doubled size */
+            height: auto;
+            margin-bottom: 10px; /* Minimized gap */
         }
 
         .setup-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
-            margin-bottom: 30px;
+            margin-top: 0;
+            margin-bottom: 15px; /* Minimized gap */
             color: #000;
         }
 
-        /* Avatar Selection - Vertical Mobile */
+        /* Avatar Selection - Mobile Vertical */
         .avatar-options {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px; /* Minimized gap between avatars */
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 40px;
+            max-width: 280px;
+            margin-bottom: 15px; /* Moved button closer */
         }
 
         .avatar-choice {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             cursor: pointer;
-            padding: 10px;
+            padding: 5px 10px;
             border-radius: 20px;
             transition: 0.2s;
         }
 
         .avatar-btn {
-            width: 85px;
-            height: 85px;
+            width: 70px; /* Slightly adjusted for mobile height constraints */
+            height: 70px;
             border-radius: 50%;
             border: 4px solid transparent;
             object-fit: cover;
@@ -85,19 +88,28 @@
         }
 
         .avatar-choice span {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #333;
         }
 
-        /* Desktop Layout */
+        /* Desktop Layout Adjustments */
         @media (min-width: 768px) {
+            .logo-img {
+                width: 160px; /* Maintained doubled size */
+                margin-bottom: 25px;
+            }
+            .setup-title {
+                font-size: 32px;
+                margin-bottom: 30px;
+            }
             .avatar-options {
                 flex-direction: row;
                 max-width: 800px;
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 40px;
+                margin-bottom: 40px;
             }
             .avatar-choice {
                 flex-direction: column;
@@ -107,12 +119,15 @@
                 width: 120px;
                 height: 120px;
             }
+            .primary-btn {
+                margin-top: 30px;
+            }
         }
 
         .primary-btn {
             width: 100%;
-            max-width: 300px;
-            padding: 16px;
+            max-width: 280px;
+            padding: 14px;
             background: var(--whatsapp);
             color: white;
             border: none;
@@ -120,7 +135,6 @@
             font-weight: 800;
             cursor: pointer;
             font-size: 18px;
-            margin-top: 20px;
         }
 
         .primary-btn:disabled {
@@ -128,16 +142,8 @@
             cursor: not-allowed;
         }
 
-        .app-header {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; max-width: 480px; padding: 15px 0; position: relative;
-        }
-        .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
-        .header-btn {
-            background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px;
-            border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute;
-            top: 50%; transform: translateY(-50%);
-        }
+        /* Main App Content Hidden during setup */
+        #main-content { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .main-card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; }
         .hidden { display: none !important; }
         
@@ -151,46 +157,35 @@
 <body onload="init()">
 
     <div id="setup-card" class="hidden">
-        <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+        <img src="logo.png" alt="Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/160?text=Logo'">
         <h2 class="setup-title" data-i18n="whoAreYou">Choose your avatar</h2>
         <div class="avatar-options" id="avatar-selector"></div>
         <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled data-i18n="enterApp">Let's do it!</button>
     </div>
 
     <div id="main-content" class="hidden">
-        <header class="app-header">
-            <h1 id="app-name-display">🚀 Let's Do It!</h1>
-            <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
-        </header>
-
         <div class="main-card">
             <div id="user-info" style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"></div>
             <h2 data-i18n="doSomething">let's do something together!</h2>
             <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
-            
             <div class="face-grid">
                 <div id="faces-render" style="display:contents;"></div>
             </div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants" style="max-width:100%"></button>
-        </div>
-        
-        <div class="main-card">
-            <h2 data-i18n="futureActivities">🚀 Future Activities!</h2>
-            <div id="final-list"></div>
         </div>
     </div>
 
     <script>
         const i18n = {
             eng: {
-                langBtn: "HEB", whoAreYou: "Choose your avatar", enterApp: "Let's do it!",
+                whoAreYou: "Choose your avatar", enterApp: "Let's do it!",
                 hiUser: "Hi", doSomething: "Let's do something together!", planPlaceholder: "What's the plan?",
-                futureActivities: "🚀 Future Activities!", selectParticipants: "Select Participants", invitePrefix: "Invite"
+                selectParticipants: "Select Participants", invitePrefix: "Invite"
             },
             heb: {
-                langBtn: "ENG", whoAreYou: "בחר מי את/ה", enterApp: "בואו נתחיל!",
+                whoAreYou: "בחר מי את/ה", enterApp: "בואו נתחיל!",
                 hiUser: "היי", doSomething: "בואו נעשה משהו ביחד!", planPlaceholder: "מה התכנון?",
-                futureActivities: "🚀 פעילויות עתידיות!", selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את"
+                selectParticipants: "בחרו משתתפים", invitePrefix: "הזמן את"
             }
         };
 
@@ -205,21 +200,9 @@
         let currentUser = JSON.parse(localStorage.getItem('letsdoit_user_identity'));
         let selected = [];
 
-        function toggleLanguage() { 
-            currentLang = currentLang === 'eng' ? 'heb' : 'eng'; 
-            localStorage.setItem('letsdoit_lang', currentLang); 
-            location.reload(); 
-        }
-
         function init() {
             document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
             document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]);
-            
-            const langBtn = document.getElementById('lang-toggle');
-            if(langBtn) {
-                langBtn.innerText = i18n[currentLang].langBtn;
-                langBtn.style[currentLang === 'heb' ? 'left' : 'right'] = '10px';
-            }
 
             if (!currentUser) {
                 document.getElementById('setup-card').classList.remove('hidden');
@@ -253,8 +236,7 @@
 
         function showMainApp() {
             document.getElementById('main-content').classList.remove('hidden');
-            const welcomeText = currentLang === 'heb' ? `היי, ${currentUser.name}` : `Hi, ${currentUser.name}`;
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${welcomeText}</b>`;
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:40px;height:40px;border-radius:50%"> <b>${i18n[currentLang].hiUser}, ${currentUser.name}</b>`;
             document.getElementById('faces-render').innerHTML = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face-img" onerror="this.src='https://via.placeholder.com/50'">
@@ -272,24 +254,14 @@
         function updateUIState() {
             const val = document.getElementById('main-input').value;
             family.forEach(f => {
-                const face = document.getElementById(`f-${f.id}`);
-                if (face) face.classList.toggle('selected', selected.includes(f.id));
+                const el = document.getElementById(`f-${f.id}`);
+                if (el) el.classList.toggle('selected', selected.includes(f.id));
             });
             const btn = document.getElementById('action-btn');
-            if (btn) {
-                btn.disabled = !(selected.length > 0 && val);
-                if (selected.length > 0) {
-                    const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-                    btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
-                } else {
-                    btn.innerText = i18n[currentLang].selectParticipants;
-                }
-            }
+            if (btn) btn.disabled = !(selected.length > 0 && val);
         }
 
-        function sendWA() {
-            alert("Sending Invite...");
-        }
+        function sendWA() { alert("Invite Sent!"); }
     </script>
 </body>
 </html>
