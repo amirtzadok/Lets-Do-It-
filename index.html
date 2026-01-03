@@ -42,10 +42,6 @@
         .face-img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
         .face-wrapper.selected .face-img { border-color: var(--primary); }
 
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; direction: ltr; }
-        .star { font-size: 40px; cursor: pointer; color: #d1d5db; transition: 0.2s; }
-        .star.active { color: var(--star-gold); }
-
         input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
         .logistics-label { font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px; text-align: start; }
 
@@ -59,9 +55,10 @@
         .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; box-sizing: border-box; }
         .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; max-height: 90vh; overflow-y: auto; }
         .hidden { display: none !important; }
-        
-        .view-data-point { text-align: start; background: #f8fafc; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
-        .view-data-point b { color: var(--primary); }
+
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; direction: ltr; }
+        .star { font-size: 40px; cursor: pointer; color: #d1d5db; transition: 0.2s; }
+        .star.active { color: var(--star-gold); }
     </style>
 </head>
 <body onload="init()">
@@ -95,44 +92,25 @@
 
     <div id="details-modal" class="modal-bg hidden">
         <div class="modal-card">
-            <h2 id="modal-activity-title" style="margin-bottom:20px;">Activity Details</h2>
-            
+            <h2 id="modal-activity-title" style="margin-bottom:20px;">Details</h2>
             <div id="edit-area" class="hidden">
-                <label class="logistics-label">Name of activity</label>
-                <input type="text" id="edit-name">
-                
-                <label class="logistics-label">Date</label>
-                <input type="date" id="edit-date">
-                
-                <label class="logistics-label">Start hour</label>
-                <input type="time" id="edit-time">
-                
+                <label class="logistics-label">Name of activity</label><input type="text" id="edit-name">
+                <label class="logistics-label">Date</label><input type="date" id="edit-date">
+                <label class="logistics-label">Start hour</label><input type="time" id="edit-time">
                 <label class="logistics-label">Duration</label>
                 <select id="edit-dur">
                     <option value="1-3 hours">1-3 hours</option>
                     <option value="half a day">Half a day</option>
                     <option value="full day">Full day</option>
                 </select>
-                
-                <label class="logistics-label">Extra details</label>
-                <textarea id="edit-details" rows="3"></textarea>
-                
-                <label class="logistics-label">URL link</label>
-                <input type="text" id="edit-url" placeholder="https://...">
-                
+                <label class="logistics-label">Extra details</label><textarea id="edit-details" rows="3"></textarea>
+                <label class="logistics-label">URL link</label><input type="text" id="edit-url" placeholder="https://...">
                 <button class="primary-btn" onclick="saveDetails()">Save Changes</button>
             </div>
-
             <div id="view-area" class="hidden">
-                <div class="view-data-point"><b>Date:</b> <span id="v-date">TBD</span></div>
-                <div class="view-data-point"><b>Start Hour:</b> <span id="v-time">TBD</span></div>
-                <div class="view-data-point"><b>Duration:</b> <span id="v-dur">TBD</span></div>
-                <div class="view-data-point"><b>Extra Details:</b> <span id="v-details">No extra info</span></div>
-                <div id="v-url-container"></div>
-                
-                <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()" style="margin-top:10px;">Add more details</button>
+                <p id="v-data" style="text-align:start; background:#f8fafc; padding:10px; border-radius:10px; font-size:14px; white-space: pre-wrap;"></p>
+                <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()">Add more details</button>
             </div>
-            
             <button class="secondary-btn" onclick="closeModals()">Close</button>
         </div>
     </div>
@@ -144,7 +122,7 @@
                 <span style="font-size:11px; cursor:pointer; color:#94a3b8; font-weight:bold;" onclick="resetIdentity()" data-i18n="notMe">Not you?</span>
             </div>
             <input type="text" id="main-input" data-i18n-placeholder="planPlaceholder" oninput="updateUIState()">
-            <div class="face-grid" id="faces-render"></div>
+            <div class="face-grid" id="faces-container"></div>
             <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled data-i18n="selectParticipants">Select Participants</button>
         </div>
         <div class="card">
@@ -183,16 +161,17 @@
         let currentLang = localStorage.getItem('ldit_lang') || 'eng';
         let currentUser = JSON.parse(localStorage.getItem('ldit_user'));
         let activities = JSON.parse(localStorage.getItem('ldit_list')) || [];
+        let selected = [];
         let tempRating = 0, incomingIdea = null, activeActivityId = null;
 
         function toggleLanguage() {
-            currentLang = currentLang === 'eng' ? 'heb' : 'eng';
+            currentLang = (currentLang === 'eng') ? 'heb' : 'eng';
             localStorage.setItem('ldit_lang', currentLang);
             location.reload();
         }
 
         function init() {
-            document.body.dir = currentLang === 'heb' ? 'rtl' : 'ltr';
+            document.body.dir = (currentLang === 'heb') ? 'rtl' : 'ltr';
             document.getElementById('lang-toggle').innerText = i18n[currentLang].langBtn;
             
             const params = new URLSearchParams(window.location.search);
@@ -203,30 +182,12 @@
                 document.getElementById('rating-modal').classList.remove('hidden');
             }
 
-            if (!currentUser) { renderSetup(); document.getElementById('setup-card').classList.remove('hidden'); }
-            else showMainApp();
-        }
-
-        function setRating(n) {
-            tempRating = n;
-            document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < n));
-            document.getElementById('rating-text').innerText = i18n[currentLang].ratings[n];
-            document.getElementById('confirm-rate-btn').disabled = false;
-        }
-
-        function submitRating() {
-            const isHigh = tempRating >= 4;
-            const msg = isHigh ? i18n[currentLang].addMore : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
-            
-            if (isHigh && !activities.find(a => a.id == incomingIdea.id)) {
-                activities.push({ ...incomingIdea, title: incomingIdea.t, dateRaw: '', time: '', dur: '', details: '', url: '' });
-                localStorage.setItem('ldit_list', JSON.stringify(activities));
+            if (!currentUser) {
+                renderSetup();
+                document.getElementById('setup-card').classList.remove('hidden');
+            } else {
+                showMainApp();
             }
-
-            const phone = family.find(f => f.name === incomingIdea.c)?.phone || "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            closeModals();
-            if (currentUser) renderFinalList();
         }
 
         function renderSetup() {
@@ -238,10 +199,11 @@
         }
 
         function selectSelf(id, name) {
-            document.querySelectorAll('.avatar-btn').forEach(b => b.parentElement.classList.remove('active'));
+            document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             const b = document.getElementById('start-btn');
-            b.disabled = false; b.innerText = i18n[currentLang].welcomeUser.replace("{name}", name);
+            b.disabled = false;
+            b.innerText = i18n[currentLang].welcomeUser.replace("{name}", name);
             window.tempId = id;
         }
 
@@ -254,39 +216,65 @@
         function showMainApp() {
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"> ${currentUser.name}`;
-            document.getElementById('faces-render').innerHTML = family.map(f => `
+            renderFaceGrid();
+            renderFinalList();
+        }
+
+        function renderFaceGrid() {
+            let html = family.map(f => `
                 <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
                     <img src="${f.img}" class="face-img">
                     <p style="font-size:10px; font-weight:bold;">${f.name}</p>
-                </div>`).join('') + `<div class="face-wrapper" id="f-all" onclick="selectAll()"><div style="width:42px;height:42px;background:#fff1f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">❤️</div><p style="font-size:10px; font-weight:bold;">${i18n[currentLang].everyone}</p></div>`;
-            renderFinalList();
+                </div>`).join('');
+            html += `
+                <div class="face-wrapper" id="f-all" onclick="toggleAll()">
+                    <div style="width:42px;height:42px;background:#fff1f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">❤️</div>
+                    <p style="font-size:10px; font-weight:bold;">${i18n[currentLang].everyone}</p>
+                </div>`;
+            document.getElementById('faces-container').innerHTML = html;
         }
 
         function toggleFace(id) {
             const idx = selected.indexOf(id);
-            idx > -1 ? selected.splice(idx, 1) : selected.push(id);
+            if (idx > -1) selected.splice(idx, 1);
+            else selected.push(id);
             updateUIState();
         }
 
-        function selectAll() {
-            selected = (selected.length === family.length) ? [] : family.map(f => f.id);
+        function toggleAll() {
+            if (selected.length === family.length) selected = [];
+            else selected = family.map(f => f.id);
             updateUIState();
         }
 
         function updateUIState() {
-            const val = document.getElementById('main-input').value;
-            family.forEach(f => { if(document.getElementById(`f-${f.id}`)) document.getElementById(`f-${f.id}`).classList.toggle('selected', selected.includes(f.id)) });
+            const val = document.getElementById('main-input').value.trim();
+            family.forEach(f => {
+                const el = document.getElementById(`f-${f.id}`);
+                if(el) el.classList.toggle('selected', selected.includes(f.id));
+            });
+            const allBtn = document.getElementById('f-all');
+            if(allBtn) allBtn.classList.toggle('selected', selected.length === family.length && family.length > 0);
+
             const btn = document.getElementById('action-btn');
-            btn.disabled = !(selected.length > 0 && val);
-            if (selected.length > 0) btn.innerText = `${i18n[currentLang].invitePrefix} ${selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ')}`;
+            btn.disabled = !(selected.length > 0 && val.length > 0);
+            
+            if (selected.length > 0) {
+                const names = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
+            } else {
+                btn.innerText = i18n[currentLang].selectParticipants;
+            }
         }
 
         function sendWA() {
             const title = document.getElementById('main-input').value;
-            const pNames = selected.length === family.length ? i18n[currentLang].groupName : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const isEveryone = selected.length === family.length;
+            const pNames = isEveryone ? i18n[currentLang].groupName : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
             const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: pNames });
             const waText = `🚀 *${currentUser.name}* idea: *${title}*\nRate it:\n${window.location.origin}${window.location.pathname}?${params.toString()}`;
-            window.open(`https://wa.me/${(!params.get('p').includes('&') && selected.length === 1) ? family.find(f => f.id === selected[0]).phone : ""}?text=${encodeURIComponent(waText)}`, '_blank');
+            const targetPhone = (!isEveryone && selected.length === 1) ? family.find(f => f.id === selected[0]).phone : "";
+            window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(waText)}`, '_blank');
             location.reload();
         }
 
@@ -295,7 +283,7 @@
                 <div class="list-item" onclick="openDetails(${a.id})">
                     <div style="position:absolute; right:12px; top:12px; z-index:10;" onclick="event.stopPropagation(); deleteItem(${a.id})">🗑️</div>
                     <b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small>
-                    ${a.dateRaw ? `<br><span style="font-size:12px; font-weight:bold;">📅 ${a.dateRaw} @ ${a.time}</span>` : `<br><span style="color:var(--heart);font-size:11px;">Details missing - Tap to fill</span>`}
+                    <br><span style="font-size:11px; ${!a.dateRaw ? 'color:var(--heart);' : ''}">${a.dateRaw ? '📅 ' + a.dateRaw + ' @ ' + a.time : 'Details missing - Tap to fill'}</span>
                 </div>`).join('') || `<p>No confirmed activities.</p>`;
         }
 
@@ -303,25 +291,22 @@
             activeActivityId = id;
             const a = activities.find(x => x.id == id);
             const isCreator = currentUser && a.creator === currentUser.name;
-            
             document.getElementById('modal-activity-title').innerText = isCreator ? "Edit Logistics" : a.title;
             document.getElementById('edit-area').classList.toggle('hidden', !isCreator);
             document.getElementById('view-area').classList.toggle('hidden', isCreator);
             
             if(isCreator) {
                 document.getElementById('edit-name').value = a.title;
-                document.getElementById('edit-date').value = a.dateRaw;
-                document.getElementById('edit-time').value = a.time;
+                document.getElementById('edit-date').value = a.dateRaw || '';
+                document.getElementById('edit-time').value = a.time || '';
                 document.getElementById('edit-dur').value = a.dur || "1-3 hours";
                 document.getElementById('edit-details').value = a.details || "";
-                document.getElementById('edit-url').value = a.url;
+                document.getElementById('edit-url').value = a.url || "";
             } else {
-                document.getElementById('v-date').innerText = a.dateRaw || "TBD";
-                document.getElementById('v-time').innerText = a.time || "TBD";
-                document.getElementById('v-dur').innerText = a.dur || "TBD";
-                document.getElementById('v-details').innerText = a.details || "No extra info";
-                document.getElementById('v-url-container').innerHTML = a.url ? `<a href="${a.url}" target="_blank" class="link-btn" style="display:block; text-align:center; margin-top:10px;">Open URL Link</a>` : "";
-                document.getElementById('nudge-btn').classList.toggle('hidden', !!a.time && !!a.dateRaw);
+                let info = `Date: ${a.dateRaw || 'TBD'}\nTime: ${a.time || 'TBD'}\nDuration: ${a.dur || 'TBD'}\n\nDetails: ${a.details || 'None'}`;
+                document.getElementById('v-data').innerText = info;
+                if(a.url) document.getElementById('v-data').innerHTML += `<br><br><a href="${a.url}" target="_blank" style="color:var(--primary); font-weight:bold;">Open URL Link</a>`;
+                document.getElementById('nudge-btn').classList.toggle('hidden', !!a.dateRaw);
             }
             document.getElementById('details-modal').classList.remove('hidden');
         }
@@ -342,7 +327,25 @@
         function nudgeCreator() {
             const a = activities.find(x => x.id == activeActivityId);
             const phone = family.find(f => f.name === a.creator)?.phone || "";
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(i18n[currentLang].addMore + " (" + a.title + ")")}`, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent("Hey " + a.creator + ", please add more details to: " + a.title)}`, '_blank');
+        }
+
+        function setRating(n) {
+            tempRating = n;
+            document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < n));
+            document.getElementById('rating-text').innerText = i18n[currentLang].ratings[n];
+            document.getElementById('confirm-rate-btn').disabled = false;
+        }
+
+        function submitRating() {
+            if (tempRating >= 4 && !activities.find(a => a.id == incomingIdea.id)) {
+                activities.push({ ...incomingIdea, title: incomingIdea.t, dateRaw: '', time: '', dur: '', details: '', url: '' });
+                localStorage.setItem('ldit_list', JSON.stringify(activities));
+            }
+            const phone = family.find(f => f.name === incomingIdea.c)?.phone || "";
+            const msg = (tempRating >= 4) ? i18n[currentLang].addMore : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            closeModals();
         }
 
         function deleteItem(id) { if(confirm("Delete?")) { activities = activities.filter(a => a.id != id); localStorage.setItem('ldit_list', JSON.stringify(activities)); renderFinalList(); } }
