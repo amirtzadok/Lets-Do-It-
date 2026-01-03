@@ -26,6 +26,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Prevents screen movement/bounce on mobile */
             overflow: hidden; 
             position: fixed;
         }
@@ -44,29 +45,29 @@
             z-index: 1001;
         }
 
-        /* Setup Screen - Locked for No Scroll */
+        /* Setup Screen - Vertically Centered Group */
         #setup-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* Vertically Aligned to Screen */
             height: 100vh;
             width: 100%;
-            padding: 10px;
+            padding: 20px;
             text-align: center;
-            touch-action: none;
+            touch-action: none; /* Disables pull-to-refresh */
         }
 
         .logo-img {
             width: 160px; /* Doubled size */
             height: auto;
-            margin-bottom: 8px; 
+            margin-bottom: 15px; 
         }
 
         .setup-title {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 800;
-            margin: 0 0 12px 0;
+            margin: 0 0 20px 0;
             color: #000;
         }
 
@@ -74,10 +75,10 @@
         .avatar-options {
             display: flex;
             flex-direction: column;
-            gap: 8px; 
+            gap: 12px; 
             width: 100%;
             max-width: 280px;
-            margin-bottom: 12px;
+            margin-bottom: 25px;
         }
 
         .avatar-choice {
@@ -92,12 +93,12 @@
         }
 
         .avatar-btn {
-            width: 65px; 
-            height: 65px;
+            width: 75px; 
+            height: 75px;
             border-radius: 50%;
             border: 4px solid transparent;
             object-fit: cover;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .avatar-choice.active .avatar-btn {
@@ -106,7 +107,7 @@
         }
 
         .avatar-choice span {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
         }
@@ -114,16 +115,19 @@
         /* Desktop Layout Adjustments */
         @media (min-width: 768px) {
             body { overflow: auto; position: static; }
-            .logo-img { width: 160px; margin-bottom: 20px; }
-            .setup-title { font-size: 32px; margin-bottom: 25px; }
+            .logo-img { width: 180px; margin-bottom: 60px; } /* Increased Space */
+            .setup-title { font-size: 36px; margin-bottom: 50px; } /* Increased Space */
             .avatar-options {
                 flex-direction: row;
-                max-width: 800px;
+                max-width: 900px;
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 40px;
+                gap: 60px; /* Increased Space between avatars */
+                margin-bottom: 70px; /* Increased Space to button */
             }
-            .avatar-btn { width: 110px; height: 110px; }
+            .avatar-btn { width: 130px; height: 130px; }
+            .avatar-choice span { font-size: 22px; }
+            .primary-btn { max-width: 320px; padding: 20px; font-size: 20px; }
         }
 
         .primary-btn {
