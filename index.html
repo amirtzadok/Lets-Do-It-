@@ -46,7 +46,7 @@
         .logistics-label { font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px; text-align: start; }
 
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
-        .primary-btn:disabled { background: #cbd5e1; }
+        .primary-btn:disabled { background: #cbd5e1; opacity: 0.7; }
         .secondary-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 15px; margin-top: 8px; font-weight: bold; cursor: pointer; }
 
         .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
@@ -93,6 +93,7 @@
     <div id="details-modal" class="modal-bg hidden">
         <div class="modal-card">
             <h2 id="modal-activity-title" style="margin-bottom:20px;">Details</h2>
+            
             <div id="edit-area" class="hidden">
                 <label class="logistics-label">Name of activity</label><input type="text" id="edit-name">
                 <label class="logistics-label">Date</label><input type="date" id="edit-date">
@@ -106,7 +107,9 @@
                 <label class="logistics-label">Extra details</label><textarea id="edit-details" rows="3"></textarea>
                 <label class="logistics-label">URL link</label><input type="text" id="edit-url" placeholder="https://...">
                 <button class="primary-btn" onclick="saveDetails()">Save Changes</button>
+                <button id="final-update-btn" class="secondary-btn hidden" style="background:var(--whatsapp); color:white; margin-top:15px;" onclick="shareFinalUpdate()">Update Everyone</button>
             </div>
+
             <div id="view-area" class="hidden">
                 <p id="v-data" style="text-align:start; background:#f8fafc; padding:10px; border-radius:10px; font-size:14px; white-space: pre-wrap;"></p>
                 <button class="primary-btn hidden" id="nudge-btn" onclick="nudgeCreator()">Add more details</button>
@@ -139,7 +142,8 @@
                 futureActivities: "🚀 Let's Do It!", notMe: "Not you?", groupName: "Tzadok family",
                 invitePrefix: "Invite", selectParticipants: "Select Participants", submit: "Send Feedback",
                 rateIdea: "Rate {name}'s idea", tryAgain: "Try another idea, {name}.", 
-                addMore: "Add more details on this activity!", ratings: ["", "Don't want to", "Probably no", "Maybe", "I like it", "Let's do it!"]
+                addMore: "Add more details on this activity!", ratings: ["", "Don't want to", "Probably no", "Maybe", "I like it", "Let's do it!"],
+                updateMsg: "{name} added more details about {activity}!"
             },
             heb: {
                 langBtn: "ENG", whoAreYou: "מי את/ה?", enterApp: "קדימה!", welcomeUser: "ברוך הבא {name}",
@@ -147,7 +151,8 @@
                 futureActivities: "🚀 בואו נעשה את זה!", notMe: "זה לא את/ה?", groupName: "משפחת צדוק",
                 invitePrefix: "הזמן את", selectParticipants: "בחרו משתתפים", submit: "שלח משוב",
                 rateIdea: "דרגו את הרעיון של {name}", tryAgain: "נסה רעיון אחר, {name}.", 
-                addMore: "תוסיף עוד פרטים על הפעילות!", ratings: ["", "לא רוצה", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה את זה!"]
+                addMore: "תוסיף עוד פרטים על הפעילות!", ratings: ["", "לא רוצה", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה את זה!"],
+                updateMsg: "{name} הוסיף/ה עוד פרטים על {activity}!"
             }
         };
 
@@ -175,19 +180,40 @@
             document.getElementById('lang-toggle').innerText = i18n[currentLang].langBtn;
             
             const params = new URLSearchParams(window.location.search);
+            
             if (params.get('import')) {
                 incomingIdea = { id: params.get('id'), t: params.get('t'), c: params.get('c'), p: params.get('p') };
                 document.getElementById('rate-title-main').innerText = i18n[currentLang].rateIdea.replace("{name}", incomingIdea.c);
                 document.getElementById('rate-activity-name').innerText = incomingIdea.t;
                 document.getElementById('rating-modal').classList.remove('hidden');
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
+
+            const editId = params.get('editDetails');
+            const viewId = params.get('viewDetails');
+            if (editId) sessionStorage.setItem('pendingEdit', editId);
+            if (viewId) sessionStorage.setItem('pendingView', viewId);
 
             if (!currentUser) {
                 renderSetup();
                 document.getElementById('setup-card').classList.remove('hidden');
             } else {
                 showMainApp();
+                checkPendingModals();
             }
+        }
+
+        function checkPendingModals() {
+            const editId = sessionStorage.getItem('pendingEdit');
+            const viewId = sessionStorage.getItem('pendingView');
+            if (editId) {
+                openDetails(editId);
+                sessionStorage.removeItem('pendingEdit');
+            } else if (viewId) {
+                openDetails(viewId);
+                sessionStorage.removeItem('pendingView');
+            }
+            if (editId || viewId) window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         function renderSetup() {
@@ -210,7 +236,9 @@
         function finishSetup() {
             currentUser = family.find(f => f.id === window.tempId);
             localStorage.setItem('ldit_user', JSON.stringify(currentUser));
-            location.reload();
+            document.getElementById('setup-card').classList.add('hidden');
+            showMainApp();
+            checkPendingModals();
         }
 
         function showMainApp() {
@@ -218,6 +246,7 @@
             document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"> ${currentUser.name}`;
             renderFaceGrid();
             renderFinalList();
+            updateUIState();
         }
 
         function renderFaceGrid() {
@@ -255,10 +284,8 @@
             });
             const allBtn = document.getElementById('f-all');
             if(allBtn) allBtn.classList.toggle('selected', selected.length === family.length && family.length > 0);
-
             const btn = document.getElementById('action-btn');
-            btn.disabled = !(selected.length > 0 && val.length > 0);
-            
+            btn.disabled = !(val.length > 0 && selected.length > 0);
             if (selected.length > 0) {
                 const names = selected.length === family.length ? i18n[currentLang].everyoneInvite : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
                 btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
@@ -290,10 +317,12 @@
         function openDetails(id) {
             activeActivityId = id;
             const a = activities.find(x => x.id == id);
+            if (!a) return;
             const isCreator = currentUser && a.creator === currentUser.name;
             document.getElementById('modal-activity-title').innerText = isCreator ? "Edit Logistics" : a.title;
             document.getElementById('edit-area').classList.toggle('hidden', !isCreator);
             document.getElementById('view-area').classList.toggle('hidden', isCreator);
+            document.getElementById('final-update-btn').classList.toggle('hidden', !isCreator);
             
             if(isCreator) {
                 document.getElementById('edit-name').value = a.title;
@@ -321,7 +350,15 @@
             a.url = document.getElementById('edit-url').value;
             localStorage.setItem('ldit_list', JSON.stringify(activities));
             renderFinalList();
-            closeModals();
+            openDetails(activeActivityId);
+        }
+
+        function shareFinalUpdate() {
+            const a = activities.find(x => x.id == activeActivityId);
+            const intro = i18n[currentLang].updateMsg.replace("{name}", a.creator).replace("{activity}", a.title);
+            const viewLink = `${window.location.origin}${window.location.pathname}?viewDetails=${a.id}`;
+            const waText = `📢 ${intro}\n\nView details here:\n${viewLink}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`, '_blank');
         }
 
         function nudgeCreator() {
@@ -338,12 +375,13 @@
         }
 
         function submitRating() {
-            if (tempRating >= 4 && !activities.find(a => a.id == incomingIdea.id)) {
-                activities.push({ ...incomingIdea, title: incomingIdea.t, dateRaw: '', time: '', dur: '', details: '', url: '' });
+            const isHigh = tempRating >= 4;
+            if (isHigh && !activities.find(a => a.id == incomingIdea.id)) {
+                activities.push({ id: incomingIdea.id, title: incomingIdea.t, creator: incomingIdea.c, joinedBy: incomingIdea.p, dateRaw: '', time: '', dur: '', details: '', url: '' });
                 localStorage.setItem('ldit_list', JSON.stringify(activities));
             }
             const phone = family.find(f => f.name === incomingIdea.c)?.phone || "";
-            const msg = (tempRating >= 4) ? i18n[currentLang].addMore : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
+            let msg = isHigh ? `${i18n[currentLang].addMore}\nEdit here: ${window.location.origin}${window.location.pathname}?editDetails=${incomingIdea.id}` : i18n[currentLang].tryAgain.replace("{name}", incomingIdea.c);
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModals();
         }
