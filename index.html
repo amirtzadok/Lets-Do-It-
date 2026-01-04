@@ -11,6 +11,7 @@
             --bg: #f8fafc;
             --card: #ffffff;
             --warning: #f59e0b;
+            --disabled: #cbd5e1;
         }
 
         body, html {
@@ -19,7 +20,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: #1e293b;
-            overflow: hidden; /* Prevents unwanted scrolling on the welcome screen */
+            overflow: hidden;
         }
 
         /* --- GLOBAL HEADER --- */
@@ -34,29 +35,22 @@
         }
 
         .app-header h1 { 
-            margin: 0; 
-            font-size: 1.2rem; 
-            color: var(--primary); 
-            cursor: pointer; 
-            font-weight: bold; /* Bold Font */
+            margin: 0; font-size: 1.2rem; color: var(--primary); 
+            cursor: pointer; font-weight: bold; 
         }
 
         .header-user-zone { display: flex; align-items: center; gap: 10px; }
         .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
         .container { 
-            padding: 20px; 
-            max-width: 500px; 
-            margin: 0 auto; 
-            box-sizing: border-box; 
-            height: calc(100% - 60px); 
-            overflow-y: auto; 
+            padding: 20px; max-width: 500px; margin: 0 auto; 
+            box-sizing: border-box; height: calc(100% - 60px); overflow-y: auto; 
         }
 
         .screen { display: none; height: 100%; }
         .active { display: block; }
 
-        /* --- WELCOME SCREEN --- */
+        /* --- WELCOME SCREEN (Centering vertically & horizontally) --- */
         #welcome-screen {
             height: 100vh;
             display: flex;
@@ -64,42 +58,32 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
             background-color: var(--bg);
         }
 
-        .welcome-title { 
-            font-size: 1.8rem; 
-            color: var(--primary); 
-            margin-bottom: 10px; 
-            font-weight: bold; /* Bold Font */
-        }
+        .welcome-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
 
         .avatar-column {
             display: flex;
             flex-direction: column; 
-            gap: 10px;
-            margin: 15px 0;
+            gap: 12px;
+            margin: 20px 0;
             width: 100%;
-            align-items: center;
+            align-items: center; /* Centers avatars horizontally in the column */
         }
 
         .avatar-wrap { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            width: 200px; 
-            cursor: pointer; 
-            padding: 8px;
-            border-radius: 50px;
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 15px; 
+            width: 200px; cursor: pointer; padding: 8px;
+            border-radius: 50px; transition: background 0.2s;
+            justify-content: flex-start;
         }
 
         .avatar-img {
-            width: 55px; height: 55px; border-radius: 50%;
-            border: 4px solid transparent;
-            object-fit: cover;
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 4px solid transparent; object-fit: cover;
         }
 
         .selected .avatar-img { border: 4px solid var(--success) !important; }
@@ -113,12 +97,27 @@
         }
 
         .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            font-weight: bold; font-size: 1rem; margin-top: 10px; cursor: pointer;
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.3s;
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ghost { background: #e2e8f0; color: #475569; }
-        .btn-success { background: var(--success); color: white; }
+        
+        #welcome-action-btn { background: var(--disabled); color: #64748b; margin-top: 10px; width: 80%; max-width: 250px; }
+        #welcome-action-btn.ready { background: var(--primary); color: white; }
+
+        .btn-primary { background: var(--primary); color: white; text-transform: lowercase; }
+        .btn-ghost { background: #e2e8f0; color: #475569; margin-top: 15px; }
+        .btn-success { background: var(--success); color: white; margin-top: 15px; }
+
+        /* --- CREATION SCREEN HORIZONTAL CENTERING --- */
+        #invite-list {
+            display: flex; 
+            gap: 10px; 
+            overflow-x: auto; 
+            padding: 10px 0;
+            justify-content: center; /* Centering avatars horizontally */
+        }
+
+        .avatar-wrap-h { text-align: center; min-width: 70px; }
 
         /* --- LISTS --- */
         .activity-card {
@@ -127,7 +126,7 @@
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2rem; }
+        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2.2rem; }
         .star { cursor: pointer; color: #cbd5e1; }
         .star.filled { color: #fbbf24; }
     </style>
@@ -144,11 +143,11 @@
 
     <section id="welcome-screen" class="screen active">
         <div class="welcome-title">🚀 Let's Do It!</div>
-        <p style="margin: 5px 0;">Who is using the app?</p>
+        <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Who is using the app?</p>
         
         <div class="avatar-column" id="welcome-avatar-list"></div>
 
-        <button class="btn btn-primary" id="welcome-action-btn" onclick="confirmUser()" style="display:none; width: 80%; max-width: 250px;">
+        <button class="btn" id="welcome-action-btn" onclick="confirmUser()">
             Welcome...
         </button>
     </section>
@@ -160,17 +159,17 @@
             <input type="text" id="idea-name" placeholder="What's your suggestion?">
             
             <label>Invite Participants</label>
-            <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;" id="invite-list"></div>
+            <div id="invite-list"></div>
 
             <button class="btn btn-ghost" onclick="showScreen('details-screen')">Add more details</button>
-            <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()">invite...</button>
+            <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()" style="margin-top:15px;">invite...</button>
 
-            <h3 style="margin-top:30px">Let's Do It List ❤️</h3>
+            <h3 style="margin-top:30px; font-weight: bold;">Let's Do It List ❤️</h3>
             <div id="approved-activities-list"></div>
         </section>
 
         <section id="details-screen" class="screen">
-            <h3>Activity Details</h3>
+            <h3 style="font-weight: bold;">Activity Details</h3>
             <label>Date of Event</label><input type="date" id="det-date">
             <label>Start Hour</label><input type="time" id="det-time">
             <label>Duration</label>
@@ -193,7 +192,7 @@
         </section>
 
         <section id="rating-screen" class="screen">
-            <h2 id="rating-subtitle">Rate Idea!</h2>
+            <h2 id="rating-subtitle" style="font-weight: bold;">🚀 Rate Idea!</h2>
             <div class="star-rating" id="star-bar">
                 <span class="star" onclick="setRating(1)">★</span>
                 <span class="star" onclick="setRating(2)">★</span>
@@ -206,7 +205,7 @@
         </section>
 
         <section id="personal-area" class="screen">
-            <h3>My Suggestions</h3>
+            <h3 style="font-weight: bold;">My Suggestions</h3>
             <div id="my-suggestions-list"></div>
             <button class="btn btn-ghost" onclick="showScreen('home-screen')">Back</button>
         </section>
@@ -252,12 +251,13 @@
         function pickWelcomeUser(name) {
             selectedWelcomeUser = family.find(f => f.name === name);
             const btn = document.getElementById('welcome-action-btn');
-            btn.style.display = 'block';
+            btn.classList.add('ready');
             btn.innerText = `Welcome ${name}`;
             renderWelcome();
         }
 
         function confirmUser() {
+            if(!selectedWelcomeUser) return;
             currentUser = selectedWelcomeUser;
             document.getElementById('header-avatar').src = currentUser.img;
             showScreen('home-screen');
@@ -266,19 +266,22 @@
         function logout() {
             currentUser = null;
             selectedWelcomeUser = null;
+            const btn = document.getElementById('welcome-action-btn');
+            btn.classList.remove('ready');
+            btn.innerText = "Welcome...";
             showScreen('welcome-screen');
         }
 
         function renderHome() {
             const list = document.getElementById('invite-list');
             list.innerHTML = family.map(m => `
-                <div class="avatar-wrap-h ${selectedParticipants.includes(m.name) ? 'selected' : ''}" onclick="toggleSelect('${m.name}')" style="text-align:center; min-width:70px;">
-                    <img src="${m.img}" class="avatar-img" style="width:60px; height:60px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
+                <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
+                    <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
                     <div style="font-size:0.7rem;">${m.name}</div>
                 </div>
             `).join('') + `
-                <div onclick="toggleSelect('everyone')" style="text-align:center; min-width:70px; cursor:pointer;">
-                    <div class="heart-icon-circle" style="width:60px; height:60px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">❤️</div>
+                <div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer;">
+                    <div class="heart-icon-circle" style="width:55px; height:55px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">❤️</div>
                     <div style="font-size:0.7rem;">Everyone</div>
                 </div>
             `;
@@ -357,6 +360,9 @@
             if(act) {
                 act.rating = currentRating;
                 localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+                const creator = family.find(f => f.name === act.creator);
+                let backMsg = currentRating >= 4 ? `the ${currentUser.name} liked your idea` : `Your idea did not accepted by the ${currentUser.name}. Try sending another one`;
+                window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
             }
             window.location.href = window.location.pathname;
         }
