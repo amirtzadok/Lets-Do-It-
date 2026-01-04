@@ -16,7 +16,7 @@
         #settings-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; overflow-y: auto; display: flex; flex-direction: column; align-items: center; background: var(--bg); }
         .studio-content { width: 100%; max-width: 480px; padding: 20px; box-sizing: border-box; }
         .face-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.2s; display: flex; flex-direction: column; align-items: center; border-radius: 50%; }
+        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
         .face-wrapper.selected { opacity: 1; }
         .face-img { width: 42px; height: 42px; border-radius: 50%; border: 4px solid transparent; object-fit: cover; transition: 0.2s; }
         .face-wrapper.selected .face-img { border-color: var(--whatsapp); }
@@ -29,12 +29,10 @@
         .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; }
         .hidden { display: none !important; }
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 20px 0; direction: ltr; }
         .star { font-size: 40px; cursor: pointer; color: #d1d5db; }
         .star.active { color: var(--star-gold); }
         .suggestion-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; text-align: start; }
-        
-        /* Heart icon styling for 'All' */
         .all-circle { width:42px; height:42px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 4px solid transparent; transition: 0.2s; }
         .face-wrapper.selected .all-circle { border-color: var(--whatsapp); }
     </style>
@@ -110,6 +108,7 @@
     </div>
 
     <script>
+        // CONFIGURATION
         const BIN_ID = "695a2c70ae596e708fc3e3cc"; 
         const MASTER_KEY = "$2a$10$pSuVhxLJ5AXF5djtoV2guu7wllnnTmyAwSVPIJb1htQAEOczsdPe6";
         const REQ_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
@@ -150,8 +149,20 @@
             document.body.dir = (currentLang === 'heb') ? 'rtl' : 'ltr';
             document.getElementById('lang-toggle').innerText = i18n[currentLang].langBtn;
             await syncCloud();
+            
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('import')) {
+                incomingIdea = { id: params.get('id'), t: params.get('t'), c: params.get('c'), p: params.get('p') };
+                document.getElementById('rate-title-main').innerText = `Rate ${incomingIdea.c}'s idea`;
+                document.getElementById('rate-activity-name').innerText = incomingIdea.t;
+                document.getElementById('rating-modal').classList.remove('hidden');
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+
             if (!currentUser) { renderSetup(); document.getElementById('setup-card').classList.remove('hidden'); } 
             else { showMainApp(); }
+
+            setInterval(() => { if(!document.hidden) syncCloud(); }, 60000);
         }
 
         function handleImageUpload(event) {
@@ -195,14 +206,22 @@
         function resendIdea(id) {
             const a = activities.find(x => x.id == id);
             const params = new URLSearchParams({ import: 'true', id: a.id, t: a.title, c: a.creator, p: "Family" });
-            window.open(`https://wa.me/?text=${encodeURIComponent("🚀 Plan: " + a.title + "\nRate: " + window.location.origin + window.location.pathname + "?" + params.toString())}`);
+            const waText = `🚀 *${a.creator}* idea: *${a.title}*\nRate it:\n${window.location.origin}${window.location.pathname}?${params.toString()}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`);
         }
 
         function toggleLanguage() { currentLang = (currentLang === 'eng') ? 'heb' : 'eng'; localStorage.setItem('ldit_lang', currentLang); location.reload(); }
         function renderSetup() { document.getElementById('avatar-selector').innerHTML = family.map(f => `<div class="avatar-choice" onclick="selectSelf(${f.id})"><img src="${f.img}" class="avatar-btn" onerror="this.src='https://ui-avatars.com/api/?name=${f.name}'"><span>${f.name}</span></div>`).join(''); }
         function selectSelf(id) { document.querySelectorAll('.avatar-choice').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active'); document.getElementById('start-btn').disabled = false; window.tempId = id; }
         function finishSetup() { currentUser = family.find(f => f.id === window.tempId); localStorage.setItem('ldit_user', JSON.stringify(currentUser)); document.getElementById('setup-card').classList.add('hidden'); showMainApp(); }
-        function showMainApp() { document.getElementById('main-app').classList.remove('hidden'); document.getElementById('user-info').onclick = openSettings; document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://ui-avatars.com/api/?name=${currentUser.name}'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);"> <span>${currentUser.name}</span>`; renderFaceGrid(); }
+        
+        function showMainApp() { 
+            document.getElementById('main-app').classList.remove('hidden'); 
+            document.getElementById('user-info').onclick = openSettings; 
+            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://ui-avatars.com/api/?name=${currentUser.name}'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);"> <span>${currentUser.name}</span>`; 
+            renderFaceGrid(); 
+        }
+
         function closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); }
         
         function renderFaceGrid() { 
@@ -234,7 +253,6 @@
                 const el = document.getElementById(`f-${f.id}`); 
                 if(el) el.classList.toggle('selected', selected.includes(f.id)); 
             }); 
-            
             const allBtn = document.getElementById('f-all');
             if(allBtn) allBtn.classList.toggle('selected', selected.length === family.length && family.length > 0);
 
@@ -254,11 +272,21 @@
 
         function sendWA() { 
             const title = document.getElementById('main-input').value; 
-            const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: "Family" }); 
-            window.open(`https://wa.me/?text=${encodeURIComponent("🚀 Plan: " + title + "\nRate: " + window.location.origin + window.location.pathname + "?" + params.toString())}`); 
+            const pNames = selected.length === family.length ? "Everyone" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+            const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: pNames }); 
+            const waText = `🚀 *${currentUser.name}* idea: *${title}*\nRate it:\n${window.location.origin}${window.location.pathname}?${params.toString()}`;
+            
+            // Direct message if only one person selected
+            if (selected.length === 1) {
+                const target = family.find(f => f.id === selected[0]);
+                window.open(`https://wa.me/${target.phone}?text=${encodeURIComponent(waText)}`);
+            } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`);
+            }
+            location.reload();
         }
         
-        function renderFinalList() { document.getElementById('final-list').innerHTML = activities.map(a => `<div class="list-item" onclick="openDetails(${a.id})"><b>${a.title}</b><br><small>${a.creator}</small><br><span style="font-size:11px; ${!a.dateRaw ? 'color:var(--heart);' : ''}">${a.dateRaw ? '📅 ' + a.dateRaw : 'Details missing'}</span></div>`).join('') || "No activities yet."; }
+        function renderFinalList() { document.getElementById('final-list').innerHTML = activities.map(a => `<div class="list-item" onclick="openDetails(${a.id})"><b>${a.title}</b><br><small>${a.creator} | ${a.joinedBy}</small><br><span style="font-size:11px; ${!a.dateRaw ? 'color:var(--heart);' : ''}">${a.dateRaw ? '📅 ' + a.dateRaw : 'Details missing'}</span></div>`).join('') || "No activities yet."; }
         function openDetails(id) { activeActivityId = id; const a = activities.find(x => x.id == id); const isCreator = currentUser.name === a.creator; document.getElementById('edit-area').classList.toggle('hidden', !isCreator); document.getElementById('view-area').classList.toggle('hidden', isCreator); if (isCreator) { document.getElementById('edit-name').value = a.title; document.getElementById('edit-date').value = a.dateRaw || ""; document.getElementById('edit-time').value = a.time || ""; document.getElementById('edit-dur').value = a.dur || "1-3 hours"; document.getElementById('edit-details').value = a.details || ""; document.getElementById('edit-url').value = a.url || ""; } else { document.getElementById('v-data').innerText = `What: ${a.title}\nWhen: ${a.dateRaw || 'TBD'} @ ${a.time || 'TBD'}\nWho: ${a.joinedBy}\nNotes: ${a.details || ''}`; if(a.url) document.getElementById('v-data').innerHTML += `<br><br><a href="${a.url}" target="_blank">Open Link</a>`; } document.getElementById('details-modal').classList.remove('hidden'); }
         async function saveDetails() { const a = activities.find(x => x.id == activeActivityId); a.title = document.getElementById('edit-name').value; a.dateRaw = document.getElementById('edit-date').value; a.time = document.getElementById('edit-time').value; a.dur = document.getElementById('edit-dur').value; a.details = document.getElementById('edit-details').value; a.url = document.getElementById('edit-url').value; await syncCloud(activities); closeModals(); renderStudioList(); }
         async function deleteItem(id) { if(confirm("Delete?")) { activities = activities.filter(a => a.id != id); await syncCloud(activities); renderStudioList(); } }
