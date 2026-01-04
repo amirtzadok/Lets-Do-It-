@@ -2,316 +2,424 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Let's Do It! Fast Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Let's Do It! 🚀</title>
     <style>
-        :root { --primary: #2563eb; --whatsapp: #25d366; --heart: #f43f5e; --bg: #f8fafc; --card-shadow: 0 4px 20px rgba(0,0,0,0.08); --star-gold: #fbbf24; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); padding: 10px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; box-sizing: border-box; padding-bottom: 80px; }
-        .app-header { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 480px; padding: 15px 0; position: relative; }
-        .app-header h1 { font-size: 24px; font-weight: 900; color: var(--primary); margin: 0; }
-        .header-btn { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; cursor: pointer; position: absolute; right: 0; }
-        .card { background: white; padding: 20px; border-radius: 30px; box-shadow: var(--card-shadow); width: 100%; max-width: 480px; margin-bottom: 20px; box-sizing: border-box; }
-        #settings-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; overflow-y: auto; display: flex; flex-direction: column; align-items: center; background: var(--bg); }
-        .studio-content { width: 100%; max-width: 480px; padding: 20px; box-sizing: border-box; }
-        .face-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
-        .face-wrapper.selected { opacity: 1; }
-        .face-img { width: 42px; height: 42px; border-radius: 50%; border: 4px solid transparent; object-fit: cover; }
-        .face-wrapper.selected .face-img { border-color: var(--whatsapp); }
-        input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
-        .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
-        .primary-btn:disabled { background: #cbd5e1; opacity: 0.7; }
-        .secondary-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 15px; margin-top: 8px; font-weight: bold; cursor: pointer; }
-        .list-item { background: #f1f5f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border-left: 5px solid var(--whatsapp); position: relative; cursor: pointer; }
-        .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-card { background: white; border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; }
-        .hidden { display: none !important; }
-        .star { font-size: 40px; cursor: pointer; color: #d1d5db; }
-        .star.active { color: var(--star-gold); }
-        .suggestion-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; text-align: start; }
-        .all-circle { width:42px; height:42px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 4px solid transparent; }
-        .face-wrapper.selected .all-circle { border-color: var(--whatsapp); }
+        :root {
+            --primary: #6366f1;
+            --success: #28a745;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --warning: #f59e0b;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* --- GLOBAL HEADER --- */
+        .app-header {
+            background: var(--card);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .app-header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); cursor: pointer; }
+
+        .header-user-zone { display: flex; align-items: center; gap: 10px; }
+        .not-you-link { font-size: 0.7rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; box-sizing: border-box; }
+        .screen { display: none; }
+        .active { display: block; }
+
+        /* --- WELCOME SCREEN (Vertically Centered) --- */
+        #welcome-screen {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .welcome-title { font-size: 2rem; color: var(--primary); margin-bottom: 30px; }
+
+        /* --- AVATARS & SELECTION --- */
+        .avatar-container {
+            display: flex; gap: 12px; overflow-x: auto;
+            padding: 10px 0; margin-bottom: 20px;
+            justify-content: center; width: 100%;
+        }
+
+        .avatar-wrap { text-align: center; min-width: 75px; cursor: pointer; }
+
+        .avatar-img {
+            width: 70px; height: 70px; border-radius: 50%;
+            border: 4px solid transparent;
+            object-fit: cover; transition: 0.2s;
+        }
+
+        /* Selection Border */
+        .selected .avatar-img, .selected .heart-icon-circle {
+            border: 4px solid var(--success) !important;
+        }
+
+        .heart-icon-circle {
+            width: 70px; height: 70px; border-radius: 50%;
+            background: #ffe4e6; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 1.8rem; border: 4px solid transparent;
+        }
+
+        /* --- UI ELEMENTS --- */
+        label { display: block; margin-top: 15px; font-weight: bold; color: #64748b; font-size: 0.85rem; text-align: left; }
+        input, select {
+            width: 100%; padding: 14px; margin-top: 5px;
+            border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            font-weight: bold; font-size: 1rem; margin-top: 15px; cursor: pointer;
+        }
+        .btn-primary { background: var(--primary); color: white; text-transform: lowercase; }
+        .btn-ghost { background: #e2e8f0; color: #475569; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+
+        /* --- CARDS --- */
+        .activity-card {
+            background: white; padding: 15px; border-radius: 12px;
+            margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; text-align: left;
+        }
+
+        .star-rating { display: flex; justify-content: center; gap: 10px; margin: 20px 0; font-size: 2.2rem; }
+        .star { cursor: pointer; color: #cbd5e1; }
+        .star.filled { color: #fbbf24; }
     </style>
 </head>
-<body onload="init()">
+<body>
 
-    <header class="app-header">
-        <h1 id="sync-status">🚀 Let's do it!</h1>
-        <button id="lang-toggle" class="header-btn" onclick="toggleLanguage()"></button>
+    <header class="app-header" id="main-header" style="display: none;">
+        <h1 onclick="showScreen('home-screen')">Let's Do It! 🚀</h1>
+        <div class="header-user-zone">
+            <div class="not-you-link" onclick="logout()">not you?</div>
+            <img id="header-avatar" src="" class="avatar-img" style="width:35px; height:35px; border: 2px solid var(--primary)" onclick="showScreen('personal-area')">
+        </div>
     </header>
 
-    <div id="setup-card" class="card hidden">
-        <h2>Who are you?</h2>
-        <div id="avatar-selector" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;"></div>
-        <button class="primary-btn" id="start-btn" onclick="finishSetup()" disabled style="margin-top:20px;">Let's do it!</button>
-    </div>
+    <div class="container">
+        
+        <section id="welcome-screen" class="screen active">
+            <div class="welcome-title">Let's Do It! 🚀</div>
+            <p>Who is using the app?</p>
+            <div class="avatar-container" id="welcome-avatar-list"></div>
+            <button class="btn btn-primary" id="welcome-action-btn" onclick="confirmUser()" style="display:none; max-width: 300px;">
+                Welcome...
+            </button>
+        </section>
 
-    <div id="settings-screen" class="hidden">
-        <div class="studio-content">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 id="studio-user-title">Area</h2>
-                <button class="header-btn" onclick="closeSettings()" style="position:static">✕ Close</button>
+        <section id="home-screen" class="screen">
+            <label>The Idea</label>
+            <input type="text" id="idea-name" placeholder="What's your suggestion?">
+            
+            <label>Invite Participants</label>
+            <div class="avatar-container" id="invite-list" style="justify-content: flex-start;"></div>
+
+            <button class="btn btn-ghost" onclick="showScreen('details-screen')">Add more details</button>
+            <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()">invite...</button>
+
+            <h3 style="margin-top:40px">Let's Do It List ❤️</h3>
+            <div id="approved-activities-list"></div>
+        </section>
+
+        <section id="details-screen" class="screen">
+            <h3>Activity Details</h3>
+            <label>Date of Event</label><input type="date" id="det-date">
+            <label>Start Hour</label><input type="time" id="det-time">
+            <label>Duration</label>
+            <select id="det-duration">
+                <option value="">Choose duration...</option>
+                <option value="1-3 hours">1-3 hours</option>
+                <option value="half a day">Half a day</option>
+                <option value="full day">Full day</option>
+            </select>
+            <label>Time Period</label>
+            <select id="det-period">
+                <option value="this week">This Week</option>
+                <option value="this month">This Month</option>
+                <option value="in the 3 months ahead">3 Months Ahead</option>
+                <option value="this year">This Year</option>
+            </select>
+            <label>URL Field</label><input type="url" id="det-url" placeholder="https://...">
+            <button class="btn btn-success" onclick="saveDetails()">Save</button>
+            <button class="btn btn-ghost" onclick="showScreen('home-screen')">Cancel</button>
+        </section>
+
+        <section id="view-activity-screen" class="screen">
+            <h2 id="view-name">Activity</h2>
+            <div id="view-details-content" style="background: #eff6ff; padding: 15px; border-radius: 12px;"></div>
+            <div id="view-actions"></div>
+            <button class="btn btn-ghost" onclick="showScreen('home-screen')">Back</button>
+        </section>
+
+        <section id="rating-screen" class="screen">
+            <h2 id="rating-subtitle">Rate Idea!</h2>
+            <div class="star-rating" id="star-bar">
+                <span class="star" onclick="setRating(1)">★</span>
+                <span class="star" onclick="setRating(2)">★</span>
+                <span class="star" onclick="setRating(3)">★</span>
+                <span class="star" onclick="setRating(4)">★</span>
+                <span class="star" onclick="setRating(5)">★</span>
             </div>
-            <div class="card" style="text-align: center;">
-                <img id="studio-avatar-img" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--primary); object-fit: cover; cursor: pointer;" onclick="document.getElementById('camera-input').click()">
-                <input type="file" id="camera-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-            </div>
+            <p id="rating-feedback" style="text-align:center; font-weight:bold; height: 20px;"></p>
+            <button class="btn btn-primary" onclick="submitRating()">Let's Do It!</button>
+        </section>
+
+        <section id="personal-area" class="screen">
             <h3>My Suggestions</h3>
-            <div id="studio-suggestions-list"></div>
-        </div>
-    </div>
+            <div id="my-suggestions-list"></div>
+            <button class="btn btn-ghost" onclick="showScreen('home-screen')">Back</button>
+        </section>
 
-    <div id="main-app" class="hidden">
-        <div class="card">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <div id="user-info" style="display:flex; align-items:center; gap:8px; font-weight:bold; cursor:pointer;"></div>
-                <span style="font-size:11px; cursor:pointer; color:#94a3b8;" onclick="resetIdentity()">Not you?</span>
-            </div>
-            <input type="text" id="main-input" placeholder="What's the plan?" oninput="updateUIState()">
-            <div class="face-grid" id="faces-container"></div>
-            <button class="primary-btn" id="action-btn" onclick="sendWA()" disabled>Select Participants</button>
-        </div>
-        <div class="card"><h2>🚀 Let's Do It!</h2><div id="final-list"></div></div>
-    </div>
-
-    <div id="details-modal" class="modal-bg hidden">
-        <div class="modal-card">
-            <h2 id="modal-activity-title">Details</h2>
-            <div id="edit-area" class="hidden">
-                <input type="text" id="edit-name">
-                <input type="date" id="edit-date">
-                <input type="time" id="edit-time">
-                <textarea id="edit-details" rows="3" placeholder="Additional notes..."></textarea>
-                <button class="primary-btn" onclick="saveDetails()">Save Changes</button>
-            </div>
-            <div id="view-area" class="hidden"><p id="v-data" style="text-align:start; white-space: pre-wrap; background:#f1f5f9; padding:15px; border-radius:15px;"></p></div>
-            <button class="secondary-btn" onclick="closeModals()">Close</button>
-        </div>
-    </div>
-
-    <div id="rating-modal" class="modal-bg hidden">
-        <div class="modal-card">
-            <h3 id="rate-title-main"></h3>
-            <h1 id="rate-activity-name" style="color: var(--primary);"></h1>
-            <div style="display:flex; justify-content:center; gap:10px; margin:20px 0;">
-                <span class="star" onclick="setRating(1)">★</span><span class="star" onclick="setRating(2)">★</span><span class="star" onclick="setRating(3)">★</span><span class="star" onclick="setRating(4)">★</span><span class="star" onclick="setRating(5)">★</span>
-            </div>
-            <button class="primary-btn" id="confirm-rate-btn" onclick="submitRating()" disabled>Send Feedback</button>
-        </div>
     </div>
 
     <script>
-        const CONFIG = {
-            BIN_ID: "695a2c70ae596e708fc3e3cc",
-            KEY: "$2a$10$pSuVhxLJ5AXF5djtoV2guu7wllnnTmyAwSVPIJb1htQAEOczsdPe6",
-            URL: "https://api.jsonbin.io/v3/b/695a2c70ae596e708fc3e3cc"
-        };
-
-        let family = JSON.parse(localStorage.getItem('ldit_family')) || [
-            { id: 1, name: "Amir", phone: "972547880404", img: "amir.png" },
-            { id: 2, name: "Rani", phone: "972542428664", img: "rani.png" },
-            { id: 3, name: "Lia", phone: "972526765297", img: "lia.png" },
-            { id: 4, name: "Gal", phone: "972553054450", img: "gal.png" }
+        const family = [
+            { name: "Amir", phone: "+972547880404", img: "amir.png" },
+            { name: "Rani", phone: "+972542428664", img: "rani.png" },
+            { name: "Lia", phone: "+972526765297", img: "lia.png" },
+            { name: "Gal", phone: "+972553054450", img: "gal.png" }
         ];
 
-        let currentUser = JSON.parse(localStorage.getItem('ldit_user'));
-        let activities = [];
-        let selected = [];
-        let tempRating = 0, incomingIdea = null, activeActivityId = null;
+        let currentUser = null;
+        let selectedWelcomeUser = null;
+        let selectedParticipants = [];
+        let activities = JSON.parse(localStorage.getItem('tzadokActivities')) || [];
+        let currentRating = 0;
+        let editingId = null;
 
-        // FAST CLOUD SYNC
-        async function syncCloud(dataToUpload = null) {
-            try {
-                const method = dataToUpload ? 'PUT' : 'GET';
-                const headers = { "X-Master-Key": CONFIG.KEY, "Content-Type": "application/json" };
-                const body = dataToUpload ? JSON.stringify({ activities: dataToUpload }) : null;
-                
-                const res = await fetch(dataToUpload ? CONFIG.URL : CONFIG.URL + '/latest', { method, headers, body });
-                const result = await res.json();
-                
-                if (!dataToUpload) {
-                    activities = result.record.activities || [];
-                    renderFinalList();
-                }
-            } catch (e) { console.warn("Sync slow or offline"); }
+        function showScreen(id) {
+            document.getElementById('main-header').style.display = (id === 'welcome-screen') ? 'none' : 'flex';
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'home-screen') renderHome();
+            if(id === 'personal-area') renderPersonalArea();
+            if(id === 'welcome-screen') renderWelcome();
         }
 
-        async function init() {
-            await syncCloud();
-            
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('import')) {
-                incomingIdea = { id: params.get('id'), t: params.get('t'), c: params.get('c'), p: params.get('p') };
-                document.getElementById('rate-title-main').innerText = `Rate ${incomingIdea.c}'s idea`;
-                document.getElementById('rate-activity-name').innerText = incomingIdea.t;
-                document.getElementById('rating-modal').classList.remove('hidden');
-                window.history.replaceState({}, '', window.location.pathname);
-            }
-
-            if (!currentUser) { 
-                renderSetup(); 
-                document.getElementById('setup-card').classList.remove('hidden'); 
-            } else { 
-                showMainApp(); 
-            }
+        // --- WELCOME LOGIC ---
+        function renderWelcome() {
+            const list = document.getElementById('welcome-avatar-list');
+            list.innerHTML = family.map(m => `
+                <div class="avatar-wrap ${selectedWelcomeUser?.name === m.name ? 'selected' : ''}" onclick="pickWelcomeUser('${m.name}')">
+                    <img src="${m.img}" class="avatar-img">
+                    <div style="font-size:0.8rem; margin-top:5px;">${m.name}</div>
+                </div>
+            `).join('');
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentUser.img = e.target.result;
-                    family = family.map(f => f.id === currentUser.id ? {...f, img: e.target.result} : f);
-                    localStorage.setItem('ldit_user', JSON.stringify(currentUser));
-                    localStorage.setItem('ldit_family', JSON.stringify(family));
-                    document.getElementById('studio-avatar-img').src = e.target.result;
-                    showMainApp();
-                };
-                reader.readAsDataURL(file);
-            }
+        function pickWelcomeUser(name) {
+            selectedWelcomeUser = family.find(f => f.name === name);
+            const btn = document.getElementById('welcome-action-btn');
+            btn.style.display = 'block';
+            btn.innerText = `Welcome ${name}`;
+            renderWelcome();
         }
 
-        function showMainApp() {
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-info').onclick = openSettings;
-            document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://ui-avatars.com/api/?name=${currentUser.name}'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);"> <span>${currentUser.name}</span>`;
-            renderFaceGrid();
+        function confirmUser() {
+            currentUser = selectedWelcomeUser;
+            document.getElementById('header-avatar').src = currentUser.img;
+            showScreen('home-screen');
         }
 
-        function renderFaceGrid() {
-            let html = family.map(f => `<div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})"><img src="${f.img}" class="face-img" onerror="this.src='https://ui-avatars.com/api/?name=${f.name}'"><p style="font-size:10px;">${f.name}</p></div>`).join('');
-            html += `<div class="face-wrapper" id="f-all" onclick="toggleAll()"><div class="all-circle">❤️</div><p style="font-size:10px;">All</p></div>`;
-            document.getElementById('faces-container').innerHTML = html;
+        function logout() {
+            currentUser = null;
+            selectedWelcomeUser = null;
+            showScreen('welcome-screen');
         }
 
-        function toggleFace(id) {
-            selected.includes(id) ? selected = selected.filter(x => x!==id) : selected.push(id);
-            updateUIState();
+        // --- HOME & CREATION ---
+        function renderHome() {
+            const list = document.getElementById('invite-list');
+            list.innerHTML = family.map(m => `
+                <div class="avatar-wrap ${selectedParticipants.includes(m.name) ? 'selected' : ''}" onclick="toggleSelect('${m.name}')">
+                    <img src="${m.img}" class="avatar-img">
+                    <div style="font-size:0.8rem; margin-top:5px;">${m.name}</div>
+                </div>
+            `).join('') + `
+                <div class="avatar-wrap ${selectedParticipants.includes('everyone') ? 'selected' : ''}" onclick="toggleSelect('everyone')">
+                    <div class="heart-icon-circle">❤️</div>
+                    <div style="font-size:0.8rem; margin-top:5px;">Everyone</div>
+                </div>
+            `;
+            updateInviteButton();
+            renderApprovedList();
         }
 
-        function toggleAll() {
-            selected.length === family.length ? selected = [] : selected = family.map(f => f.id);
-            updateUIState();
-        }
-
-        function updateUIState() {
-            family.forEach(f => {
-                const el = document.getElementById(`f-${f.id}`);
-                if(el) el.classList.toggle('selected', selected.includes(f.id));
-            });
-            const allBtn = document.getElementById('f-all');
-            if(allBtn) allBtn.classList.toggle('selected', selected.length === family.length);
-
-            const btn = document.getElementById('action-btn');
-            const val = document.getElementById('main-input').value;
-            btn.disabled = !(val && selected.length);
-            
-            if (selected.length === 1) {
-                btn.innerText = `Invite ${family.find(f => f.id === selected[0]).name}`;
-            } else if (selected.length > 1) {
-                btn.innerText = selected.length === family.length ? "Invite Everyone" : `Invite ${selected.length} People`;
+        function toggleSelect(name) {
+            if(name === 'everyone') {
+                selectedParticipants = selectedParticipants.includes('everyone') ? [] : ['everyone'];
             } else {
-                btn.innerText = "Select Participants";
+                if(selectedParticipants.includes('everyone')) selectedParticipants = [];
+                const idx = selectedParticipants.indexOf(name);
+                if(idx > -1) selectedParticipants.splice(idx, 1);
+                else selectedParticipants.push(name);
             }
+            renderHome();
         }
 
-        function sendWA() {
-            const title = document.getElementById('main-input').value;
-            const pNames = selected.length === family.length ? "Family" : family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
-            const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: pNames });
-            const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-            const msg = `🚀 *${currentUser.name}* idea: *${title}*\nRate it:\n${url}`;
+        function updateInviteButton() {
+            const btn = document.getElementById('invite-submit-btn');
+            if (!selectedParticipants.length) { btn.innerText = "invite..."; return; }
+            if (selectedParticipants.includes('everyone')) { btn.innerText = "invite+everyone"; return; }
+            const names = [...selectedParticipants];
+            let formatted = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' & ' + names.slice(-1);
+            btn.innerText = `invite+${formatted.toLowerCase()}`;
+        }
+
+        function saveDetails() {
+            const data = {
+                date: document.getElementById('det-date').value,
+                time: document.getElementById('det-time').value,
+                duration: document.getElementById('det-duration').value,
+                period: document.getElementById('det-period').value,
+                url: document.getElementById('det-url').value
+            };
+            if(editingId) {
+                activities.find(a => a.id === editingId).details = data;
+                editingId = null;
+            } else {
+                window.tempDetails = data;
+            }
+            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+            showScreen('home-screen');
+        }
+
+        function sendInvites() {
+            const idea = document.getElementById('idea-name').value;
+            if(!idea) return alert("Enter an idea!");
+            const newAct = {
+                id: Date.now(), creator: currentUser.name, name: idea,
+                participants: [...selectedParticipants], details: window.tempDetails || {}, rating: 0
+            };
+            activities.push(newAct);
+            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
             
-            if (selected.length === 1) {
-                window.open(`https://wa.me/${family.find(f => f.id === selected[0]).phone}?text=${encodeURIComponent(msg)}`);
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            const phone = family.find(f => f.name === selectedParticipants[0])?.phone || family[1].phone;
+            const msg = `Hey ${selectedParticipants[0]}!, ${currentUser.name} has an idea for ${idea}, rate his idea! View here: ${window.location.href}?rateId=${newAct.id}`;
+            window.open(`https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            selectedParticipants = []; window.tempDetails = {}; document.getElementById('idea-name').value = "";
+            renderHome();
+        }
+
+        function renderApprovedList() {
+            const div = document.getElementById('approved-activities-list');
+            const approved = activities.filter(a => a.rating >= 4);
+            div.innerHTML = approved.map(a => `
+                <div class="activity-card" onclick="viewActivity(${a.id})">
+                    <div><strong>${a.name} ❤️</strong><div style="font-size:0.7rem; color:gray">Period: ${a.details?.period || 'TBD'}</div></div>
+                    <span>🚀</span>
+                </div>
+            `).join('');
+        }
+
+        function viewActivity(id) {
+            const act = activities.find(a => a.id === id);
+            showScreen('view-activity-screen');
+            document.getElementById('view-name').innerText = act.name;
+            const hasDetails = act.details?.date || act.details?.duration;
+            document.getElementById('view-details-content').innerHTML = `
+                <p><strong>Creator:</strong> ${act.creator}</p>
+                <p><strong>Date:</strong> ${act.details?.date || '???'}</p>
+                <p><strong>Duration:</strong> ${act.details?.duration || '???'}</p>
+                ${act.details?.url ? `<p><a href="${act.details.url}" target="_blank">View Link</a></p>` : ''}
+            `;
+            const actions = document.getElementById('view-actions');
+            actions.innerHTML = "";
+            if(act.creator === currentUser.name) {
+                actions.innerHTML = `<button class="btn btn-primary" onclick="editIdea(${act.id})">Edit Details</button>`;
+            } else if(!hasDetails) {
+                actions.innerHTML = `<button class="btn btn-warning" onclick="askForDetails('${act.creator}', '${act.name}')">Ask for Details</button>`;
             }
         }
 
-        function renderFinalList() {
-            document.getElementById('final-list').innerHTML = activities.map(a => `<div class="list-item" onclick="openDetails(${a.id})"><b>${a.title}</b><br><small>${a.creator}</small></div>`).join('') || "No active plans.";
+        function askForDetails(creatorName, ideaName) {
+            const creator = family.find(f => f.name === creatorName);
+            const msg = `${currentUser.name} asked you to add more details about your idea: "${ideaName}"`;
+            window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        function openDetails(id) {
-            activeActivityId = id;
-            const a = activities.find(x => x.id == id);
-            const isCreator = currentUser.name === a.creator;
-            document.getElementById('edit-area').classList.toggle('hidden', !isCreator);
-            document.getElementById('view-area').classList.toggle('hidden', isCreator);
-            if (isCreator) {
-                document.getElementById('edit-name').value = a.title;
-            } else {
-                document.getElementById('v-data').innerText = `Plan: ${a.title}\nCreator: ${a.creator}\nDetails: ${a.details || 'None'}`;
-            }
-            document.getElementById('details-modal').classList.remove('hidden');
+        function editIdea(id) {
+            const act = activities.find(a => a.id === id);
+            editingId = id;
+            showScreen('details-screen');
+            document.getElementById('det-date').value = act.details?.date || '';
+            document.getElementById('det-duration').value = act.details?.duration || '';
+            document.getElementById('det-period').value = act.details?.period || 'this week';
+            document.getElementById('det-url').value = act.details?.url || '';
         }
 
-        async function saveDetails() {
-            const a = activities.find(x => x.id == activeActivityId);
-            a.title = document.getElementById('edit-name').value;
-            a.details = document.getElementById('edit-details').value;
-            renderFinalList(); // Instant UI update
-            closeModals();
-            await syncCloud(activities); // Background sync
+        // --- RATING LOGIC ---
+        function setRating(val) {
+            currentRating = val;
+            const stars = document.querySelectorAll('.star');
+            const feedback = document.getElementById('rating-feedback');
+            const texts = ["", "dont want to. ❌", "probably no. 👎", "maybe. 😐", "i like it. 👍", "What a wonderful idea! 😍"];
+            stars.forEach((s, i) => s.classList.toggle('filled', i < val));
+            feedback.innerText = texts[val];
         }
 
-        function setRating(n) {
-            tempRating = n;
-            document.querySelectorAll('.star').forEach((s, i) => s.style.color = i < n ? 'var(--star-gold)' : '#d1d5db');
-            document.getElementById('confirm-rate-btn').disabled = false;
-        }
-
-        async function submitRating() {
-            if (tempRating >= 4 && !activities.find(a => a.id == incomingIdea.id)) {
-                activities.push({ id: incomingIdea.id, title: incomingIdea.t, creator: incomingIdea.c, details: '' });
-                await syncCloud(activities);
+        function submitRating() {
+            const id = new URLSearchParams(window.location.search).get('rateId');
+            const act = activities.find(a => a.id == id);
+            if(act) {
+                act.rating = currentRating;
+                localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+                const creator = family.find(f => f.name === act.creator);
+                let msg = currentRating >= 4 ? `The ${currentUser.name} liked your idea! Click to add more details: ${window.location.href.split('?')[0]}` 
+                                             : `Your idea did not accepted by the ${currentUser.name}. Try sending another one`;
+                window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
             }
             window.location.href = window.location.pathname;
         }
 
-        function openSettings() {
-            document.getElementById('settings-screen').classList.remove('hidden');
-            document.getElementById('studio-user-title').innerText = `${currentUser.name}'s Area`;
-            document.getElementById('studio-avatar-img').src = currentUser.img;
-            renderStudioList();
+        function renderPersonalArea() {
+            const div = document.getElementById('my-suggestions-list');
+            const myItems = activities.filter(a => a.creator === currentUser.name);
+            div.innerHTML = myItems.length ? myItems.map(a => `
+                <div class="activity-card" onclick="editIdea(${a.id})">
+                    <div><strong>${a.name}</strong><br><small>Rating: ${a.rating}/5</small></div>
+                    <span>✏️</span>
+                </div>
+            `).join('') : "<p>No suggestions yet.</p>";
         }
 
-        function renderStudioList() {
-            const myIdeas = activities.filter(a => a.creator === currentUser.name);
-            document.getElementById('studio-suggestions-list').innerHTML = myIdeas.map(a => `<div class="suggestion-card"><strong>${a.title}</strong><button class="secondary-btn" onclick="deleteItem(${a.id})">🗑️</button></div>`).join('') || "No suggestions.";
+        // Init Check
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('rateId')) {
+            // Force user pick to rate
+            showScreen('welcome-screen');
+            document.querySelector('#welcome-screen p').innerText = "Pick your name to rate the idea:";
+        } else {
+            showScreen('welcome-screen');
         }
-
-        async function deleteItem(id) {
-            if(confirm("Delete?")) {
-                activities = activities.filter(a => a.id != id);
-                renderFinalList();
-                renderStudioList();
-                await syncCloud(activities);
-            }
-        }
-
-        function renderSetup() {
-            document.getElementById('avatar-selector').innerHTML = family.map(f => `<div onclick="selectSelf(${f.id})" style="cursor:pointer; text-align:center;"><img src="${f.img}" onerror="this.src='https://ui-avatars.com/api/?name=${f.name}'" style="width:50px; height:50px; border-radius:50%; object-fit:cover;"><span>${f.name}</span></div>`).join('');
-        }
-
-        function selectSelf(id) {
-            window.tempId = id;
-            document.getElementById('start-btn').disabled = false;
-        }
-
-        function finishSetup() {
-            currentUser = family.find(f => f.id === window.tempId);
-            localStorage.setItem('ldit_user', JSON.stringify(currentUser));
-            document.getElementById('setup-card').classList.add('hidden');
-            showMainApp();
-        }
-
-        function closeModals() { document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden')); }
-        function closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); }
-        function resetIdentity() { localStorage.removeItem('ldit_user'); location.reload(); }
-        function toggleLanguage() { location.reload(); }
+        renderWelcome();
     </script>
 </body>
 </html>
