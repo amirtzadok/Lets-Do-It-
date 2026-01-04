@@ -16,9 +16,10 @@
         #settings-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; overflow-y: auto; display: flex; flex-direction: column; align-items: center; background: var(--bg); }
         .studio-content { width: 100%; max-width: 480px; padding: 20px; box-sizing: border-box; }
         .face-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin: 15px 0; }
-        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .face-wrapper { cursor: pointer; text-align: center; opacity: 0.4; transition: 0.2s; display: flex; flex-direction: column; align-items: center; border-radius: 50%; }
         .face-wrapper.selected { opacity: 1; }
-        .face-img { width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; object-fit: cover; }
+        .face-img { width: 42px; height: 42px; border-radius: 50%; border: 4px solid transparent; object-fit: cover; transition: 0.2s; }
+        .face-wrapper.selected .face-img { border-color: var(--whatsapp); }
         input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
         .logistics-label { font-size: 12px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px; text-align: start; }
         .primary-btn { width: 100%; padding: 16px; background: var(--whatsapp); color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 17px; }
@@ -32,6 +33,10 @@
         .star { font-size: 40px; cursor: pointer; color: #d1d5db; }
         .star.active { color: var(--star-gold); }
         .suggestion-card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; text-align: start; }
+        
+        /* Heart icon styling for 'All' */
+        .all-circle { width:42px; height:42px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 4px solid transparent; transition: 0.2s; }
+        .face-wrapper.selected .all-circle { border-color: var(--whatsapp); }
     </style>
 </head>
 <body onload="init()">
@@ -110,8 +115,8 @@
         const REQ_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
         const i18n = {
-            eng: { mySuggestions: "My Suggestions", langBtn: "HEB", planPlaceholder: "What's the plan?", futureActivities: "🚀 Let's Do It!", ratings: ["", "No", "Probably no", "Maybe", "I like it", "Let's do it!"], letsDoIt: "🚀 Let's do it!" },
-            heb: { mySuggestions: "ההצעות שלי", langBtn: "ENG", planPlaceholder: "מה התכנון?", futureActivities: "🚀 בואו נעשה את זה!", ratings: ["", "לא", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה!"], letsDoIt: "🚀 בואו נעשה את זה!" }
+            eng: { mySuggestions: "My Suggestions", langBtn: "HEB", planPlaceholder: "What's the plan?", futureActivities: "🚀 Let's Do It!", ratings: ["", "No", "Probably no", "Maybe", "I like it", "Let's do it!"], letsDoIt: "🚀 Let's do it!", invitePrefix: "Invite", everyone: "Everyone" },
+            heb: { mySuggestions: "ההצעות שלי", langBtn: "ENG", planPlaceholder: "מה התכנון?", futureActivities: "🚀 בואו נעשה את זה!", ratings: ["", "לא", "כנראה שלא", "אולי", "אוהב את זה", "בואו נעשה!"], letsDoIt: "🚀 בואו נעשה את זה!", invitePrefix: "הזמן את", everyone: "כולם" }
         };
 
         let family = JSON.parse(localStorage.getItem('ldit_family')) || [
@@ -199,11 +204,60 @@
         function finishSetup() { currentUser = family.find(f => f.id === window.tempId); localStorage.setItem('ldit_user', JSON.stringify(currentUser)); document.getElementById('setup-card').classList.add('hidden'); showMainApp(); }
         function showMainApp() { document.getElementById('main-app').classList.remove('hidden'); document.getElementById('user-info').onclick = openSettings; document.getElementById('user-info').innerHTML = `<img src="${currentUser.img}" onerror="this.src='https://ui-avatars.com/api/?name=${currentUser.name}'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);"> <span>${currentUser.name}</span>`; renderFaceGrid(); }
         function closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); }
-        function renderFaceGrid() { let html = family.map(f => `<div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})"><img src="${f.img}" class="face-img" onerror="this.src='https://ui-avatars.com/api/?name=${f.name}'"><p style="font-size:10px;">${f.name}</p></div>`).join(''); html += `<div class="face-wrapper" id="f-all" onclick="toggleAll()"><div style="width:42px;height:42px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;">❤️</div><p style="font-size:10px;">All</p></div>`; document.getElementById('faces-container').innerHTML = html; }
-        function toggleFace(id) { selected.includes(id) ? selected = selected.filter(x => x!==id) : selected.push(id); updateUIState(); }
-        function toggleAll() { selected.length === family.length ? selected = [] : selected = family.map(f => f.id); updateUIState(); }
-        function updateUIState() { family.forEach(f => { const el = document.getElementById(`f-${f.id}`); if(el) el.classList.toggle('selected', selected.includes(f.id)); }); const btn = document.getElementById('action-btn'); btn.disabled = !(document.getElementById('main-input').value && selected.length); btn.innerText = selected.length ? `Invite ${selected.length} People` : "Select Participants"; }
-        function sendWA() { const title = document.getElementById('main-input').value; const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: "Family" }); window.open(`https://wa.me/?text=${encodeURIComponent("🚀 Plan: " + title + "\nRate: " + window.location.origin + window.location.pathname + "?" + params.toString())}`); }
+        
+        function renderFaceGrid() { 
+            let html = family.map(f => `
+                <div class="face-wrapper" id="f-${f.id}" onclick="toggleFace(${f.id})">
+                    <img src="${f.img}" class="face-img" onerror="this.src='https://ui-avatars.com/api/?name=${f.name}'">
+                    <p style="font-size:10px;">${f.name}</p>
+                </div>`).join(''); 
+            html += `
+                <div class="face-wrapper" id="f-all" onclick="toggleAll()">
+                    <div class="all-circle">❤️</div>
+                    <p style="font-size:10px;">${i18n[currentLang].everyone}</p>
+                </div>`; 
+            document.getElementById('faces-container').innerHTML = html; 
+        }
+
+        function toggleFace(id) { 
+            selected.includes(id) ? selected = selected.filter(x => x!==id) : selected.push(id); 
+            updateUIState(); 
+        }
+
+        function toggleAll() { 
+            selected.length === family.length ? selected = [] : selected = family.map(f => f.id); 
+            updateUIState(); 
+        }
+
+        function updateUIState() { 
+            family.forEach(f => { 
+                const el = document.getElementById(`f-${f.id}`); 
+                if(el) el.classList.toggle('selected', selected.includes(f.id)); 
+            }); 
+            
+            const allBtn = document.getElementById('f-all');
+            if(allBtn) allBtn.classList.toggle('selected', selected.length === family.length && family.length > 0);
+
+            const btn = document.getElementById('action-btn'); 
+            const inputVal = document.getElementById('main-input').value;
+            btn.disabled = !(inputVal && selected.length); 
+            
+            if (selected.length === 0) {
+                btn.innerText = "Select Participants";
+            } else if (selected.length === family.length) {
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${i18n[currentLang].everyone}`;
+            } else {
+                const names = family.filter(f => selected.includes(f.id)).map(f => f.name).join(' & ');
+                btn.innerText = `${i18n[currentLang].invitePrefix} ${names}`;
+            }
+        }
+
+        function sendWA() { 
+            const title = document.getElementById('main-input').value; 
+            const params = new URLSearchParams({ import: 'true', id: Date.now(), t: title, c: currentUser.name, p: "Family" }); 
+            window.open(`https://wa.me/?text=${encodeURIComponent("🚀 Plan: " + title + "\nRate: " + window.location.origin + window.location.pathname + "?" + params.toString())}`); 
+        }
+        
         function renderFinalList() { document.getElementById('final-list').innerHTML = activities.map(a => `<div class="list-item" onclick="openDetails(${a.id})"><b>${a.title}</b><br><small>${a.creator}</small><br><span style="font-size:11px; ${!a.dateRaw ? 'color:var(--heart);' : ''}">${a.dateRaw ? '📅 ' + a.dateRaw : 'Details missing'}</span></div>`).join('') || "No activities yet."; }
         function openDetails(id) { activeActivityId = id; const a = activities.find(x => x.id == id); const isCreator = currentUser.name === a.creator; document.getElementById('edit-area').classList.toggle('hidden', !isCreator); document.getElementById('view-area').classList.toggle('hidden', isCreator); if (isCreator) { document.getElementById('edit-name').value = a.title; document.getElementById('edit-date').value = a.dateRaw || ""; document.getElementById('edit-time').value = a.time || ""; document.getElementById('edit-dur').value = a.dur || "1-3 hours"; document.getElementById('edit-details').value = a.details || ""; document.getElementById('edit-url').value = a.url || ""; } else { document.getElementById('v-data').innerText = `What: ${a.title}\nWhen: ${a.dateRaw || 'TBD'} @ ${a.time || 'TBD'}\nWho: ${a.joinedBy}\nNotes: ${a.details || ''}`; if(a.url) document.getElementById('v-data').innerHTML += `<br><br><a href="${a.url}" target="_blank">Open Link</a>`; } document.getElementById('details-modal').classList.remove('hidden'); }
         async function saveDetails() { const a = activities.find(x => x.id == activeActivityId); a.title = document.getElementById('edit-name').value; a.dateRaw = document.getElementById('edit-date').value; a.time = document.getElementById('edit-time').value; a.dur = document.getElementById('edit-dur').value; a.details = document.getElementById('edit-details').value; a.url = document.getElementById('edit-url').value; await syncCloud(activities); closeModals(); renderStudioList(); }
