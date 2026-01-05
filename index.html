@@ -28,18 +28,31 @@
             background: var(--card);
             padding: 10px 20px;
             display: flex;
-            justify-content: space-between;
+            /* Changed to center the title, while keeping avatar absolute */
+            justify-content: center; 
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             position: sticky; top: 0; z-index: 100;
+            height: 60px; /* Fixed height for alignment */
+            box-sizing: border-box;
+            position: relative; /* Needed for absolute positioning of avatar */
         }
 
         .app-header h1 { 
             margin: 0; font-size: 1.2rem; color: var(--primary); 
             cursor: pointer; font-weight: bold; 
+            text-align: center;
         }
 
-        .header-user-zone { display: flex; align-items: center; gap: 10px; }
+        /* Move user zone to the left via absolute positioning */
+        .header-user-zone { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            position: absolute;
+            left: 20px;
+        }
+        
         .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
         .container { 
@@ -52,10 +65,8 @@
         .active { display: block; }
 
         /* --- WELCOME SCREEN --- */
-        /* Updated to fix the 'stuck screen' bug */
         #welcome-screen {
             height: 100vh;
-            /* removed display:flex from here so it can be hidden */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -65,10 +76,7 @@
             background-color: var(--bg);
         }
         
-        /* Only apply flex layout when active */
-        #welcome-screen.active {
-            display: flex;
-        }
+        #welcome-screen.active { display: flex; }
 
         .welcome-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
 
@@ -117,14 +125,24 @@
 
         /* --- CREATION SCREEN --- */
         #invite-list {
-            display: flex; 
-            gap: 10px; 
-            overflow-x: auto; 
+            display: flex;
+            flex-direction: column; /* Stack Heart on top, avatars below */
+            align-items: center;
+            gap: 15px; 
             padding: 10px 0;
-            justify-content: center; 
+            width: 100%;
         }
 
-        .avatar-wrap-h { text-align: center; min-width: 70px; }
+        /* Container for the 4 avatars */
+        .avatars-row {
+            display: flex;
+            justify-content: space-between; /* Spread evenly */
+            width: 100%;
+            padding: 0 10px; /* Prevent edge cutting */
+            box-sizing: border-box;
+        }
+
+        .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
 
         /* --- LISTS --- */
         .activity-card {
@@ -141,11 +159,11 @@
 <body>
 
     <header class="app-header" id="main-header" style="display: none;">
-        <h1 onclick="showScreen('home-screen')">🚀 Let's Do It!</h1>
         <div class="header-user-zone">
-            <div class="not-you-link" onclick="logout()">not you?</div>
             <img id="header-avatar" src="" class="avatar-img" style="width:35px; height:35px; border: 2px solid var(--primary)" onclick="showScreen('personal-area')">
+            <div class="not-you-link" onclick="logout()">not you?</div>
         </div>
+        <h1 onclick="showScreen('home-screen')">🚀 Let's Do It!</h1>
     </header>
 
     <section id="welcome-screen" class="screen active">
@@ -287,17 +305,33 @@
 
         function renderHome() {
             const list = document.getElementById('invite-list');
-            list.innerHTML = family.map(m => `
-                <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
-                    <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
-                    <div style="font-size:0.7rem;">${m.name}</div>
-                </div>
-            `).join('') + `
-                <div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer;">
-                    <div class="heart-icon-circle" style="width:55px; height:55px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">❤️</div>
-                    <div style="font-size:0.7rem;">Everyone</div>
+            
+            // 1. Create Everyone Button (Heart)
+            const everyoneHtml = `
+                <div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer; margin-bottom: 5px;">
+                    <div class="heart-icon-circle" style="width:60px; height:60px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">
+                        <span style="font-size: 1.8rem;">❤️</span>
+                    </div>
+                    <div style="font-size:0.8rem; font-weight:bold; margin-top:4px;">Everyone</div>
                 </div>
             `;
+
+            // 2. Create Row of Family Members
+            const familyHtml = family.map(m => `
+                <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
+                    <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
+                    <div style="font-size:0.75rem; margin-top:2px;">${m.name}</div>
+                </div>
+            `).join('');
+
+            // 3. Combine them
+            list.innerHTML = `
+                ${everyoneHtml}
+                <div class="avatars-row">
+                    ${familyHtml}
+                </div>
+            `;
+            
             updateInviteButton();
             renderApprovedList();
         }
