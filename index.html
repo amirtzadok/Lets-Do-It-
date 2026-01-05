@@ -55,8 +55,8 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers the entire content group vertically */
-            align-items: center;     /* Centers the group horizontally */
+            justify-content: center;
+            align-items: center;
             text-align: center;
             padding: 20px;
             box-sizing: border-box;
@@ -69,7 +69,7 @@
             display: flex;
             flex-direction: column; 
             gap: 12px;
-            margin: 25px 0; /* Creates balanced space around the list within the group */
+            margin: 25px 0;
             width: 100%;
             align-items: center; 
         }
@@ -256,11 +256,19 @@
             renderWelcome();
         }
 
+        // --- FIX IMPLEMENTED HERE ---
         function confirmUser() {
             if(!selectedWelcomeUser) return;
             currentUser = selectedWelcomeUser;
             document.getElementById('header-avatar').src = currentUser.img;
-            showScreen('home-screen');
+            
+            // Check if user came from an Invite Link (Rate Mode)
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('rateId')) {
+                showScreen('rating-screen');
+            } else {
+                showScreen('home-screen');
+            }
         }
 
         function logout() {
@@ -332,7 +340,12 @@
             
             const target = selectedParticipants[0];
             const phone = family.find(f => f.name === target)?.phone || family[1].phone;
-            const msg = `Hey ${target}!, ${currentUser.name} has an idea for ${idea}, rate his idea! View here: ${window.location.href}?rateId=${newAct.id}`;
+            
+            // --- FIX: Cleaner URL generation ---
+            // Ensures we don't end up with index.html?rateId=123?rateId=456
+            const cleanUrl = window.location.origin + window.location.pathname;
+            const msg = `Hey ${target}!, ${currentUser.name} has an idea for ${idea}, rate his idea! View here: ${cleanUrl}?rateId=${newAct.id}`;
+            
             window.open(`https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
             
             selectedParticipants = []; document.getElementById('idea-name').value = "";
@@ -364,6 +377,7 @@
                 let backMsg = currentRating >= 4 ? `the ${currentUser.name} liked your idea` : `Your idea did not accepted by the ${currentUser.name}. Try sending another one`;
                 window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
             }
+            // Clear params and reload
             window.location.href = window.location.pathname;
         }
 
