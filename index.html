@@ -78,19 +78,24 @@
         .btn-primary { background: var(--primary); color: white; text-transform: lowercase; }
         .btn-ghost { background: #e2e8f0; color: #475569; margin-top: 15px; }
         .btn-success { background: var(--success); color: white; margin-top: 15px; }
+        .btn-warning { background: var(--warning); color: white; margin-top: 15px; }
+        /* NEW: Danger Button */
+        .btn-danger { background: var(--danger); color: white; margin-top: 15px; }
         
-        /* Hidden initially */
         #btn-add-details { display: none; }
 
         /* --- LISTS --- */
         #invite-list { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 10px 0; width: 100%; }
         .avatars-row { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; box-sizing: border-box; }
         .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        
         .activity-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        
         .personal-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s; }
         .personal-card:active { border-color: var(--primary); }
         .personal-info { flex-grow: 1; text-align: left; }
         .delete-btn { background: #fee2e2; color: var(--danger); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; font-weight: bold; cursor: pointer; }
+        
         .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2.2rem; }
         .star { cursor: pointer; color: #cbd5e1; }
         .star.filled { color: #fbbf24; }
@@ -136,7 +141,7 @@
                 <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()" style="margin-top:15px;">invite...</button>
 
                 <h3 style="margin-top:30px; font-weight: bold;">Let's Do It List ❤️</h3>
-                <p style="color:#94a3b8; font-size:0.75rem;">(Tap item to view info)</p>
+                <p style="color:#94a3b8; font-size:0.75rem;">(Tap item to view/edit)</p>
                 <div id="approved-activities-list"></div>
             </section>
 
@@ -167,7 +172,12 @@
                 <textarea id="det-more-info" rows="3" placeholder="Any extra info?"></textarea>
 
                 <label>URL Field</label><input type="url" id="det-url" placeholder="https://...">
-                <button class="btn btn-success" onclick="saveDetails()">Save & Return</button>
+                
+                <button class="btn btn-warning" onclick="saveDraft()">Save as Draft 💾</button>
+                <button class="btn btn-success" onclick="saveDetails()">Save & Return to Invite</button>
+                
+                <button class="btn btn-danger" id="btn-delete-details" onclick="deleteFromDetails()" style="display:none;">Delete Suggestion 🗑️</button>
+                
                 <button class="btn btn-ghost" onclick="showScreen('home-screen')">Cancel</button>
             </section>
 
@@ -220,48 +230,26 @@
         function initApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const savedUser = localStorage.getItem('tzadokCurrentUser');
-
             if(urlParams.has('rateId')) {
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
-                    confirmUser(true);
-                } else {
-                    showScreen('welcome-screen');
-                    document.querySelector('#welcome-screen p').innerText = "Please identify yourself to rate:";
-                    renderWelcome();
-                }
+                if (savedUser) { currentUser = JSON.parse(savedUser); confirmUser(true); } 
+                else { showScreen('welcome-screen'); document.querySelector('#welcome-screen p').innerText = "Please identify yourself to rate:"; renderWelcome(); }
                 return;
             }
-
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                confirmUser(true);
-            } else {
-                showScreen('welcome-screen');
-                renderWelcome();
-            }
+            if (savedUser) { currentUser = JSON.parse(savedUser); confirmUser(true); } 
+            else { showScreen('welcome-screen'); renderWelcome(); }
         }
 
         function showScreen(id) {
             const isWelcome = id === 'welcome-screen';
             document.getElementById('main-header').style.display = isWelcome ? 'none' : 'flex';
-            
             const appContainer = document.getElementById('app-container');
             const welcomeScreen = document.getElementById('welcome-screen');
-
-            if (isWelcome) {
-                appContainer.style.display = 'none';
-                welcomeScreen.classList.add('active');
-            } else {
-                welcomeScreen.classList.remove('active');
-                appContainer.style.display = 'block';
-            }
-            
+            if (isWelcome) { appContainer.style.display = 'none'; welcomeScreen.classList.add('active'); } 
+            else { welcomeScreen.classList.remove('active'); appContainer.style.display = 'block'; }
             if (!isWelcome) {
                 document.querySelectorAll('#app-container .screen').forEach(s => s.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
             }
-            
             if(id === 'home-screen') renderHome();
             if(id === 'welcome-screen') renderWelcome();
             if(id === 'personal-area') renderPersonalArea();
@@ -288,54 +276,37 @@
         function confirmUser(isAutoLogin = false) {
             if (!isAutoLogin && !selectedWelcomeUser) return;
             if (!isAutoLogin) currentUser = selectedWelcomeUser;
-
             localStorage.setItem('tzadokCurrentUser', JSON.stringify(currentUser));
             document.getElementById('header-avatar').src = currentUser.img;
-            
             const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('rateId')) {
-                showScreen('rating-screen');
-            } else {
-                showScreen('home-screen');
-            }
+            if(urlParams.has('rateId')) showScreen('rating-screen'); else showScreen('home-screen');
         }
 
         function logout() {
-            currentUser = null;
-            selectedWelcomeUser = null;
-            localStorage.removeItem('tzadokCurrentUser');
-            cancelEdit();
+            currentUser = null; selectedWelcomeUser = null;
+            localStorage.removeItem('tzadokCurrentUser'); cancelEdit();
             const btn = document.getElementById('welcome-action-btn');
-            btn.classList.remove('ready');
-            btn.innerText = "Welcome...";
+            btn.classList.remove('ready'); btn.innerText = "Welcome...";
             showScreen('welcome-screen');
         }
 
         // --- HOME SCREEN LOGIC ---
         function renderHome() {
             const list = document.getElementById('invite-list');
-            
-            const everyoneHtml = `
-                <div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer; margin-bottom: 5px;">
+            const everyoneHtml = `<div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer; margin-bottom: 5px;">
                     <div class="heart-icon-circle" style="width:60px; height:60px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">
                         <span style="font-size: 1.8rem;">❤️</span>
                     </div>
                     <div style="font-size:0.8rem; font-weight:bold; margin-top:4px;">Everyone</div>
-                </div>
-            `;
+                </div>`;
             const familyHtml = family.map(m => `
                 <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
                     <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
                     <div style="font-size:0.75rem; margin-top:2px;">${m.name}</div>
-                </div>
-            `).join('');
-
+                </div>`).join('');
             list.innerHTML = `${everyoneHtml}<div class="avatars-row">${familyHtml}</div>`;
-            
             document.getElementById('editing-indicator').style.display = editingActivityId ? 'block' : 'none';
-            toggleDetailsButton(); // Check visibility on render
-            updateInviteButton();
-            renderApprovedList();
+            toggleDetailsButton(); updateInviteButton(); renderApprovedList();
         }
 
         function toggleSelect(name) {
@@ -343,8 +314,7 @@
             else {
                 if(selectedParticipants.includes('everyone')) selectedParticipants = [];
                 const idx = selectedParticipants.indexOf(name);
-                if(idx > -1) selectedParticipants.splice(idx, 1);
-                else selectedParticipants.push(name);
+                if(idx > -1) selectedParticipants.splice(idx, 1); else selectedParticipants.push(name);
             }
             renderHome();
         }
@@ -352,17 +322,14 @@
         function toggleDetailsButton() {
             const val = document.getElementById('idea-name').value;
             const btn = document.getElementById('btn-add-details');
-            if(val.trim().length > 0) btn.style.display = 'block';
-            else btn.style.display = 'none';
+            if(val.trim().length > 0) btn.style.display = 'block'; else btn.style.display = 'none';
         }
 
         function updateInviteButton() {
             const btn = document.getElementById('invite-submit-btn');
             let baseText = editingActivityId ? "Update & Invite" : "invite";
-            
             if (!selectedParticipants.length) { btn.innerText = `${baseText}...`; return; }
             if (selectedParticipants.includes('everyone')) { btn.innerText = `${baseText} everyone`; return; }
-            
             const names = [...selectedParticipants];
             let formatted = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' & ' + names.slice(-1);
             btn.innerText = `${baseText} ${formatted.toLowerCase()}`;
@@ -373,21 +340,23 @@
             const mainName = document.getElementById('idea-name').value;
             document.getElementById('det-name-edit').value = mainName;
             document.getElementById('lbl-more-info').innerText = `More about "${mainName}"`;
-
+            
+            // Fill Fields
             document.getElementById('det-date').value = window.tempDetails.date || "";
             document.getElementById('det-time').value = window.tempDetails.time || ""; 
             document.getElementById('det-duration').value = window.tempDetails.duration || "";
             document.getElementById('det-period').value = window.tempDetails.period || "this week";
             document.getElementById('det-url').value = window.tempDetails.url || "";
             document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
+            
+            // Hide delete because it's new
+            document.getElementById('btn-delete-details').style.display = 'none';
 
             showScreen('details-screen');
         }
 
-        function saveDetails() {
-            document.getElementById('idea-name').value = document.getElementById('det-name-edit').value;
-
-            window.tempDetails = {
+        function captureDetails() {
+            return {
                 date: document.getElementById('det-date').value,
                 time: document.getElementById('det-time').value,
                 duration: document.getElementById('det-duration').value,
@@ -395,11 +364,39 @@
                 url: document.getElementById('det-url').value,
                 moreInfo: document.getElementById('det-more-info').value
             };
-            
-            // UPDATED: Add Check Mark
-            document.getElementById('btn-add-details').innerText = "Add more details ✅";
+        }
 
+        function saveDetails() {
+            document.getElementById('idea-name').value = document.getElementById('det-name-edit').value;
+            window.tempDetails = captureDetails();
+            document.getElementById('btn-add-details').innerText = "Add more details ✅";
             showScreen('home-screen');
+        }
+
+        function saveDraft() {
+            const name = document.getElementById('det-name-edit').value;
+            if(!name) return alert("Please enter a name first.");
+
+            const details = captureDetails();
+            const actId = editingActivityId || Date.now();
+            
+            const newAct = {
+                id: actId,
+                creator: currentUser.name,
+                name: name,
+                participants: [],
+                details: details,
+                rating: 0,
+                isDraft: true
+            };
+
+            const index = activities.findIndex(a => a.id === actId);
+            if(index > -1) activities[index] = newAct;
+            else activities.push(newAct);
+
+            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+            cancelEdit();
+            showScreen('personal-area');
         }
 
         function sendInvites() {
@@ -416,15 +413,13 @@
                 name: ideaName,
                 participants: [...selectedParticipants],
                 details: window.tempDetails || {},
-                rating: rating
+                rating: rating,
+                isDraft: false 
             };
 
-            if (editingActivityId) {
-                const index = activities.findIndex(a => a.id === editingActivityId);
-                if(index > -1) activities[index] = newAct;
-            } else {
-                activities.push(newAct);
-            }
+            const index = activities.findIndex(a => a.id === editingActivityId);
+            if(index > -1) activities[index] = newAct;
+            else activities.push(newAct);
             
             localStorage.setItem('tzadokActivities', JSON.stringify(activities));
             
@@ -434,41 +429,34 @@
             const msg = `Hey! ${currentUser.name} suggests: ${ideaName}. Rate it here: ${cleanUrl}?rateId=${actId}`;
             
             window.open(`https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
-            
             cancelEdit();
         }
 
         function cancelEdit() {
-            editingActivityId = null;
-            selectedParticipants = [];
-            window.tempDetails = {};
+            editingActivityId = null; selectedParticipants = []; window.tempDetails = {};
             document.getElementById('idea-name').value = "";
-            // UPDATED: Reset Button Text
             document.getElementById('btn-add-details').innerText = "Add more details";
             renderHome();
         }
 
         function renderApprovedList() {
             const div = document.getElementById('approved-activities-list');
-            const approved = activities.filter(a => a.rating >= 4);
+            const approved = activities.filter(a => a.rating >= 4 && !a.isDraft);
             
-            if(approved.length === 0) {
-                div.innerHTML = "<div style='text-align:center; color:#cbd5e1;'>No approved activities yet.</div>";
-                return;
-            }
+            if(approved.length === 0) { div.innerHTML = "<div style='text-align:center; color:#cbd5e1;'>No approved activities yet.</div>"; return; }
 
             div.innerHTML = approved.map(a => {
-                let subtext = "";
-                if(a.details && a.details.date) {
-                    subtext = `<div style="font-size:0.75rem; color:#64748b;">📅 ${a.details.date} ${a.details.time ? '@ '+a.details.time : ''}</div>`;
-                }
+                let subtext = a.details?.date ? `<div style="font-size:0.75rem; color:#64748b;">📅 ${a.details.date}</div>` : "";
+                const isCreator = a.creator === currentUser.name;
+                const action = isCreator ? `editSuggestion(${a.id})` : `viewActivityDetails(${a.id})`;
+                const icon = isCreator ? "✏️" : "🚀";
                 return `
-                <div class="activity-card" onclick="viewActivityDetails(${a.id})">
+                <div class="activity-card" onclick="${action}">
                     <div style="text-align:left;">
                         <strong>${a.name} ❤️</strong>
                         ${subtext}
                     </div>
-                    <span>🚀</span>
+                    <span>${icon}</span>
                 </div>`;
             }).join('');
         }
@@ -476,7 +464,6 @@
         function viewActivityDetails(id) {
             const act = activities.find(a => a.id === id);
             if(!act) return;
-            
             document.getElementById('view-title').innerText = act.name + " ❤️";
             let html = `<p><strong>Suggestor:</strong> ${act.creator}</p>`;
             if(act.details.date) html += `<p><strong>Date:</strong> ${act.details.date}</p>`;
@@ -484,21 +471,15 @@
             if(act.details.duration) html += `<p><strong>Duration:</strong> ${act.details.duration}</p>`;
             if(act.details.moreInfo) html += `<p><strong>Note:</strong> ${act.details.moreInfo}</p>`;
             if(act.details.url) html += `<p><a href="${act.details.url}" target="_blank">Link</a></p>`;
-            
             document.getElementById('view-body').innerHTML = html;
             document.getElementById('view-modal').style.display = 'flex';
         }
-        function closeViewModal() {
-            document.getElementById('view-modal').style.display = 'none';
-        }
+        function closeViewModal() { document.getElementById('view-modal').style.display = 'none'; }
 
         function setRating(val) {
             currentRating = val;
-            const stars = document.querySelectorAll('.star');
-            const feedback = document.getElementById('rating-feedback');
-            const texts = ["", "dont want to. ❌", "probably no. 👎", "maybe. 😐", "i like it. 👍", "What a wonderful idea! 😍"];
-            stars.forEach((s, i) => s.classList.toggle('filled', i < val));
-            feedback.innerText = texts[val];
+            document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('filled', i < val));
+            document.getElementById('rating-feedback').innerText = ["", "dont want to. ❌", "probably no. 👎", "maybe. 😐", "i like it. 👍", "What a wonderful idea! 😍"][val];
         }
 
         function submitRating() {
@@ -508,7 +489,8 @@
                 act.rating = currentRating;
                 localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 const creator = family.find(f => f.name === act.creator);
-                let backMsg = currentRating >= 4 ? `the ${currentUser.name} liked your idea` : `Your idea did not accepted by the ${currentUser.name}. Try sending another one`;
+                const cleanUrl = window.location.origin + window.location.pathname;
+                let backMsg = currentRating >= 4 ? `${currentUser.name} liked your idea` : `Your Idea didn't make it to the list, try another! ${cleanUrl}`;
                 if(creator) window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
             }
             window.location.href = window.location.pathname;
@@ -517,36 +499,59 @@
         function renderPersonalArea() {
             const div = document.getElementById('my-suggestions-list');
             const myItems = activities.filter(a => a.creator === currentUser.name);
-            
-            if(myItems.length === 0) {
-                div.innerHTML = "<div style='text-align:center; color:#94a3b8; margin-top:20px;'>No suggestions yet.</div>";
-                return;
-            }
+            if(myItems.length === 0) { div.innerHTML = "<div style='text-align:center; color:#94a3b8; margin-top:20px;'>No suggestions yet.</div>"; return; }
 
-            div.innerHTML = myItems.map(a => `
+            div.innerHTML = myItems.map(a => {
+                const draftLabel = a.isDraft ? `<span style="color:var(--warning); font-size:0.75rem; font-weight:bold;">(Draft)</span>` : "";
+                const ratingLabel = !a.isDraft ? `Rating: ${a.rating}/5` : "Not sent yet";
+                return `
                 <div class="personal-card" onclick="editSuggestion(${a.id})">
                     <div class="personal-info">
-                        <div style="font-weight:bold; font-size:1.1rem;">${a.name}</div>
-                        <div style="font-size:0.8rem; color:#64748b;">Rating: ${a.rating}/5</div>
+                        <div style="font-weight:bold; font-size:1.1rem;">${a.name} ${draftLabel}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">${ratingLabel}</div>
                     </div>
                     <div class="delete-btn" onclick="deleteSuggestion(event, ${a.id})">🗑️</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function editSuggestion(id) {
             const act = activities.find(a => a.id === id);
             if(!act) return;
+            
             editingActivityId = act.id;
             selectedParticipants = act.participants || [];
             window.tempDetails = act.details || {};
-            document.getElementById('idea-name').value = act.name;
             
-            // UPDATED: Check if details exist to show checkmark
+            document.getElementById('idea-name').value = act.name;
             const hasDetails = Object.values(window.tempDetails).some(x => x && x.trim() !== "");
             document.getElementById('btn-add-details').innerText = hasDetails ? "Add more details ✅" : "Add more details";
-            
-            showScreen('home-screen');
+
+            document.getElementById('det-name-edit').value = act.name;
+            document.getElementById('lbl-more-info').innerText = `More about "${act.name}"`;
+            document.getElementById('det-date').value = window.tempDetails.date || "";
+            document.getElementById('det-time').value = window.tempDetails.time || ""; 
+            document.getElementById('det-duration').value = window.tempDetails.duration || "";
+            document.getElementById('det-period').value = window.tempDetails.period || "this week";
+            document.getElementById('det-url').value = window.tempDetails.url || "";
+            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
+
+            // SHOW delete button because we are editing existing
+            document.getElementById('btn-delete-details').style.display = 'block';
+
+            showScreen('details-screen');
+        }
+
+        // NEW: Function for the button inside details screen
+        function deleteFromDetails() {
+            if(!editingActivityId) return; 
+            if(!confirm("Delete this suggestion permanently?")) return;
+
+            activities = activities.filter(a => a.id !== editingActivityId);
+            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+
+            cancelEdit();
+            showScreen('personal-area');
         }
 
         function deleteSuggestion(e, id) {
