@@ -12,6 +12,7 @@
             --card: #ffffff;
             --warning: #f59e0b;
             --disabled: #cbd5e1;
+            --danger: #ef4444;
         }
 
         body, html {
@@ -20,7 +21,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: #1e293b;
-            overflow: hidden; /* Prevents scroll on the body itself */
+            overflow: hidden;
         }
 
         /* --- GLOBAL HEADER --- */
@@ -64,12 +65,8 @@
 
         /* --- WELCOME SCREEN --- */
         #welcome-screen {
-            /* FIXED: Use 100% instead of 100vh to fit actual visible mobile area */
-            height: 100%; 
-            width: 100%;
-            position: absolute; /* Ensures it sits on top of everything nicely */
-            top: 0; left: 0;
-            
+            height: 100%; width: 100%;
+            position: absolute; top: 0; left: 0;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -77,7 +74,7 @@
             padding: 20px;
             box-sizing: border-box;
             background-color: var(--bg);
-            z-index: 200; /* Ensure it stays on top */
+            z-index: 200;
         }
         
         #welcome-screen.active { display: flex; }
@@ -85,24 +82,14 @@
         .welcome-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
 
         .avatar-column {
-            display: flex;
-            flex-direction: column; 
-            gap: 12px;
-            margin: 25px 0;
-            width: 100%;
-            align-items: center; 
+            display: flex; flex-direction: column; gap: 12px;
+            margin: 25px 0; width: 100%; align-items: center; 
         }
 
         .avatar-wrap { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            width: 200px; 
-            cursor: pointer; 
-            padding: 8px;
-            border-radius: 50px; 
-            transition: background 0.2s;
-            justify-content: center; /* Centered content as requested previously */
+            display: flex; align-items: center; gap: 15px; width: 200px; 
+            cursor: pointer; padding: 8px; border-radius: 50px; 
+            transition: background 0.2s; justify-content: center;
         }
 
         .avatar-img {
@@ -134,20 +121,13 @@
 
         /* --- CREATION SCREEN --- */
         #invite-list {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px; 
-            padding: 10px 0;
-            width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 15px; padding: 10px 0; width: 100%;
         }
 
         .avatars-row {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 0 10px;
-            box-sizing: border-box;
+            display: flex; justify-content: space-between; width: 100%;
+            padding: 0 10px; box-sizing: border-box;
         }
 
         .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
@@ -157,11 +137,45 @@
             background: white; padding: 15px; border-radius: 12px;
             margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; /* Now clickable to see details */
+        }
+        
+        /* Personal Area Specific Styles */
+        .personal-card {
+            background: white; padding: 15px; border-radius: 12px;
+            margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s;
+        }
+        .personal-card:active { border-color: var(--primary); }
+        .personal-info { flex-grow: 1; text-align: left; }
+        .delete-btn {
+            background: #fee2e2; color: var(--danger);
+            width: 35px; height: 35px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin-left: 10px; font-weight: bold; cursor: pointer;
         }
 
         .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2.2rem; }
         .star { cursor: pointer; color: #cbd5e1; }
         .star.filled { color: #fbbf24; }
+        
+        #editing-indicator {
+            background-color: #fff7ed; border: 1px solid #fdba74; color: #c2410c;
+            padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px;
+            display: none; text-align: center;
+        }
+        
+        /* Modal for Viewing Details (Read Only) */
+        #view-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 500; display: none;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 15px;
+            width: 85%; max-width: 400px; text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -177,27 +191,28 @@
     <section id="welcome-screen" class="screen active">
         <div class="welcome-title">🚀 Let's Do It!</div>
         <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Who is using the app?</p>
-        
         <div class="avatar-column" id="welcome-avatar-list"></div>
-
-        <button class="btn" id="welcome-action-btn" onclick="confirmUser()">
-            Welcome...
-        </button>
+        <button class="btn" id="welcome-action-btn" onclick="confirmUser()">Welcome...</button>
     </section>
 
     <div class="container" id="app-container" style="display:none;">
         
         <section id="home-screen" class="screen">
+            <div id="editing-indicator">
+                ✏️ Editing suggestion. <span style="text-decoration:underline; cursor:pointer;" onclick="cancelEdit()">Cancel</span>
+            </div>
+
             <label>The Idea</label>
             <input type="text" id="idea-name" placeholder="What's your suggestion?">
             
             <label>Invite Participants</label>
             <div id="invite-list"></div>
 
-            <button class="btn btn-ghost" onclick="showScreen('details-screen')">Add more details</button>
+            <button class="btn btn-ghost" onclick="openDetailsScreen()">Add more details</button>
             <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()" style="margin-top:15px;">invite...</button>
 
             <h3 style="margin-top:30px; font-weight: bold;">Let's Do It List ❤️</h3>
+            <p style="color:#94a3b8; font-size:0.75rem;">(Tap item to view info)</p>
             <div id="approved-activities-list"></div>
         </section>
 
@@ -220,7 +235,7 @@
                 <option value="this year">This Year</option>
             </select>
             <label>URL Field</label><input type="url" id="det-url" placeholder="https://...">
-            <button class="btn btn-success" onclick="saveDetails()">Save</button>
+            <button class="btn btn-success" onclick="saveDetails()">Save & Return</button>
             <button class="btn btn-ghost" onclick="showScreen('home-screen')">Cancel</button>
         </section>
 
@@ -239,9 +254,18 @@
 
         <section id="personal-area" class="screen">
             <h3 style="font-weight: bold;">My Suggestions</h3>
+            <p style="color:#64748b; font-size:0.8rem;">Tap an item to edit/resend.</p>
             <div id="my-suggestions-list"></div>
-            <button class="btn btn-ghost" onclick="showScreen('home-screen')">Back</button>
+            <button class="btn btn-ghost" onclick="cancelEdit(); showScreen('home-screen')">Back</button>
         </section>
+    </div>
+
+    <div id="view-modal" onclick="closeViewModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="view-title" style="color:var(--primary); margin-top:0;"></h2>
+            <div id="view-body" style="text-align:left; color:#475569; margin: 20px 0;"></div>
+            <button class="btn btn-primary" onclick="closeViewModal()">Close</button>
+        </div>
     </div>
 
     <script>
@@ -257,6 +281,9 @@
         let selectedParticipants = [];
         let activities = JSON.parse(localStorage.getItem('tzadokActivities')) || [];
         let currentRating = 0;
+        
+        let editingActivityId = null; 
+        window.tempDetails = {};
 
         function showScreen(id) {
             const isWelcome = id === 'welcome-screen';
@@ -293,18 +320,15 @@
             if(!selectedWelcomeUser) return;
             currentUser = selectedWelcomeUser;
             document.getElementById('header-avatar').src = currentUser.img;
-            
             const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('rateId')) {
-                showScreen('rating-screen');
-            } else {
-                showScreen('home-screen');
-            }
+            if(urlParams.has('rateId')) showScreen('rating-screen');
+            else showScreen('home-screen');
         }
 
         function logout() {
             currentUser = null;
             selectedWelcomeUser = null;
+            cancelEdit();
             const btn = document.getElementById('welcome-action-btn');
             btn.classList.remove('ready');
             btn.innerText = "Welcome...";
@@ -337,14 +361,16 @@
                 </div>
             `;
             
+            const indicator = document.getElementById('editing-indicator');
+            indicator.style.display = editingActivityId ? 'block' : 'none';
+
             updateInviteButton();
             renderApprovedList();
         }
 
         function toggleSelect(name) {
-            if(name === 'everyone') {
-                selectedParticipants = selectedParticipants.includes('everyone') ? [] : ['everyone'];
-            } else {
+            if(name === 'everyone') selectedParticipants = selectedParticipants.includes('everyone') ? [] : ['everyone'];
+            else {
                 if(selectedParticipants.includes('everyone')) selectedParticipants = [];
                 const idx = selectedParticipants.indexOf(name);
                 if(idx > -1) selectedParticipants.splice(idx, 1);
@@ -355,16 +381,29 @@
 
         function updateInviteButton() {
             const btn = document.getElementById('invite-submit-btn');
-            if (!selectedParticipants.length) { btn.innerText = "invite..."; return; }
-            if (selectedParticipants.includes('everyone')) { btn.innerText = "invite+everyone"; return; }
+            let baseText = editingActivityId ? "Update & Invite" : "invite";
+            
+            if (!selectedParticipants.length) { btn.innerText = `${baseText}...`; return; }
+            if (selectedParticipants.includes('everyone')) { btn.innerText = `${baseText} everyone`; return; }
+            
             const names = [...selectedParticipants];
             let formatted = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' & ' + names.slice(-1);
-            btn.innerText = `invite+${formatted.toLowerCase()}`;
+            btn.innerText = `${baseText} ${formatted.toLowerCase()}`;
+        }
+
+        function openDetailsScreen() {
+            document.getElementById('det-date').value = window.tempDetails.date || "";
+            document.getElementById('det-time').value = window.tempDetails.time || ""; 
+            document.getElementById('det-duration').value = window.tempDetails.duration || "";
+            document.getElementById('det-period').value = window.tempDetails.period || "this week";
+            document.getElementById('det-url').value = window.tempDetails.url || "";
+            showScreen('details-screen');
         }
 
         function saveDetails() {
             window.tempDetails = {
                 date: document.getElementById('det-date').value,
+                time: document.getElementById('det-time').value,
                 duration: document.getElementById('det-duration').value,
                 period: document.getElementById('det-period').value,
                 url: document.getElementById('det-url').value
@@ -373,31 +412,94 @@
         }
 
         function sendInvites() {
-            const idea = document.getElementById('idea-name').value;
-            if(!idea) return alert("Enter an idea!");
+            const ideaName = document.getElementById('idea-name').value;
+            if(!ideaName) return alert("Enter an idea!");
+            if(selectedParticipants.length === 0) return alert("Select who to invite!");
+
+            let actId = editingActivityId || Date.now();
+            // Preserve existing rating if editing
+            let rating = editingActivityId ? (activities.find(a => a.id === actId)?.rating || 0) : 0;
+
             const newAct = {
-                id: Date.now(), creator: currentUser.name, name: idea,
-                participants: [...selectedParticipants], details: window.tempDetails || {}, rating: 0
+                id: actId,
+                creator: currentUser.name,
+                name: ideaName,
+                participants: [...selectedParticipants],
+                details: window.tempDetails || {},
+                rating: rating
             };
-            activities.push(newAct);
+
+            if (editingActivityId) {
+                const index = activities.findIndex(a => a.id === editingActivityId);
+                if(index > -1) activities[index] = newAct;
+            } else {
+                activities.push(newAct);
+            }
+            
+            // This is the key: Update LocalStorage immediately
             localStorage.setItem('tzadokActivities', JSON.stringify(activities));
             
             const target = selectedParticipants[0];
             const phone = family.find(f => f.name === target)?.phone || family[1].phone;
-            
             const cleanUrl = window.location.origin + window.location.pathname;
-            const msg = `Hey ${target}!, ${currentUser.name} has an idea for ${idea}, rate his idea! View here: ${cleanUrl}?rateId=${newAct.id}`;
+            const msg = `Hey! ${currentUser.name} suggests: ${ideaName}. Rate it here: ${cleanUrl}?rateId=${actId}`;
             
             window.open(`https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
             
-            selectedParticipants = []; document.getElementById('idea-name').value = "";
-            renderHome();
+            cancelEdit();
+        }
+
+        function cancelEdit() {
+            editingActivityId = null;
+            selectedParticipants = [];
+            window.tempDetails = {};
+            document.getElementById('idea-name').value = "";
+            renderHome(); // Re-renders the list with fresh data
         }
 
         function renderApprovedList() {
             const div = document.getElementById('approved-activities-list');
             const approved = activities.filter(a => a.rating >= 4);
-            div.innerHTML = approved.map(a => `<div class="activity-card"><strong>${a.name} ❤️</strong><span>🚀</span></div>`).join('');
+            
+            if(approved.length === 0) {
+                div.innerHTML = "<div style='text-align:center; color:#cbd5e1;'>No approved activities yet.</div>";
+                return;
+            }
+
+            div.innerHTML = approved.map(a => {
+                // Show date if exists, otherwise show name only
+                let subtext = "";
+                if(a.details && a.details.date) {
+                    subtext = `<div style="font-size:0.75rem; color:#64748b;">📅 ${a.details.date} ${a.details.time ? '@ '+a.details.time : ''}</div>`;
+                }
+                return `
+                <div class="activity-card" onclick="viewActivityDetails(${a.id})">
+                    <div style="text-align:left;">
+                        <strong>${a.name} ❤️</strong>
+                        ${subtext}
+                    </div>
+                    <span>🚀</span>
+                </div>`;
+            }).join('');
+        }
+
+        // --- VIEW ONLY MODAL (NEW) ---
+        function viewActivityDetails(id) {
+            const act = activities.find(a => a.id === id);
+            if(!act) return;
+            
+            document.getElementById('view-title').innerText = act.name + " ❤️";
+            let html = `<p><strong>Suggestor:</strong> ${act.creator}</p>`;
+            if(act.details.date) html += `<p><strong>Date:</strong> ${act.details.date}</p>`;
+            if(act.details.time) html += `<p><strong>Time:</strong> ${act.details.time}</p>`;
+            if(act.details.duration) html += `<p><strong>Duration:</strong> ${act.details.duration}</p>`;
+            if(act.details.url) html += `<p><a href="${act.details.url}" target="_blank">Link</a></p>`;
+            
+            document.getElementById('view-body').innerHTML = html;
+            document.getElementById('view-modal').style.display = 'flex';
+        }
+        function closeViewModal() {
+            document.getElementById('view-modal').style.display = 'none';
         }
 
         function setRating(val) {
@@ -417,7 +519,7 @@
                 localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 const creator = family.find(f => f.name === act.creator);
                 let backMsg = currentRating >= 4 ? `the ${currentUser.name} liked your idea` : `Your idea did not accepted by the ${currentUser.name}. Try sending another one`;
-                window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
+                if(creator) window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
             }
             window.location.href = window.location.pathname;
         }
@@ -425,7 +527,39 @@
         function renderPersonalArea() {
             const div = document.getElementById('my-suggestions-list');
             const myItems = activities.filter(a => a.creator === currentUser.name);
-            div.innerHTML = myItems.map(a => `<div class="activity-card">${a.name} (Rating: ${a.rating}/5)</div>`).join('');
+            
+            if(myItems.length === 0) {
+                div.innerHTML = "<div style='text-align:center; color:#94a3b8; margin-top:20px;'>No suggestions yet.</div>";
+                return;
+            }
+
+            div.innerHTML = myItems.map(a => `
+                <div class="personal-card" onclick="editSuggestion(${a.id})">
+                    <div class="personal-info">
+                        <div style="font-weight:bold; font-size:1.1rem;">${a.name}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">Rating: ${a.rating}/5</div>
+                    </div>
+                    <div class="delete-btn" onclick="deleteSuggestion(event, ${a.id})">🗑️</div>
+                </div>
+            `).join('');
+        }
+
+        function editSuggestion(id) {
+            const act = activities.find(a => a.id === id);
+            if(!act) return;
+            editingActivityId = act.id;
+            selectedParticipants = act.participants || [];
+            window.tempDetails = act.details || {};
+            document.getElementById('idea-name').value = act.name;
+            showScreen('home-screen');
+        }
+
+        function deleteSuggestion(e, id) {
+            e.stopPropagation();
+            if(!confirm("Delete this suggestion?")) return;
+            activities = activities.filter(a => a.id !== id);
+            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
+            renderPersonalArea();
         }
 
         const urlParams = new URLSearchParams(window.location.search);
