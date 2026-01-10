@@ -139,7 +139,7 @@
                 <img id="header-avatar" src="" class="avatar-img" style="width:35px; height:35px; border: 2px solid var(--primary)" onclick="showScreen('personal-area')">
                 <div class="not-you-link" onclick="logout()">not you?</div>
             </div>
-            <h1 onclick="showScreen('home-screen')">🚀 Let's Do It!</h1>
+            <h1 onclick="onLogoClick()">🚀 Let's Do It!</h1>
         </header>
 
         <section id="welcome-screen" class="screen">
@@ -330,6 +330,19 @@
             const btn = document.getElementById('welcome-action-btn');
             btn.classList.remove('ready'); btn.innerText = "Welcome...";
             showScreen('welcome-screen');
+        }
+
+        // --- NEW FUNCTION: HEADER LOGIC ---
+        function onLogoClick() {
+            const isEditing = editingActivityId !== null;
+            const inDetails = document.getElementById('details-screen').classList.contains('active');
+            
+            // If in Details Screen and actively Editing (not creating new), treat logo as Save
+            if (inDetails && isEditing) {
+                saveFromDetails();
+            } else {
+                showScreen('home-screen');
+            }
         }
 
         // --- HOME SCREEN LOGIC ---
@@ -573,7 +586,11 @@
                 localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 const creator = family.find(f => f.name === act.creator);
                 const cleanUrl = window.location.origin + window.location.pathname;
-                let backMsg = currentRating >= 4 ? `${currentUser.name} liked your idea` : `Your Idea didn't make it to the list, try another! ${cleanUrl}`;
+                
+                let backMsg = currentRating >= 4 
+                    ? `${currentUser.name} liked your idea.\nUpdate details!\n${cleanUrl}` 
+                    : `Your Idea didn't make it to the list, try another! ${cleanUrl}`;
+
                 if(creator) window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
             }
             window.location.href = window.location.pathname;
