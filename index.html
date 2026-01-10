@@ -53,14 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result == true) {
       _ideaController.clear();
       setState(() {}); // Rebuild to ensure UI updates
-      
-      // Optional: Show a snackbar confirming save
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Activity saved successfully!"),
-          duration: Duration(seconds: 2),
-        ),
-      );
+
+      // Check if widget is still in the tree before using context
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Activity saved successfully!"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -84,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
+
             // Input Field
             TextField(
               controller: _ideaController,
@@ -99,10 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 contentPadding: const EdgeInsets.all(16),
               ),
               // Optional: Allow pressing "Enter" on keyboard to go next
-              onSubmitted: (_) => _navigateToDetails(), 
+              onSubmitted: (_) => _navigateToDetails(),
             ),
             const SizedBox(height: 16),
-            
+
             // Continue Button
             ElevatedButton(
               onPressed: _navigateToDetails,
@@ -186,7 +188,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             // Text Field
             TextField(
               controller: _activityController,
@@ -239,3 +241,4 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
     );
   }
 }
+  
