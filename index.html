@@ -1,645 +1,241 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🚀 Let's Do It!</title>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --success: #28a745;
-            --bg: #f1f5f9;
-            --app-bg: #ffffff;
-            --card: #ffffff;
-            --warning: #f59e0b;
-            --disabled: #cbd5e1;
-            --danger: #ef4444;
-        }
+import 'package:flutter/material.dart';
 
-        body, html {
-            margin: 0; padding: 0;
-            height: 100%; width: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: #1e293b;
-            overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-        }
+void main() {
+  runApp(const MyApp());
+}
 
-        #app-frame {
-            width: 100%; height: 100%; max-width: 480px;
-            background-color: var(--app-bg); position: relative;
-            display: flex; flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden;
-        }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-        @media (min-width: 500px) {
-            #app-frame { height: 90vh; border-radius: 20px; border: 1px solid #e2e8f0; }
-        }
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Activity Planner',
+      theme: ThemeData(
+        primarySwatch: Colors.grey,
+        scaffoldBackgroundColor: const Color(0xFFFDFDFD),
+        useMaterial3: true,
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
 
-        /* --- HEADER --- */
-        .app-header {
-            background: var(--card); padding: 10px 20px;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 100;
-            height: 60px; flex-shrink: 0; position: relative;
-        }
-        
-        .app-header h1 { 
-            margin: 0; font-size: 1.2rem; color: var(--primary); 
-            cursor: pointer; font-weight: bold; 
-            text-align: center; user-select: none;
-            transition: opacity 0.2s;
-        }
-        .app-header h1:active { opacity: 0.7; }
+// ---------------------------------------------------------
+// 1. HOME SCREEN
+// ---------------------------------------------------------
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-        .header-user-zone { display: flex; align-items: center; gap: 10px; position: absolute; left: 20px; }
-        .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-        /* --- CONTENT --- */
-        .scroll-container { padding: 20px; flex-grow: 1; overflow-y: auto; box-sizing: border-box; background-color: #f8fafc; }
-        .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _ideaController = TextEditingController();
 
-        /* --- WELCOME --- */
-        #welcome-screen {
-            height: 100%; display: none; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            padding: 20px; box-sizing: border-box; background-color: white; z-index: 200;
-        }
-        #welcome-screen.active { display: flex; }
-        .welcome-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-        .avatar-column { display: flex; flex-direction: column; gap: 12px; margin: 25px 0; width: 100%; align-items: center; }
-        .avatar-wrap { display: flex; align-items: center; gap: 15px; width: 200px; cursor: pointer; padding: 8px; border-radius: 50px; transition: background 0.2s; justify-content: center; }
-        .avatar-img { width: 50px; height: 50px; border-radius: 50%; border: 4px solid transparent; object-fit: cover; }
-        .selected .avatar-img { border: 4px solid var(--success) !important; }
-        .selected.avatar-wrap { background: #dcfce7; }
+  // Logic to navigate and wait for a result
+  void _navigateToDetails() async {
+    if (_ideaController.text.trim().isEmpty) return;
 
-        /* --- UI ELEMENTS --- */
-        label { display: block; margin-top: 15px; font-weight: bold; color: #64748b; font-size: 0.85rem; text-align: left; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
-        
-        /* New helper for side-by-side inputs */
-        .input-row { display: flex; gap: 12px; width: 100%; }
-        .input-group { flex: 1; min-width: 0; } /* min-width 0 prevents flex overflow */
-        
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
-        #welcome-action-btn { background: var(--disabled); color: #64748b; margin-top: 10px; width: 80%; max-width: 250px; }
-        #welcome-action-btn.ready { background: var(--success); color: white; }
-        .btn-primary { background: var(--primary); color: white; text-transform: lowercase; }
-        .btn-ghost { background: #e2e8f0; color: #475569; margin-top: 15px; }
-        
-        /* Icon Action Bar for Details Screen */
-        .icon-action-bar {
-            display: flex; justify-content: center; align-items: center; gap: 20px;
-            margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;
-        }
-        .icon-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; cursor: pointer; border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .icon-btn:active { transform: scale(0.95); }
-        .icon-btn-save { background: var(--success); color: white; }
-        .icon-btn-delete { background: white; border: 2px solid var(--danger); color: var(--danger); }
-        .icon-btn-send { background: var(--primary); color: white; }
-        
-        #btn-add-details { display: none; }
+    // Push to Details Screen and wait for 'result'
+    final bool? result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ActivityDetailsScreen(
+          initialActivity: _ideaController.text,
+        ),
+      ),
+    );
 
-        /* --- LISTS --- */
-        #invite-list { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 10px 0; width: 100%; }
-        .avatars-row { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; box-sizing: border-box; }
-        .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
-        
-        .activity-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        
-        .personal-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s; }
-        .personal-card:active { border-color: var(--primary); }
-        .personal-info { flex-grow: 1; text-align: left; }
-        .delete-btn { background: #fee2e2; color: var(--danger); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; font-weight: bold; cursor: pointer; }
-        
-        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2.2rem; }
-        .star { cursor: pointer; color: #cbd5e1; }
-        .star.filled { color: #fbbf24; }
-        #editing-indicator { background-color: #fff7ed; border: 1px solid #fdba74; color: #c2410c; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; text-align: center; }
-        
-        /* Modal */
-        #view-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 500; display: none; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 400px; text-align: center; }
-    </style>
-</head>
-<body>
+    // If result is true (Save was clicked), clear the field
+    if (result == true) {
+      _ideaController.clear();
+      setState(() {}); // Rebuild to ensure UI updates
+      
+      // Optional: Show a snackbar confirming save
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Activity saved successfully!"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
-    <div id="app-frame">
-        <header class="app-header" id="main-header" style="display: none;">
-            <div class="header-user-zone">
-                <img id="header-avatar" src="" class="avatar-img" style="width:35px; height:35px; border: 2px solid var(--primary)" onclick="showScreen('personal-area')">
-                <div class="not-you-link" onclick="logout()">not you?</div>
-            </div>
-            <h1 onclick="showScreen('home-screen')">🚀 Let's Do It!</h1>
-        </header>
-
-        <section id="welcome-screen" class="screen">
-            <div class="welcome-title">🚀 Let's Do It!</div>
-            <p style="margin: 0; font-size: 0.9rem; color: #64748b;">Who is using the app?</p>
-            <div class="avatar-column" id="welcome-avatar-list"></div>
-            <button class="btn" id="welcome-action-btn" onclick="confirmUser()">Welcome...</button>
-        </section>
-
-        <div class="scroll-container" id="app-container" style="display:none;">
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "What's on your mind?",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
             
-            <section id="home-screen" class="screen">
-                <div id="editing-indicator">
-                    ✏️ Editing suggestion. <span style="text-decoration:underline; cursor:pointer;" onclick="cancelEdit()">Cancel</span>
-                </div>
-
-                <label>The Idea</label>
-                <input type="text" id="idea-name" placeholder="What's your suggestion?" oninput="toggleDetailsButton()">
-                
-                <label>Invite Participants</label>
-                <div id="invite-list"></div>
-
-                <button class="btn btn-ghost" id="btn-add-details" onclick="openDetailsScreen()">Add more details</button>
-                <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()" style="margin-top:15px;">invite...</button>
-
-                <h3 style="margin-top:30px; font-weight: bold;">Let's Do It List ❤️</h3>
-                <p style="color:#94a3b8; font-size:0.75rem;">(Tap item to view/edit)</p>
-                <div id="approved-activities-list"></div>
-            </section>
-
-            <section id="details-screen" class="screen">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="font-weight: bold; margin:0; cursor: pointer; color: var(--primary);" onclick="saveFromDetails()">Activity Details 💾</h3>
-                    <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="showScreen('home-screen')">Cancel</div>
-                </div>
-                
-                <label>Activity Name</label>
-                <input type="text" id="det-name-edit" style="font-weight:bold; color:var(--primary);">
-
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Date</label>
-                        <input type="date" id="det-date">
-                    </div>
-                    <div class="input-group">
-                        <label>Start Hour</label>
-                        <input type="time" id="det-time">
-                    </div>
-                </div>
-
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Duration</label>
-                        <select id="det-duration">
-                            <option value="">...</option>
-                            <option value="1-3 hours">1-3 h</option>
-                            <option value="half a day">Half day</option>
-                            <option value="full day">Full day</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Period</label>
-                        <select id="det-period">
-                            <option value="this week">This Week</option>
-                            <option value="this month">This Month</option>
-                            <option value="in 3 months">3 Months</option>
-                            <option value="this year">This Year</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <label id="lbl-more-info">More about...</label>
-                <textarea id="det-more-info" rows="2" placeholder="Any extra info?"></textarea>
-
-                <label>Link</label><input type="url" id="det-url" placeholder="https://...">
-
-                <div class="icon-action-bar">
-                    <button class="icon-btn icon-btn-delete" id="det-btn-delete" onclick="deleteFromDetails()" title="Delete">🗑️</button>
-                    <button class="icon-btn icon-btn-save" onclick="saveFromDetails()" title="Save">💾</button>
-                    <button class="icon-btn icon-btn-send" id="det-btn-send" onclick="sendFromDetails()" title="Send Invite" style="display:none;">🚀</button>
-                </div>
-            </section>
-
-            <section id="rating-screen" class="screen">
-                <h2 id="rating-subtitle" style="font-weight: bold;">🚀 Rate Idea!</h2>
-                <div class="star-rating" id="star-bar">
-                    <span class="star" onclick="setRating(1)">★</span>
-                    <span class="star" onclick="setRating(2)">★</span>
-                    <span class="star" onclick="setRating(3)">★</span>
-                    <span class="star" onclick="setRating(4)">★</span>
-                    <span class="star" onclick="setRating(5)">★</span>
-                </div>
-                <p id="rating-feedback" style="text-align:center; font-weight:bold; height: 20px;"></p>
-                <button class="btn btn-primary" onclick="submitRating()">Let's Do It!</button>
-            </section>
-
-            <section id="personal-area" class="screen">
-                <h3 style="font-weight: bold;">My Suggestions</h3>
-                <p style="color:#64748b; font-size:0.8rem;">Tap an item to edit/resend.</p>
-                <div id="my-suggestions-list"></div>
-                <button class="btn btn-ghost" onclick="cancelEdit(); showScreen('home-screen')">Back</button>
-            </section>
-        </div>
-    </div>
-
-    <div id="view-modal" onclick="closeViewModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="view-title" style="color:var(--primary); margin-top:0;"></h2>
-            <div id="view-body" style="text-align:left; color:#475569; margin: 20px 0;"></div>
-            <button class="btn btn-primary" onclick="closeViewModal()">Close</button>
-        </div>
-    </div>
-
-    <script>
-        const family = [
-            { name: "Amir", phone: "+972547880404", img: "amir.png" },
-            { name: "Rani", phone: "+972542428664", img: "rani.png" },
-            { name: "Lia", phone: "+972526765297", img: "lia.png" },
-            { name: "Gal", phone: "+972553054450", img: "gal.png" }
-        ];
-
-        let currentUser = null;
-        let selectedWelcomeUser = null;
-        let selectedParticipants = [];
-        let activities = JSON.parse(localStorage.getItem('tzadokActivities')) || [];
-        let currentRating = 0;
-        let editingActivityId = null; 
-        window.tempDetails = {};
-
-        function initApp() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const savedUser = localStorage.getItem('tzadokCurrentUser');
-            if(urlParams.has('rateId')) {
-                if (savedUser) { currentUser = JSON.parse(savedUser); confirmUser(true); } 
-                else { showScreen('welcome-screen'); document.querySelector('#welcome-screen p').innerText = "Please identify yourself to rate:"; renderWelcome(); }
-                return;
-            }
-            if (savedUser) { currentUser = JSON.parse(savedUser); confirmUser(true); } 
-            else { showScreen('welcome-screen'); renderWelcome(); }
-        }
-
-        function showScreen(id) {
-            const isWelcome = id === 'welcome-screen';
-            document.getElementById('main-header').style.display = isWelcome ? 'none' : 'flex';
-            const appContainer = document.getElementById('app-container');
-            const welcomeScreen = document.getElementById('welcome-screen');
-            if (isWelcome) { appContainer.style.display = 'none'; welcomeScreen.classList.add('active'); } 
-            else { welcomeScreen.classList.remove('active'); appContainer.style.display = 'block'; }
-            if (!isWelcome) {
-                document.querySelectorAll('#app-container .screen').forEach(s => s.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-            }
-            if(id === 'home-screen') renderHome();
-            if(id === 'welcome-screen') renderWelcome();
-            if(id === 'personal-area') renderPersonalArea();
-        }
-
-        function renderWelcome() {
-            const list = document.getElementById('welcome-avatar-list');
-            list.innerHTML = family.map(m => `
-                <div class="avatar-wrap ${selectedWelcomeUser?.name === m.name ? 'selected' : ''}" onclick="pickWelcomeUser('${m.name}')">
-                    <img src="${m.img}" class="avatar-img">
-                    <span style="font-weight:bold;">${m.name}</span>
-                </div>
-            `).join('');
-        }
-
-        function pickWelcomeUser(name) {
-            selectedWelcomeUser = family.find(f => f.name === name);
-            const btn = document.getElementById('welcome-action-btn');
-            btn.classList.add('ready');
-            btn.innerText = `Welcome ${name}`;
-            renderWelcome();
-        }
-
-        function confirmUser(isAutoLogin = false) {
-            if (!isAutoLogin && !selectedWelcomeUser) return;
-            if (!isAutoLogin) currentUser = selectedWelcomeUser;
-            localStorage.setItem('tzadokCurrentUser', JSON.stringify(currentUser));
-            document.getElementById('header-avatar').src = currentUser.img;
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('rateId')) showScreen('rating-screen'); else showScreen('home-screen');
-        }
-
-        function logout() {
-            currentUser = null; selectedWelcomeUser = null;
-            localStorage.removeItem('tzadokCurrentUser'); cancelEdit();
-            const btn = document.getElementById('welcome-action-btn');
-            btn.classList.remove('ready'); btn.innerText = "Welcome...";
-            showScreen('welcome-screen');
-        }
-
-        // --- HOME SCREEN LOGIC ---
-        function renderHome() {
-            const list = document.getElementById('invite-list');
-            const everyoneHtml = `<div class="avatar-wrap-h" onclick="toggleSelect('everyone')" style="cursor:pointer; margin-bottom: 5px;">
-                    <div class="heart-icon-circle" style="width:60px; height:60px; border-radius:50%; background:#ffe4e6; display:flex; align-items:center; justify-content:center; border: 4px solid ${selectedParticipants.includes('everyone') ? 'var(--success)' : 'transparent'}">
-                        <span style="font-size: 1.8rem;">❤️</span>
-                    </div>
-                    <div style="font-size:0.8rem; font-weight:bold; margin-top:4px;">Everyone</div>
-                </div>`;
-            const familyHtml = family.map(m => `
-                <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
-                    <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
-                    <div style="font-size:0.75rem; margin-top:2px;">${m.name}</div>
-                </div>`).join('');
-            list.innerHTML = `${everyoneHtml}<div class="avatars-row">${familyHtml}</div>`;
-            document.getElementById('editing-indicator').style.display = editingActivityId ? 'block' : 'none';
-            toggleDetailsButton(); updateInviteButton(); renderApprovedList();
-        }
-
-        function toggleSelect(name) {
-            if(name === 'everyone') selectedParticipants = selectedParticipants.includes('everyone') ? [] : ['everyone'];
-            else {
-                if(selectedParticipants.includes('everyone')) selectedParticipants = [];
-                const idx = selectedParticipants.indexOf(name);
-                if(idx > -1) selectedParticipants.splice(idx, 1); else selectedParticipants.push(name);
-            }
-            renderHome();
-        }
-
-        function toggleDetailsButton() {
-            const val = document.getElementById('idea-name').value;
-            const btn = document.getElementById('btn-add-details');
-            if(val.trim().length > 0) btn.style.display = 'block'; else btn.style.display = 'none';
-        }
-
-        function updateInviteButton() {
-            const btn = document.getElementById('invite-submit-btn');
-            let baseText = editingActivityId ? "Update & Invite" : "invite";
-            if (!selectedParticipants.length) { btn.innerText = `${baseText}...`; return; }
-            if (selectedParticipants.includes('everyone')) { btn.innerText = `${baseText} everyone`; return; }
-            const names = [...selectedParticipants];
-            let formatted = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' & ' + names.slice(-1);
-            btn.innerText = `${baseText} ${formatted.toLowerCase()}`;
-        }
-
-        // --- DETAILS SCREEN LOGIC ---
-        function openDetailsScreen() {
-            const mainName = document.getElementById('idea-name').value;
-            document.getElementById('det-name-edit').value = mainName;
-            document.getElementById('lbl-more-info').innerText = `More about "${mainName}"`;
+            // Input Field
+            TextField(
+              controller: _ideaController,
+              decoration: InputDecoration(
+                hintText: "Enter a new activity idea...",
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(16),
+              ),
+              // Optional: Allow pressing "Enter" on keyboard to go next
+              onSubmitted: (_) => _navigateToDetails(), 
+            ),
+            const SizedBox(height: 16),
             
-            // Fill Fields
-            document.getElementById('det-date').value = window.tempDetails.date || "";
-            document.getElementById('det-time').value = window.tempDetails.time || ""; 
-            document.getElementById('det-duration').value = window.tempDetails.duration || "";
-            document.getElementById('det-period').value = window.tempDetails.period || "this week";
-            document.getElementById('det-url').value = window.tempDetails.url || "";
-            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
+            // Continue Button
+            ElevatedButton(
+              onPressed: _navigateToDetails,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Continue to Details",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------
+// 2. ACTIVITY DETAILS SCREEN
+// ---------------------------------------------------------
+class ActivityDetailsScreen extends StatefulWidget {
+  final String initialActivity;
+
+  const ActivityDetailsScreen({super.key, required this.initialActivity});
+
+  @override
+  State<ActivityDetailsScreen> createState() => _ActivityDetailsScreenState();
+}
+
+class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
+  late TextEditingController _activityController;
+
+  @override
+  void initState() {
+    super.initState();
+    _activityController = TextEditingController(text: widget.initialActivity);
+  }
+
+  @override
+  void dispose() {
+    _activityController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFDFDFD),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFDFDFD),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context), // Returns null (no save)
+        ),
+        title: const Text(
+          "Activity Details",
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        // REMOVED: No 'actions' property here (Top Save button removed)
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Label
+            const Text(
+              "EDIT ACTIVITY",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 8),
             
-            // Icon Logic
-            const existing = activities.find(a => a.id === editingActivityId);
-            
-            // Delete: Only if editing an existing ID
-            document.getElementById('det-btn-delete').style.display = editingActivityId ? 'flex' : 'none';
-            
-            // Send: Only if editing a Draft that hasn't been sent yet
-            const isDraft = existing ? existing.isDraft : false;
-            document.getElementById('det-btn-send').style.display = (editingActivityId && isDraft) ? 'flex' : 'none';
+            // Text Field
+            TextField(
+              controller: _activityController,
+              maxLines: 3,
+              style: const TextStyle(fontSize: 18, height: 1.5),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
 
-            showScreen('details-screen');
-        }
+            const Spacer(),
 
-        function captureDetails() {
-            return {
-                date: document.getElementById('det-date').value,
-                time: document.getElementById('det-time').value,
-                duration: document.getElementById('det-duration').value,
-                period: document.getElementById('det-period').value,
-                url: document.getElementById('det-url').value,
-                moreInfo: document.getElementById('det-more-info').value
-            };
-        }
+            // REMOVED: "Editing Suggestion Cancel" button is gone.
 
-        function saveFromDetails() {
-            const name = document.getElementById('det-name-edit').value;
-            if(!name) return alert("Name is required");
-            
-            document.getElementById('idea-name').value = name;
-            window.tempDetails = captureDetails();
-
-            // Logic: 
-            // 1. If we are editing an existing item (editingActivityId is set), update it permanently.
-            // 2. If it's a new item, just save to temp.
-            
-            if (editingActivityId) {
-                // Update existing record
-                const index = activities.findIndex(a => a.id === editingActivityId);
-                if (index > -1) {
-                    activities[index].name = name;
-                    activities[index].details = window.tempDetails;
-                    localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-                }
-            } else {
-                // New Item Flow: just confirm UI change
-                document.getElementById('btn-add-details').innerText = "Add more details ✅";
-            }
-            
-            // ALWAYS return to Home Screen (Main) as requested
-            showScreen('home-screen');
-        }
-
-        function sendFromDetails() {
-            // This button is only visible if it's a Draft
-            // We need to save the current details, then trigger the invite logic
-            saveDraft(false); // Save internal state
-            // Now force the invite logic using current input data
-            document.getElementById('idea-name').value = document.getElementById('det-name-edit').value;
-            window.tempDetails = captureDetails();
-            sendInvites(); // This will handle the actual sending and screen switching
-        }
-
-        // Helper to save draft without switching screens immediately (used by logic)
-        function saveDraft(switchScreen = true) {
-            const name = document.getElementById('det-name-edit').value;
-            if(!name) return;
-            const details = captureDetails();
-            const actId = editingActivityId || Date.now();
-            
-            const newAct = {
-                id: actId,
-                creator: currentUser.name,
-                name: name,
-                participants: selectedParticipants.length ? selectedParticipants : [],
-                details: details,
-                rating: 0,
-                isDraft: true
-            };
-
-            const index = activities.findIndex(a => a.id === actId);
-            if(index > -1) activities[index] = newAct;
-            else activities.push(newAct);
-
-            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-            if(switchScreen) {
-                cancelEdit();
-                showScreen('personal-area');
-            }
-        }
-
-        function sendInvites() {
-            const ideaName = document.getElementById('idea-name').value;
-            if(!ideaName) return alert("Enter an idea!");
-            
-            if(selectedParticipants.length === 0) selectedParticipants = ['everyone'];
-
-            let actId = editingActivityId || Date.now();
-            let rating = editingActivityId ? (activities.find(a => a.id === actId)?.rating || 0) : 0;
-
-            const newAct = {
-                id: actId,
-                creator: currentUser.name,
-                name: ideaName,
-                participants: [...selectedParticipants],
-                details: window.tempDetails || {},
-                rating: rating,
-                isDraft: false 
-            };
-
-            const index = activities.findIndex(a => a.id === editingActivityId);
-            if(index > -1) activities[index] = newAct;
-            else activities.push(newAct);
-            
-            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-            
-            const target = selectedParticipants[0];
-            const phone = family.find(f => f.name === target)?.phone || family[1].phone;
-            const cleanUrl = window.location.origin + window.location.pathname;
-            const msg = `Hey! ${currentUser.name} suggests: ${ideaName}. Rate it here: ${cleanUrl}?rateId=${actId}`;
-            
-            window.open(`https://wa.me/${phone.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
-            cancelEdit();
-        }
-
-        function cancelEdit() {
-            editingActivityId = null; selectedParticipants = []; window.tempDetails = {};
-            document.getElementById('idea-name').value = "";
-            document.getElementById('btn-add-details').innerText = "Add more details";
-            renderHome();
-        }
-
-        function renderApprovedList() {
-            const div = document.getElementById('approved-activities-list');
-            const approved = activities.filter(a => a.rating >= 4 && !a.isDraft);
-            
-            if(approved.length === 0) { div.innerHTML = "<div style='text-align:center; color:#cbd5e1;'>No approved activities yet.</div>"; return; }
-
-            div.innerHTML = approved.map(a => {
-                let subtext = a.details?.date ? `<div style="font-size:0.75rem; color:#64748b;">📅 ${a.details.date}</div>` : "";
-                const isCreator = a.creator === currentUser.name;
-                const action = isCreator ? `editSuggestion(${a.id})` : `viewActivityDetails(${a.id})`;
-                const icon = isCreator ? "✏️" : "🚀";
-                return `
-                <div class="activity-card" onclick="${action}">
-                    <div style="text-align:left;">
-                        <strong>${a.name} ❤️</strong>
-                        ${subtext}
-                    </div>
-                    <span>${icon}</span>
-                </div>`;
-            }).join('');
-        }
-
-        function viewActivityDetails(id) {
-            const act = activities.find(a => a.id === id);
-            if(!act) return;
-            document.getElementById('view-title').innerText = act.name + " ❤️";
-            let html = `<p><strong>Suggestor:</strong> ${act.creator}</p>`;
-            if(act.details.date) html += `<p><strong>Date:</strong> ${act.details.date}</p>`;
-            if(act.details.time) html += `<p><strong>Time:</strong> ${act.details.time}</p>`;
-            if(act.details.duration) html += `<p><strong>Duration:</strong> ${act.details.duration}</p>`;
-            if(act.details.moreInfo) html += `<p><strong>Note:</strong> ${act.details.moreInfo}</p>`;
-            if(act.details.url) html += `<p><a href="${act.details.url}" target="_blank">Link</a></p>`;
-            document.getElementById('view-body').innerHTML = html;
-            document.getElementById('view-modal').style.display = 'flex';
-        }
-        function closeViewModal() { document.getElementById('view-modal').style.display = 'none'; }
-
-        function setRating(val) {
-            currentRating = val;
-            document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('filled', i < val));
-            document.getElementById('rating-feedback').innerText = ["", "dont want to. ❌", "probably no. 👎", "maybe. 😐", "i like it. 👍", "What a wonderful idea! 😍"][val];
-        }
-
-        function submitRating() {
-            const id = new URLSearchParams(window.location.search).get('rateId');
-            const act = activities.find(a => a.id == id);
-            if(act) {
-                act.rating = currentRating;
-                localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-                const creator = family.find(f => f.name === act.creator);
-                const cleanUrl = window.location.origin + window.location.pathname;
-                let backMsg = currentRating >= 4 ? `${currentUser.name} liked your idea` : `Your Idea didn't make it to the list, try another! ${cleanUrl}`;
-                if(creator) window.open(`https://wa.me/${creator.phone.replace('+','')}?text=${encodeURIComponent(backMsg)}`, '_blank');
-            }
-            window.location.href = window.location.pathname;
-        }
-
-        function renderPersonalArea() {
-            const div = document.getElementById('my-suggestions-list');
-            const myItems = activities.filter(a => a.creator === currentUser.name);
-            if(myItems.length === 0) { div.innerHTML = "<div style='text-align:center; color:#94a3b8; margin-top:20px;'>No suggestions yet.</div>"; return; }
-
-            div.innerHTML = myItems.map(a => {
-                const draftLabel = a.isDraft ? `<span style="color:var(--warning); font-size:0.75rem; font-weight:bold;">(Draft)</span>` : "";
-                const ratingLabel = !a.isDraft ? `Rating: ${a.rating}/5` : "Not sent yet";
-                return `
-                <div class="personal-card" onclick="editSuggestion(${a.id})">
-                    <div class="personal-info">
-                        <div style="font-weight:bold; font-size:1.1rem;">${a.name} ${draftLabel}</div>
-                        <div style="font-size:0.8rem; color:#64748b;">${ratingLabel}</div>
-                    </div>
-                    <div class="delete-btn" onclick="deleteSuggestion(event, ${a.id})">🗑️</div>
-                </div>`;
-            }).join('');
-        }
-
-        function editSuggestion(id) {
-            const act = activities.find(a => a.id === id);
-            if(!act) return;
-            
-            editingActivityId = act.id;
-            selectedParticipants = act.participants || [];
-            window.tempDetails = act.details || {};
-            
-            document.getElementById('idea-name').value = act.name;
-            const hasDetails = Object.values(window.tempDetails).some(x => x && x.trim() !== "");
-            document.getElementById('btn-add-details').innerText = hasDetails ? "Add more details ✅" : "Add more details";
-
-            document.getElementById('det-name-edit').value = act.name;
-            document.getElementById('lbl-more-info').innerText = `More about "${act.name}"`;
-            document.getElementById('det-date').value = window.tempDetails.date || "";
-            document.getElementById('det-time').value = window.tempDetails.time || ""; 
-            document.getElementById('det-duration').value = window.tempDetails.duration || "";
-            document.getElementById('det-period').value = window.tempDetails.period || "this week";
-            document.getElementById('det-url').value = window.tempDetails.url || "";
-            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
-
-            openDetailsScreen(); 
-        }
-
-        function deleteFromDetails() {
-            if(!editingActivityId) return; 
-            if(!confirm("Delete this suggestion permanently?")) return;
-            activities = activities.filter(a => a.id !== editingActivityId);
-            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-            cancelEdit();
-            showScreen('personal-area');
-        }
-
-        function deleteSuggestion(e, id) {
-            e.stopPropagation();
-            if(!confirm("Delete this suggestion?")) return;
-            activities = activities.filter(a => a.id !== id);
-            localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-            renderPersonalArea();
-        }
-
-        initApp();
-    </script>
-</body>
-</html>
+            // Bottom Save Button
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Pass 'true' back to Home to indicate a successful save
+                  Navigator.pop(context, true);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Save Activity",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
