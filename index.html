@@ -80,6 +80,10 @@
         label { display: block; margin-top: 15px; font-weight: bold; color: #64748b; font-size: 0.85rem; text-align: left; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
         
+        /* New helper for side-by-side inputs */
+        .input-row { display: flex; gap: 12px; width: 100%; }
+        .input-group { flex: 1; min-width: 0; } /* min-width 0 prevents flex overflow */
+        
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
         #welcome-action-btn { background: var(--disabled); color: #64748b; margin-top: 10px; width: 80%; max-width: 250px; }
         #welcome-action-btn.ready { background: var(--success); color: white; }
@@ -168,34 +172,49 @@
 
             <section id="details-screen" class="screen">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="font-weight: bold; margin:0;">Activity Details</h3>
+                    <h3 style="font-weight: bold; margin:0; cursor: pointer; color: var(--primary);" onclick="saveFromDetails()">Activity Details 💾</h3>
                     <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="showScreen('home-screen')">Cancel</div>
                 </div>
                 
                 <label>Activity Name</label>
                 <input type="text" id="det-name-edit" style="font-weight:bold; color:var(--primary);">
 
-                <label>Date of Event</label><input type="date" id="det-date">
-                <label>Start Hour</label><input type="time" id="det-time">
-                <label>Duration</label>
-                <select id="det-duration">
-                    <option value="">Choose duration...</option>
-                    <option value="1-3 hours">1-3 hours</option>
-                    <option value="half a day">Half a day</option>
-                    <option value="full day">Full day</option>
-                </select>
-                <label>Time Period</label>
-                <select id="det-period">
-                    <option value="this week">This Week</option>
-                    <option value="this month">This Month</option>
-                    <option value="in 3 months">3 Months Ahead</option>
-                    <option value="this year">This Year</option>
-                </select>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="det-date">
+                    </div>
+                    <div class="input-group">
+                        <label>Start Hour</label>
+                        <input type="time" id="det-time">
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Duration</label>
+                        <select id="det-duration">
+                            <option value="">...</option>
+                            <option value="1-3 hours">1-3 h</option>
+                            <option value="half a day">Half day</option>
+                            <option value="full day">Full day</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Period</label>
+                        <select id="det-period">
+                            <option value="this week">This Week</option>
+                            <option value="this month">This Month</option>
+                            <option value="in 3 months">3 Months</option>
+                            <option value="this year">This Year</option>
+                        </select>
+                    </div>
+                </div>
                 
                 <label id="lbl-more-info">More about...</label>
-                <textarea id="det-more-info" rows="3" placeholder="Any extra info?"></textarea>
+                <textarea id="det-more-info" rows="2" placeholder="Any extra info?"></textarea>
 
-                <label>URL Field</label><input type="url" id="det-url" placeholder="https://...">
+                <label>Link</label><input type="url" id="det-url" placeholder="https://...">
 
                 <div class="icon-action-bar">
                     <button class="icon-btn icon-btn-delete" id="det-btn-delete" onclick="deleteFromDetails()" title="Delete">🗑️</button>
@@ -404,8 +423,8 @@
             window.tempDetails = captureDetails();
 
             // Logic: 
-            // 1. If we are editing an existing item (editingActivityId is set), update it permanently immediately.
-            // 2. If it's a new item (from Home), just save to temp and go back to Home.
+            // 1. If we are editing an existing item (editingActivityId is set), update it permanently.
+            // 2. If it's a new item, just save to temp.
             
             if (editingActivityId) {
                 // Update existing record
@@ -413,19 +432,15 @@
                 if (index > -1) {
                     activities[index].name = name;
                     activities[index].details = window.tempDetails;
-                    // If it was a draft, it remains a draft until "Sent". If it was active, it stays active.
                     localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 }
-                // Return to Personal Area if we came from there (usually implied by editingActivityId being set)
-                // However, if we started at Home, we want to go to Home. 
-                // Simple heuristic: If draft, go to personal. If approved/active, personal.
-                // Or just go back to previous screen. For simplicity, let's go Personal Area.
-                showScreen('personal-area');
             } else {
-                // New Item Flow
+                // New Item Flow: just confirm UI change
                 document.getElementById('btn-add-details').innerText = "Add more details ✅";
-                showScreen('home-screen');
             }
+            
+            // ALWAYS return to Home Screen (Main) as requested
+            showScreen('home-screen');
         }
 
         function sendFromDetails() {
@@ -470,8 +485,6 @@
             const ideaName = document.getElementById('idea-name').value;
             if(!ideaName) return alert("Enter an idea!");
             
-            // If sending from details, selectedParticipants might be empty if not set in Home
-            // We'll default to 'everyone' if empty for a new send, or keep existing
             if(selectedParticipants.length === 0) selectedParticipants = ['everyone'];
 
             let actId = editingActivityId || Date.now();
@@ -494,7 +507,7 @@
             localStorage.setItem('tzadokActivities', JSON.stringify(activities));
             
             const target = selectedParticipants[0];
-            const phone = family.find(f => f.name === target)?.phone || family[1].phone; // Default to Rani if issue
+            const phone = family.find(f => f.name === target)?.phone || family[1].phone;
             const cleanUrl = window.location.origin + window.location.pathname;
             const msg = `Hey! ${currentUser.name} suggests: ${ideaName}. Rate it here: ${cleanUrl}?rateId=${actId}`;
             
@@ -606,7 +619,7 @@
             document.getElementById('det-url').value = window.tempDetails.url || "";
             document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
 
-            openDetailsScreen(); // Use updated logic
+            openDetailsScreen(); 
         }
 
         function deleteFromDetails() {
