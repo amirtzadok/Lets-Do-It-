@@ -50,10 +50,16 @@
             cursor: pointer; font-weight: bold; 
             text-align: center; user-select: none;
             transition: opacity 0.2s;
+            position: relative; z-index: 10; /* Lower z-index than user zone */
         }
         .app-header h1:active { opacity: 0.7; }
 
-        .header-user-zone { display: flex; align-items: center; gap: 10px; position: absolute; left: 20px; }
+        /* CHANGED: Added z-index to ensure clicks work (was being blocked by H1) */
+        .header-user-zone { 
+            display: flex; align-items: center; gap: 10px; 
+            position: absolute; left: 20px; 
+            z-index: 20; 
+        }
         .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
         /* --- CONTENT --- */
@@ -173,7 +179,7 @@
             <section id="details-screen" class="screen">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="font-weight: bold; margin:0; color: var(--primary);">Activity Details</h3>
-                    <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="cancelEdit(); showScreen('home-screen')">Cancel</div>
+                    <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="goHome()">Cancel</div>
                 </div>
                 
                 <label>Activity Name</label>
@@ -240,7 +246,7 @@
                 <h3 style="font-weight: bold;">My Suggestions</h3>
                 <p style="color:#64748b; font-size:0.8rem;">Tap an item to edit/resend.</p>
                 <div id="my-suggestions-list"></div>
-                <button class="btn btn-ghost" onclick="cancelEdit(); showScreen('home-screen')">Back</button>
+                <button class="btn btn-ghost" onclick="goHome()">Back</button>
             </section>
         </div>
     </div>
@@ -332,16 +338,21 @@
             showScreen('welcome-screen');
         }
 
-        // --- NEW FUNCTION: HEADER LOGIC ---
+        // --- NEW HELPER FUNCTION TO FIX NAVIGATION ---
+        function goHome() {
+            cancelEdit();
+            showScreen('home-screen');
+        }
+
         function onLogoClick() {
             const isEditing = editingActivityId !== null;
             const inDetails = document.getElementById('details-screen').classList.contains('active');
             
-            // If in Details Screen and actively Editing (not creating new), treat logo as Save
+            // If in Details Screen and actively Editing, treat logo as Save
             if (inDetails && isEditing) {
                 saveFromDetails();
             } else {
-                showScreen('home-screen');
+                goHome(); // Use safer navigation
             }
         }
 
@@ -447,8 +458,7 @@
                     activities[index].details = window.tempDetails;
                     localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 }
-                cancelEdit(); 
-                showScreen('home-screen');
+                goHome(); // Updated
             } else {
                 // New Item Flow: just confirm UI change
                 document.getElementById('btn-add-details').innerText = "Add more details ✅";
