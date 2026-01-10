@@ -227,6 +227,8 @@
 
             <section id="rating-screen" class="screen">
                 <h2 id="rating-subtitle" style="font-weight: bold;">🚀 Rate Idea!</h2>
+                <p id="rating-text" style="margin: 5px 0 15px; font-size: 1rem; color: #334155; padding: 0 10px; text-align:center;"></p>
+                
                 <div class="star-rating" id="star-bar">
                     <span class="star" onclick="setRating(1)">★</span>
                     <span class="star" onclick="setRating(2)">★</span>
@@ -322,8 +324,19 @@
             if (!isAutoLogin) currentUser = selectedWelcomeUser;
             localStorage.setItem('tzadokCurrentUser', JSON.stringify(currentUser));
             document.getElementById('header-avatar').src = currentUser.img;
+            
+            // CHANGED: Handle rateId display logic
             const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('rateId')) showScreen('rating-screen'); else showScreen('home-screen');
+            if(urlParams.has('rateId')) {
+                const id = urlParams.get('rateId');
+                const act = activities.find(a => a.id == id);
+                if(act) {
+                    document.getElementById('rating-text').innerText = `${act.creator} suggested ${act.name}. Rate the idea!`;
+                }
+                showScreen('rating-screen');
+            } else {
+                showScreen('home-screen');
+            }
         }
 
         function logout() {
