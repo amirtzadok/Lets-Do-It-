@@ -8,8 +8,8 @@
         :root {
             --primary: #6366f1;
             --success: #28a745;
-            --bg: #f1f5f9; /* Darker background for desktop outer area */
-            --app-bg: #ffffff; /* White background for the app itself */
+            --bg: #f1f5f9;
+            --app-bg: #ffffff;
             --card: #ffffff;
             --warning: #f59e0b;
             --disabled: #cbd5e1;
@@ -23,199 +23,87 @@
             background-color: var(--bg);
             color: #1e293b;
             overflow: hidden;
-            display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center;     /* Center vertically */
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- APP CONTAINER (Mobile Frame) --- */
         #app-frame {
-            width: 100%;
-            height: 100%;
-            max-width: 480px; /* Limits width on desktop */
-            background-color: var(--app-bg);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); /* Nice shadow on desktop */
-            overflow: hidden;
+            width: 100%; height: 100%; max-width: 480px;
+            background-color: var(--app-bg); position: relative;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden;
         }
 
         @media (min-width: 500px) {
-            #app-frame {
-                height: 90vh; /* Floating window effect on desktop */
-                border-radius: 20px;
-                border: 1px solid #e2e8f0;
-            }
+            #app-frame { height: 90vh; border-radius: 20px; border: 1px solid #e2e8f0; }
         }
 
-        /* --- GLOBAL HEADER --- */
+        /* --- HEADER --- */
         .app-header {
-            background: var(--card);
-            padding: 10px 20px;
-            display: flex;
-            justify-content: center; 
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            z-index: 100;
-            height: 60px;
-            flex-shrink: 0; /* Prevent header from shrinking */
-            position: relative;
+            background: var(--card); padding: 10px 20px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 100;
+            height: 60px; flex-shrink: 0; position: relative;
         }
-
-        .app-header h1 { 
-            margin: 0; font-size: 1.2rem; color: var(--primary); 
-            cursor: pointer; font-weight: bold; 
-            text-align: center;
-        }
-
-        .header-user-zone { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            position: absolute;
-            left: 20px;
-        }
-        
+        .app-header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); cursor: pointer; font-weight: bold; }
+        .header-user-zone { display: flex; align-items: center; gap: 10px; position: absolute; left: 20px; }
         .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
-        /* --- SCROLLABLE CONTENT AREA --- */
-        .scroll-container { 
-            padding: 20px; 
-            flex-grow: 1; /* Fills remaining space */
-            overflow-y: auto; 
-            box-sizing: border-box;
-            background-color: #f8fafc; /* Inner app background */
-        }
-
-        /* --- SCREEN VISIBILITY LOGIC --- */
+        /* --- CONTENT --- */
+        .scroll-container { padding: 20px; flex-grow: 1; overflow-y: auto; box-sizing: border-box; background-color: #f8fafc; }
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- WELCOME SCREEN --- */
+        /* --- WELCOME --- */
         #welcome-screen {
-            height: 100%;
-            display: none; /* Flex applied via active class logic manually */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: white;
-            z-index: 200;
+            height: 100%; display: none; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 20px; box-sizing: border-box; background-color: white; z-index: 200;
         }
-        
         #welcome-screen.active { display: flex; }
-
         .welcome-title { font-size: 1.8rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
-
-        .avatar-column {
-            display: flex; flex-direction: column; gap: 12px;
-            margin: 25px 0; width: 100%; align-items: center; 
-        }
-
-        .avatar-wrap { 
-            display: flex; align-items: center; gap: 15px; width: 200px; 
-            cursor: pointer; padding: 8px; border-radius: 50px; 
-            transition: background 0.2s; justify-content: center;
-        }
-
-        .avatar-img {
-            width: 50px; height: 50px; border-radius: 50%;
-            border: 4px solid transparent; object-fit: cover;
-        }
-
+        .avatar-column { display: flex; flex-direction: column; gap: 12px; margin: 25px 0; width: 100%; align-items: center; }
+        .avatar-wrap { display: flex; align-items: center; gap: 15px; width: 200px; cursor: pointer; padding: 8px; border-radius: 50px; transition: background 0.2s; justify-content: center; }
+        .avatar-img { width: 50px; height: 50px; border-radius: 50%; border: 4px solid transparent; object-fit: cover; }
         .selected .avatar-img { border: 4px solid var(--success) !important; }
         .selected.avatar-wrap { background: #dcfce7; }
 
         /* --- UI ELEMENTS --- */
         label { display: block; margin-top: 15px; font-weight: bold; color: #64748b; font-size: 0.85rem; text-align: left; }
-        input, select {
-            width: 100%; padding: 12px; margin-top: 5px;
-            border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box;
-        }
-
-        .btn {
-            width: 100%; padding: 16px; border: none; border-radius: 12px;
-            font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.3s;
-        }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
         
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.3s; }
         #welcome-action-btn { background: var(--disabled); color: #64748b; margin-top: 10px; width: 80%; max-width: 250px; }
         #welcome-action-btn.ready { background: var(--success); color: white; }
-
         .btn-primary { background: var(--primary); color: white; text-transform: lowercase; }
         .btn-ghost { background: #e2e8f0; color: #475569; margin-top: 15px; }
         .btn-success { background: var(--success); color: white; margin-top: 15px; }
-
-        /* --- CREATION SCREEN --- */
-        #invite-list {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 15px; padding: 10px 0; width: 100%;
-        }
-
-        .avatars-row {
-            display: flex; justify-content: space-between; width: 100%;
-            padding: 0 10px; box-sizing: border-box;
-        }
-
-        .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Hidden initially */
+        #btn-add-details { display: none; }
 
         /* --- LISTS --- */
-        .activity-card {
-            background: white; padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; 
-        }
-        
-        /* Personal Area Specific Styles */
-        .personal-card {
-            background: white; padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s;
-        }
+        #invite-list { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 10px 0; width: 100%; }
+        .avatars-row { display: flex; justify-content: space-between; width: 100%; padding: 0 10px; box-sizing: border-box; }
+        .avatar-wrap-h { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .activity-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .personal-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s; }
         .personal-card:active { border-color: var(--primary); }
         .personal-info { flex-grow: 1; text-align: left; }
-        .delete-btn {
-            background: #fee2e2; color: var(--danger);
-            width: 35px; height: 35px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-left: 10px; font-weight: bold; cursor: pointer;
-        }
-
+        .delete-btn { background: #fee2e2; color: var(--danger); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; font-weight: bold; cursor: pointer; }
         .star-rating { display: flex; justify-content: center; gap: 8px; margin: 15px 0; font-size: 2.2rem; }
         .star { cursor: pointer; color: #cbd5e1; }
         .star.filled { color: #fbbf24; }
+        #editing-indicator { background-color: #fff7ed; border: 1px solid #fdba74; color: #c2410c; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; text-align: center; }
         
-        #editing-indicator {
-            background-color: #fff7ed; border: 1px solid #fdba74; color: #c2410c;
-            padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px;
-            display: none; text-align: center;
-        }
-        
-        /* Modal for Viewing Details (Read Only) */
-        #view-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 500; display: none;
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 15px;
-            width: 85%; max-width: 400px; text-align: center;
-        }
+        /* Modal */
+        #view-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 500; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 400px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="app-frame">
-        
         <header class="app-header" id="main-header" style="display: none;">
             <div class="header-user-zone">
                 <img id="header-avatar" src="" class="avatar-img" style="width:35px; height:35px; border: 2px solid var(--primary)" onclick="showScreen('personal-area')">
@@ -239,12 +127,12 @@
                 </div>
 
                 <label>The Idea</label>
-                <input type="text" id="idea-name" placeholder="What's your suggestion?">
+                <input type="text" id="idea-name" placeholder="What's your suggestion?" oninput="toggleDetailsButton()">
                 
                 <label>Invite Participants</label>
                 <div id="invite-list"></div>
 
-                <button class="btn btn-ghost" onclick="openDetailsScreen()">Add more details</button>
+                <button class="btn btn-ghost" id="btn-add-details" onclick="openDetailsScreen()">Add more details</button>
                 <button class="btn btn-primary" id="invite-submit-btn" onclick="sendInvites()" style="margin-top:15px;">invite...</button>
 
                 <h3 style="margin-top:30px; font-weight: bold;">Let's Do It List ❤️</h3>
@@ -254,6 +142,10 @@
 
             <section id="details-screen" class="screen">
                 <h3 style="font-weight: bold;">Activity Details</h3>
+                
+                <label>Activity Name</label>
+                <input type="text" id="det-name-edit" style="font-weight:bold; color:var(--primary);">
+
                 <label>Date of Event</label><input type="date" id="det-date">
                 <label>Start Hour</label><input type="time" id="det-time">
                 <label>Duration</label>
@@ -270,6 +162,10 @@
                     <option value="in 3 months">3 Months Ahead</option>
                     <option value="this year">This Year</option>
                 </select>
+                
+                <label id="lbl-more-info">More about...</label>
+                <textarea id="det-more-info" rows="3" placeholder="Any extra info?"></textarea>
+
                 <label>URL Field</label><input type="url" id="det-url" placeholder="https://...">
                 <button class="btn btn-success" onclick="saveDetails()">Save & Return</button>
                 <button class="btn btn-ghost" onclick="showScreen('home-screen')">Cancel</button>
@@ -295,7 +191,6 @@
                 <button class="btn btn-ghost" onclick="cancelEdit(); showScreen('home-screen')">Back</button>
             </section>
         </div>
-
     </div>
 
     <div id="view-modal" onclick="closeViewModal()">
@@ -319,23 +214,20 @@
         let selectedParticipants = [];
         let activities = JSON.parse(localStorage.getItem('tzadokActivities')) || [];
         let currentRating = 0;
-        
         let editingActivityId = null; 
         window.tempDetails = {};
 
-        // --- INIT & SESSION LOGIC ---
         function initApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const savedUser = localStorage.getItem('tzadokCurrentUser');
 
-            // 1. If it's a Rating Link, always go to Welcome (or auto-login if logic allows, but safer to ask)
+            // If rating link exists
             if(urlParams.has('rateId')) {
-                // Optional: If user is saved, we could auto-login, but standard flow is safer:
                 if (savedUser) {
-                    const userObj = JSON.parse(savedUser);
-                    currentUser = userObj;
-                    confirmUser(true); // Auto-confirm if session exists
+                    currentUser = JSON.parse(savedUser);
+                    confirmUser(true); // Auto-login and go to rating
                 } else {
+                    // Must identify first
                     showScreen('welcome-screen');
                     document.querySelector('#welcome-screen p').innerText = "Please identify yourself to rate:";
                     renderWelcome();
@@ -343,11 +235,10 @@
                 return;
             }
 
-            // 2. Normal Load: Check for saved session
+            // Normal Load
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
-                console.log("Session restored for:", currentUser.name);
-                confirmUser(true); // 'true' flag skips re-saving
+                confirmUser(true);
             } else {
                 showScreen('welcome-screen');
                 renderWelcome();
@@ -356,11 +247,8 @@
 
         function showScreen(id) {
             const isWelcome = id === 'welcome-screen';
-            
-            // Toggle Header
             document.getElementById('main-header').style.display = isWelcome ? 'none' : 'flex';
             
-            // Toggle Containers
             const appContainer = document.getElementById('app-container');
             const welcomeScreen = document.getElementById('welcome-screen');
 
@@ -372,7 +260,6 @@
                 appContainer.style.display = 'block';
             }
             
-            // Toggle specific sections inside scroll-container
             if (!isWelcome) {
                 document.querySelectorAll('#app-container .screen').forEach(s => s.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
@@ -403,20 +290,15 @@
 
         function confirmUser(isAutoLogin = false) {
             if (!isAutoLogin && !selectedWelcomeUser) return;
-            
-            // Set User
             if (!isAutoLogin) currentUser = selectedWelcomeUser;
 
-            // Save Session
             localStorage.setItem('tzadokCurrentUser', JSON.stringify(currentUser));
-
-            // Update Header
             document.getElementById('header-avatar').src = currentUser.img;
             
-            // Routing
+            // STRICT REDIRECT LOGIC
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('rateId')) {
-                showScreen('rating-screen');
+                showScreen('rating-screen'); // Force Rating Screen
             } else {
                 showScreen('home-screen');
             }
@@ -425,13 +307,11 @@
         function logout() {
             currentUser = null;
             selectedWelcomeUser = null;
-            localStorage.removeItem('tzadokCurrentUser'); // Clear Session
+            localStorage.removeItem('tzadokCurrentUser');
             cancelEdit();
-            
             const btn = document.getElementById('welcome-action-btn');
             btn.classList.remove('ready');
             btn.innerText = "Welcome...";
-            
             showScreen('welcome-screen');
         }
 
@@ -447,7 +327,6 @@
                     <div style="font-size:0.8rem; font-weight:bold; margin-top:4px;">Everyone</div>
                 </div>
             `;
-
             const familyHtml = family.map(m => `
                 <div class="avatar-wrap-h" onclick="toggleSelect('${m.name}')">
                     <img src="${m.img}" class="avatar-img" style="width:55px; height:55px; border: 4px solid ${selectedParticipants.includes(m.name) ? 'var(--success)' : 'transparent'}">
@@ -455,16 +334,10 @@
                 </div>
             `).join('');
 
-            list.innerHTML = `
-                ${everyoneHtml}
-                <div class="avatars-row">
-                    ${familyHtml}
-                </div>
-            `;
+            list.innerHTML = `${everyoneHtml}<div class="avatars-row">${familyHtml}</div>`;
             
-            const indicator = document.getElementById('editing-indicator');
-            indicator.style.display = editingActivityId ? 'block' : 'none';
-
+            document.getElementById('editing-indicator').style.display = editingActivityId ? 'block' : 'none';
+            toggleDetailsButton(); // Check visibility on render
             updateInviteButton();
             renderApprovedList();
         }
@@ -480,6 +353,13 @@
             renderHome();
         }
 
+        function toggleDetailsButton() {
+            const val = document.getElementById('idea-name').value;
+            const btn = document.getElementById('btn-add-details');
+            if(val.trim().length > 0) btn.style.display = 'block';
+            else btn.style.display = 'none';
+        }
+
         function updateInviteButton() {
             const btn = document.getElementById('invite-submit-btn');
             let baseText = editingActivityId ? "Update & Invite" : "invite";
@@ -492,22 +372,38 @@
             btn.innerText = `${baseText} ${formatted.toLowerCase()}`;
         }
 
+        // --- DETAILS SCREEN LOGIC ---
         function openDetailsScreen() {
+            // 1. Sync Name from Home
+            const mainName = document.getElementById('idea-name').value;
+            document.getElementById('det-name-edit').value = mainName;
+            
+            // 2. Set Label
+            document.getElementById('lbl-more-info').innerText = `More about "${mainName}"`;
+
+            // 3. Fill other fields
             document.getElementById('det-date').value = window.tempDetails.date || "";
             document.getElementById('det-time').value = window.tempDetails.time || ""; 
             document.getElementById('det-duration').value = window.tempDetails.duration || "";
             document.getElementById('det-period').value = window.tempDetails.period || "this week";
             document.getElementById('det-url').value = window.tempDetails.url || "";
+            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; // Load extra info
+
             showScreen('details-screen');
         }
 
         function saveDetails() {
+            // 1. Save edits to name back to main input
+            document.getElementById('idea-name').value = document.getElementById('det-name-edit').value;
+
+            // 2. Save objects
             window.tempDetails = {
                 date: document.getElementById('det-date').value,
                 time: document.getElementById('det-time').value,
                 duration: document.getElementById('det-duration').value,
                 period: document.getElementById('det-period').value,
-                url: document.getElementById('det-url').value
+                url: document.getElementById('det-url').value,
+                moreInfo: document.getElementById('det-more-info').value // Save extra info
             };
             showScreen('home-screen');
         }
@@ -590,6 +486,7 @@
             if(act.details.date) html += `<p><strong>Date:</strong> ${act.details.date}</p>`;
             if(act.details.time) html += `<p><strong>Time:</strong> ${act.details.time}</p>`;
             if(act.details.duration) html += `<p><strong>Duration:</strong> ${act.details.duration}</p>`;
+            if(act.details.moreInfo) html += `<p><strong>Note:</strong> ${act.details.moreInfo}</p>`;
             if(act.details.url) html += `<p><a href="${act.details.url}" target="_blank">Link</a></p>`;
             
             document.getElementById('view-body').innerHTML = html;
@@ -659,7 +556,6 @@
             renderPersonalArea();
         }
 
-        // Start App Logic
         initApp();
     </script>
 </body>
