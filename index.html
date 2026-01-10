@@ -221,13 +221,11 @@
             const urlParams = new URLSearchParams(window.location.search);
             const savedUser = localStorage.getItem('tzadokCurrentUser');
 
-            // If rating link exists
             if(urlParams.has('rateId')) {
                 if (savedUser) {
                     currentUser = JSON.parse(savedUser);
-                    confirmUser(true); // Auto-login and go to rating
+                    confirmUser(true);
                 } else {
-                    // Must identify first
                     showScreen('welcome-screen');
                     document.querySelector('#welcome-screen p').innerText = "Please identify yourself to rate:";
                     renderWelcome();
@@ -235,7 +233,6 @@
                 return;
             }
 
-            // Normal Load
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 confirmUser(true);
@@ -295,10 +292,9 @@
             localStorage.setItem('tzadokCurrentUser', JSON.stringify(currentUser));
             document.getElementById('header-avatar').src = currentUser.img;
             
-            // STRICT REDIRECT LOGIC
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('rateId')) {
-                showScreen('rating-screen'); // Force Rating Screen
+                showScreen('rating-screen');
             } else {
                 showScreen('home-screen');
             }
@@ -374,37 +370,35 @@
 
         // --- DETAILS SCREEN LOGIC ---
         function openDetailsScreen() {
-            // 1. Sync Name from Home
             const mainName = document.getElementById('idea-name').value;
             document.getElementById('det-name-edit').value = mainName;
-            
-            // 2. Set Label
             document.getElementById('lbl-more-info').innerText = `More about "${mainName}"`;
 
-            // 3. Fill other fields
             document.getElementById('det-date').value = window.tempDetails.date || "";
             document.getElementById('det-time').value = window.tempDetails.time || ""; 
             document.getElementById('det-duration').value = window.tempDetails.duration || "";
             document.getElementById('det-period').value = window.tempDetails.period || "this week";
             document.getElementById('det-url').value = window.tempDetails.url || "";
-            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; // Load extra info
+            document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
 
             showScreen('details-screen');
         }
 
         function saveDetails() {
-            // 1. Save edits to name back to main input
             document.getElementById('idea-name').value = document.getElementById('det-name-edit').value;
 
-            // 2. Save objects
             window.tempDetails = {
                 date: document.getElementById('det-date').value,
                 time: document.getElementById('det-time').value,
                 duration: document.getElementById('det-duration').value,
                 period: document.getElementById('det-period').value,
                 url: document.getElementById('det-url').value,
-                moreInfo: document.getElementById('det-more-info').value // Save extra info
+                moreInfo: document.getElementById('det-more-info').value
             };
+            
+            // UPDATED: Add Check Mark
+            document.getElementById('btn-add-details').innerText = "Add more details ✅";
+
             showScreen('home-screen');
         }
 
@@ -449,6 +443,8 @@
             selectedParticipants = [];
             window.tempDetails = {};
             document.getElementById('idea-name').value = "";
+            // UPDATED: Reset Button Text
+            document.getElementById('btn-add-details').innerText = "Add more details";
             renderHome();
         }
 
@@ -545,6 +541,11 @@
             selectedParticipants = act.participants || [];
             window.tempDetails = act.details || {};
             document.getElementById('idea-name').value = act.name;
+            
+            // UPDATED: Check if details exist to show checkmark
+            const hasDetails = Object.values(window.tempDetails).some(x => x && x.trim() !== "");
+            document.getElementById('btn-add-details').innerText = hasDetails ? "Add more details ✅" : "Add more details";
+            
             showScreen('home-screen');
         }
 
