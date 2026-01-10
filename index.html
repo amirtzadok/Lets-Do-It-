@@ -44,7 +44,17 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 100;
             height: 60px; flex-shrink: 0; position: relative;
         }
-        .app-header h1 { margin: 0; font-size: 1.2rem; color: var(--primary); cursor: pointer; font-weight: bold; }
+        
+        /* UPDATED: Title is now explicitly a pointer/button */
+        .app-header h1 { 
+            margin: 0; font-size: 1.2rem; color: var(--primary); 
+            cursor: pointer; font-weight: bold; 
+            text-align: center;
+            user-select: none; /* Prevents text highlighting on clicks */
+            transition: opacity 0.2s;
+        }
+        .app-header h1:active { opacity: 0.7; }
+
         .header-user-zone { display: flex; align-items: center; gap: 10px; position: absolute; left: 20px; }
         .not-you-link { font-size: 0.75rem; color: #ef4444; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
@@ -79,7 +89,6 @@
         .btn-ghost { background: #e2e8f0; color: #475569; margin-top: 15px; }
         .btn-success { background: var(--success); color: white; margin-top: 15px; }
         .btn-warning { background: var(--warning); color: white; margin-top: 15px; }
-        /* NEW: Danger Button */
         .btn-danger { background: var(--danger); color: white; margin-top: 15px; }
         
         #btn-add-details { display: none; }
@@ -349,9 +358,7 @@
             document.getElementById('det-url').value = window.tempDetails.url || "";
             document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
             
-            // Hide delete because it's new
             document.getElementById('btn-delete-details').style.display = 'none';
-
             showScreen('details-screen');
         }
 
@@ -536,20 +543,16 @@
             document.getElementById('det-url').value = window.tempDetails.url || "";
             document.getElementById('det-more-info').value = window.tempDetails.moreInfo || ""; 
 
-            // SHOW delete button because we are editing existing
             document.getElementById('btn-delete-details').style.display = 'block';
 
             showScreen('details-screen');
         }
 
-        // NEW: Function for the button inside details screen
         function deleteFromDetails() {
             if(!editingActivityId) return; 
             if(!confirm("Delete this suggestion permanently?")) return;
-
             activities = activities.filter(a => a.id !== editingActivityId);
             localStorage.setItem('tzadokActivities', JSON.stringify(activities));
-
             cancelEdit();
             showScreen('personal-area');
         }
