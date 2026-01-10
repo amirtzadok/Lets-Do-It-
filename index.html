@@ -173,7 +173,7 @@
             <section id="details-screen" class="screen">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="font-weight: bold; margin:0; color: var(--primary);">Activity Details</h3>
-                    <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="showScreen('home-screen')">Cancel</div>
+                    <div style="font-size:0.9rem; color:#64748b; text-decoration:underline; cursor:pointer;" onclick="cancelEdit(); showScreen('home-screen')">Cancel</div>
                 </div>
                 
                 <label>Activity Name</label>
@@ -422,7 +422,10 @@
             document.getElementById('idea-name').value = name;
             window.tempDetails = captureDetails();
 
-            // CHANGED: Logic for saving
+            // Logic: 
+            // 1. If we are editing an existing item (editingActivityId is set), update it permanently.
+            // 2. If it's a new item, just save to temp.
+            
             if (editingActivityId) {
                 // Update existing record
                 const index = activities.findIndex(a => a.id === editingActivityId);
@@ -431,12 +434,10 @@
                     activities[index].details = window.tempDetails;
                     localStorage.setItem('tzadokActivities', JSON.stringify(activities));
                 }
-                // CHANGED: If we were editing an existing item, we are now "done". 
-                // Clear the edit mode so the home screen is clean.
                 cancelEdit(); 
                 showScreen('home-screen');
             } else {
-                // New Item Flow: just confirm UI change and go back to home to let them Invite
+                // New Item Flow: just confirm UI change
                 document.getElementById('btn-add-details').innerText = "Add more details ✅";
                 showScreen('home-screen');
             }
